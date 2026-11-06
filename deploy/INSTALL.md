@@ -1,4 +1,4 @@
-# Installare Adopta 1.0.0.16: guida passo passo
+# Installare Adopta 1.0.0.17: guida passo passo
 
 Questa guida installa la soluzione **managed** *Adopta Agents and App* in un ambiente Power Platform, dalla preparazione fino al primo invio di prova. Si fa tutto dai portali web (Power Platform admin center, Power Apps, Power Automate, Copilot Studio, Teams admin center), senza strumenti da riga di comando.
 
@@ -13,9 +13,9 @@ Il pacchetto contiene:
 | Ruoli di sicurezza | *Adopta Administrator*, *Adopta Communications Manager* |
 | Altro | prompt *ClassifyDepartment*, variabili d'ambiente `vm_AdoptaDataverseUrl` e `vm_AdoptaCoachKnowledgeUrl`, 5 connection reference |
 
-Serve solo il pacchetto `Adopta_1_0_0_16_managed.zip` (nel repository in `dist/`).
+Serve solo il pacchetto `Adopta_1_0_0_17_managed.zip` (nel repository in `dist/`).
 
-> **Stato della 1.0.0.16:** pacchetti ricostruiti e verificati localmente dai sorgenti e dalla baseline managed esistente, senza accesso all'ambiente. Import, pubblicazione e comportamento in Teams non sono stati verificati da questa build. Eseguire i test del passo 11 in un ambiente di prova prima della produzione.
+> **Stato della 1.0.0.17:** corregge i 22 errori di authoring di *Resolve communication* e quello di *Explain verified communication* della 1.0.0.16, riprodotti con il validatore semantico Microsoft locale e assenti sui sorgenti corretti. I pacchetti sono ricostruiti localmente senza accesso all'ambiente. Import, pubblicazione e comportamento in Teams non sono stati verificati da questa build. Eseguire i test del passo 11 in un ambiente di prova prima della produzione.
 
 > **Non modificare i componenti.** La soluzione è managed: se si apre e si salva un'app, un flow o un agente in Power Apps, Power Automate o Copilot Studio, si crea un livello unmanaged e gli aggiornamenti futuri non avranno più effetto su quel componente. Tutto ciò che il cliente personalizza si imposta in *Adopta Admin (code app)*. Pubblicare gli agenti in Copilot Studio invece è previsto e non crea livelli.
 
@@ -69,7 +69,7 @@ Con l'account di servizio, in Power Automate (selezionando l'ambiente giusto) �
 ## Passo 4. Importare la soluzione
 
 1. Apri [make.powerapps.com](https://make.powerapps.com) e seleziona l'ambiente in alto a destra.
-2. *Soluzioni* → **Importa soluzione** → *Sfoglia* → `Adopta_1_0_0_16_managed.zip` → *Avanti*.
+2. *Soluzioni* → **Importa soluzione** → *Sfoglia* → `Adopta_1_0_0_17_managed.zip` → *Avanti*.
 3. **Connessioni**: per ogni connection reference scegli la connessione creata al passo 3.
 4. **Variabili d'ambiente**:
    - `Adopta - Dataverse environment URL`: l'URL dell'ambiente **senza slash finale**, per esempio `https://contoso.crm4.dynamics.com`. È in Power Platform admin center → ambiente → *URL ambiente*. Compilarla adesso fa funzionare l'agente da subito.
@@ -224,7 +224,7 @@ Usa un gruppo destinatari ristretto, con almeno un utente di prova che **non** h
 
 | Versione installata | Come aggiornare |
 |---|---|
-| **1.0.0.12–1.0.0.15 managed** | Importa `Adopta_1_0_0_16_managed.zip` come al passo 4. Nelle *Impostazioni avanzate* dell'importazione lascia l'azione predefinita, quella consigliata (*Upgrade*). Poi ripubblica prima il Coach e poi Adopta (passo 6). |
+| **1.0.0.12–1.0.0.16 managed** | Importa `Adopta_1_0_0_17_managed.zip` come al passo 4. Nelle *Impostazioni avanzate* dell'importazione lascia l'azione predefinita, quella consigliata (*Upgrade*). Poi ripubblica prima il Coach e poi Adopta (passo 6). |
 | **1.0.0.11 managed** | Come sopra. Poi ripubblica il Coach e Adopta (passo 6) e scegli la **Lingua predefinita** in *Adopta Admin* (passo 8). |
 | **1.0.0.10 managed o precedente** | Prima condividi le due code app con chi usava la vecchia app canvas e la model-driven (passo 7.2). Poi importa come sopra, con l'azione consigliata (*Upgrade*): così le vecchie app vengono eliminate. Con *Update* resterebbero nell'ambiente. Poi passi 6 e 8. |
 | **Unmanaged** (qualsiasi versione) | Non si può passare a managed con un aggiornamento: usa un ambiente pulito, oppure elimina prima la soluzione unmanaged e i suoi componenti. |

@@ -51,9 +51,24 @@ action:
         type:
           kind: Table
           properties:
-            dynamicProperties:
+            vm_adoptadeliveryid:
               order: 0
-              type: Any
+              type: String
+            vm_sentat:
+              order: 1
+              type: String
+            communicationid:
+              order: 2
+              type: String
+            communicationtitle:
+              order: 3
+              type: String
+            communicationbody:
+              order: 4
+              type: String
+            communicationlink:
+              order: 5
+              type: String
 
 outputMode: All
 triggerCondition: false

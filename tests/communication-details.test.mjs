@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import path from "node:path";
 import test from "node:test";
-import { readComponent, root, runSdk, validateSolution, walk } from "../deploy/validate-solution.mjs";
+import { componentRoot, readComponent, root, runSdk, semanticTargets, validateSolution, walk } from "../deploy/validate-solution.mjs";
 import { evaluateWorkflow } from "./workflow-expression.mjs";
 
 const cardTopic = readComponent("vm_Adopta.topic.DimmiDiPiu");
@@ -126,6 +126,106 @@ test("card and chat converge on one resolver and one explanation, including miss
   assert.equal(lookup.triggerCondition, false);
   assert.equal(cardTopic.beginDialog.actions.at(-1).kind, "CancelAllDialogs");
   assert.equal(chatTopic.beginDialog.actions.at(-1).kind, "CancelAllDialogs");
+});
+
+function resolverTypeChecks(outputSchema) {
+  const topicProperties = {
+    ...resolver.inputType.properties,
+    Rows: outputSchema.properties.value,
+    CandidateId: { type: "String" },
+  };
+  const schema = {
+    kind: "Record",
+    properties: {
+      Topic: { kind: "Record", properties: topicProperties },
+      Global: { kind: "Record", properties: { CommunicationLookupPage: { type: "Number" } } },
+    },
+  };
+  const checks = walk(resolver).flatMap((node) => {
+    const expressions = [
+      node.value, node.condition,
+      typeof node.prompt === "string" && node.prompt.startsWith("{") ? `=${node.prompt.slice(1, -1)}` : null,
+    ];
+    return expressions.filter((expression) => typeof expression === "string" && expression.includes("Topic.Rows"))
+      .map((expression) => ({ name: `resolver/${node.id}`, expression, schema }));
+  });
+  return checks;
+}
+
+test("resolver formulas bind to declared connector columns, not inferred mock data", () => {
+  const checks = resolverTypeChecks(lookup.action.dynamicOutputSchema);
+  assert.ok(checks.length >= 10);
+  const results = runSdk({ typeChecks: checks }).typeChecks;
+  for (const result of results) {
+    assert.equal(result.success, true, `${result.name}: ${result.errors.join("; ")}`);
+  }
+});
+
+test("static checks reject the generic output schema that caused the authoring errors", () => {
+  const genericSchema = structuredClone(lookup.action.dynamicOutputSchema);
+  genericSchema.properties.value.type.properties = { dynamicProperties: { type: "Any" } };
+  const results = runSdk({ typeChecks: resolverTypeChecks(genericSchema) }).typeChecks;
+  const failures = results.filter((result) => !result.success);
+  assert.ok(failures.length >= 8, JSON.stringify(results));
+  assert.ok(failures.some((result) => result.errors.some((error) => error.includes("communicationid"))));
+});
+
+test("final explanation card type-checks against declared communication field types", () => {
+  const columns = lookup.action.dynamicOutputSchema.properties.value.type.properties;
+  const checks = [{
+    name: "explanation/finalCard",
+    expression: action(explanation, "finalCard").activity.attachments[0].cardContent,
+    schema: {
+      kind: "Record",
+      properties: {
+        Global: {
+          kind: "Record",
+          properties: {
+            CommunicationEnglish: resolver.inputType.properties.English,
+            CommunicationSelectedTitle: columns.communicationtitle,
+            CommunicationSelectedBody: columns.communicationbody,
+            CommunicationSelectedLink: columns.communicationlink,
+            CommunicationLastAnswer: { type: "String" },
+          },
+        },
+        Topic: {
+          kind: "Record",
+          properties: { SafeLink: { type: "Boolean" }, Sources: { type: "String" } },
+        },
+      },
+    },
+  }];
+  const [result] = runSdk({ typeChecks: checks }).typeChecks;
+  assert.equal(result.success, true, result.errors.join("; "));
+});
+
+test("Microsoft authoring validation detects both original failures across components", (context) => {
+  const lookupSource = fs.readFileSync(path.join(componentRoot, "vm_Adopta.action.ResolveCommunication", "data"), "utf8");
+  const columnsStart = lookupSource.indexOf("            vm_adoptadeliveryid:");
+  const columnsEnd = lookupSource.indexOf("\noutputMode:", columnsStart);
+  assert.ok(columnsStart >= 0 && columnsEnd > columnsStart);
+  const genericLookup = lookupSource.slice(0, columnsStart) +
+    "            dynamicProperties:\n              order: 0\n              type: Any\n" +
+    lookupSource.slice(columnsEnd);
+  const explanationSource = fs.readFileSync(path.join(componentRoot, "vm_Adopta.topic.SpiegaComunicazione", "data"), "utf8");
+  const originalExplanation = explanationSource.replace(
+    'FirstN(Table({type: "Action.OpenUrl", title: "", url: ""}), 0)',
+    'Filter(Table({type: "Action.OpenUrl", title: "", url: ""}), false)',
+  );
+  assert.notEqual(originalExplanation, explanationSource);
+  const result = runSdk({
+    semanticRoot: componentRoot,
+    semanticTargets,
+    semanticOverrides: {
+      "vm_Adopta.action.ResolveCommunication": genericLookup,
+      "vm_Adopta.topic.SpiegaComunicazione": originalExplanation,
+    },
+  });
+  const resolverErrors = result.semanticErrors.filter((error) => error.component === semanticTargets[0]);
+  const explanationErrors = result.semanticErrors.filter((error) => error.component === semanticTargets[1]);
+  assert.ok(resolverErrors.length >= 10, JSON.stringify(result.semanticErrors));
+  assert.ok(explanationErrors.some((error) => error.message.includes("predicate is a literal value")));
+  context.diagnostic(`Original schema: ${resolverErrors.length} resolver diagnostics, ${explanationErrors.length} explanation diagnostics; corrected source: zero.`);
 });
 
 cardCase("new Italian card", `Adopta.Communication.v2|it|${idA}`, true);

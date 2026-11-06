@@ -7,6 +7,10 @@ import YAML from "yaml";
 
 export const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 export const componentRoot = path.join(root, "src", "botcomponents");
+export const semanticTargets = [
+  "vm_Adopta.topic.RisolviComunicazione",
+  "vm_Adopta.topic.SpiegaComunicazione",
+];
 
 export function filesUnder(folder) {
   return fs.readdirSync(folder, { withFileTypes: true }).flatMap((entry) => {
@@ -62,7 +66,10 @@ export function validateSolution() {
     validatePaths: dataFiles,
     xmlPaths: files.filter((name) => name.endsWith(".xml")),
     cases: [],
+    semanticRoot: componentRoot,
+    semanticTargets,
   });
+  assert.deepEqual(result.semanticErrors, [], JSON.stringify(result.semanticErrors, null, 2));
   return { yaml: result.validated, xml: result.xmlCount };
 }
 

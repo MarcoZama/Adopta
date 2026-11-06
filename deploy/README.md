@@ -1,11 +1,18 @@
-# Rilascio di Adopta Agents and App (v1.0.0.16)
+# Rilascio di Adopta Agents and App (v1.0.0.17)
 
 Per installare il pacchetto managed presso un cliente, passo passo: [INSTALL.md](INSTALL.md). Questo file raccoglie i dettagli tecnici e la storia delle versioni.
 
 Pacchetti:
-- `dist/Adopta_1_0_0_16_managed.zip` (**managed**): pacchetto managed ricostruito localmente dalla baseline managed 1.0.0.15.
-- `dist/Adopta_1_0_0_16.zip` (unmanaged): generato dai sorgenti aggiornati con `pac solution pack`.
-- `dist/Adopta_1_0_0_16.sha256`: hash dei due pacchetti.
+- `dist/Adopta_1_0_0_17_managed.zip` (**managed**): pacchetto managed ricostruito localmente dalla baseline managed 1.0.0.16.
+- `dist/Adopta_1_0_0_17.zip` (unmanaged): generato dai sorgenti aggiornati con `pac solution pack`.
+- `dist/Adopta_1_0_0_17.sha256`: hash dei due pacchetti.
+
+### 1.0.0.17: correzione degli errori di authoring
+
+- L'output dell'azione interna `ResolveCommunication` dichiara esplicitamente le colonne restituite dalla FetchXML: ID consegna, data di invio, ID, titolo, corpo e link della comunicazione. La precedente tabella generica dichiarava solo `dynamicProperties`, quindi il designer non riconosceva i campi usati dal resolver.
+- La card finale costruisce l'elenco vuoto dei pulsanti con `FirstN(..., 0)`, non con un `Filter(..., false)` che il validatore di authoring segnalava come predicato costante.
+- I test includono ora il controllo statico sulle colonne dichiarate e la validazione semantica Microsoft tra i componenti. Il test negativo riproduce esattamente i 22 diagnostici del resolver e quello della card della 1.0.0.16; i sorgenti corretti ne producono zero sui due topic interessati.
+- I pacchetti 1.0.0.16 restano disponibili come baseline, ma usare la 1.0.0.17 per questa funzionalità.
 
 ### 1.0.0.16: approfondimenti unificati
 
@@ -15,7 +22,7 @@ Pacchetti:
 - La comunicazione selezionata e la spiegazione restano nel contesto della sessione. Le spiegazioni successive rileggono quella comunicazione; esempi pratici e prompt vanno al Coach con contesto esplicito, senza dichiarare una nuova lettura.
 - Il tool che legge soltanto l'ultimo invio resta per le domande sui dati dell'ultimo invio. Non viene usato per sostituire una card precedente.
 
-**Verifiche locali, non validazione dell'ambiente:** i pacchetti sono costruiti senza interrogare o modificare Power Platform. I test verificano sintassi con l'SDK Microsoft, formule Power Fx effettive, costruzione delle card e riferimenti. Import, pubblicazione, instradamento generativo, risposta dei connettori e rendering Teams restano da verificare con la checklist di [INSTALL.md](INSTALL.md). Non considerare questi test locali un'approvazione per la produzione.
+**Verifiche locali, non validazione dell'ambiente:** i pacchetti sono costruiti senza interrogare o modificare Power Platform. I test verificano sintassi, tipi dichiarati e semantica dei due topic corretti con l'SDK Microsoft e le impostazioni locali predefinite, oltre a formule Power Fx effettive, costruzione delle card e riferimenti. Import, pubblicazione, instradamento generativo, risposta dei connettori e rendering Teams restano da verificare con la checklist di [INSTALL.md](INSTALL.md). Non considerare questi test locali un'approvazione per la produzione.
 
 ### Ricostruzione completamente locale
 
@@ -27,7 +34,7 @@ npm test
 .\deploy\Build-Solution.ps1
 ```
 
-Lo script usa esclusivamente `pac solution unpack` e `pack`: nessun login, download dall'ambiente, import, export o pubblicazione. Conserva i metadati managed della baseline e applica i payload aggiornati dei topic e dei flow. Verifica versione, flag managed/unmanaged, contenuto aggiornato, asset delle code app invariati e round-trip di unpack. La baseline 1.0.0.15 resta intatta. Per evoluzioni a tabelle, ruoli, agenti o altri componenti non coperti dall'overlay occorre estendere esplicitamente lo script; non converte un export unmanaged in managed.
+Lo script usa esclusivamente `pac solution unpack` e `pack`: nessun login, download dall'ambiente, import, export o pubblicazione. Conserva i metadati managed della baseline e applica i payload aggiornati dei topic e dei flow. Verifica versione, flag managed/unmanaged, contenuto aggiornato, asset delle code app invariati e round-trip di unpack. La baseline 1.0.0.16 resta intatta. Per evoluzioni a tabelle, ruoli, agenti o altri componenti non coperti dall'overlay occorre estendere esplicitamente lo script; non converte un export unmanaged in managed.
 
 ### Provenienza della baseline 1.0.0.15
 
@@ -73,7 +80,7 @@ Le due reference Dataverse possono usare la stessa connessione. L'account della 
 
 ```powershell
 pac solution import --environment https://<org>.crm4.dynamics.com `
-  --path dist\Adopta_1_0_0_16_managed.zip `
+  --path dist\Adopta_1_0_0_17_managed.zip `
   --settings-file deploy\deploymentSettings.json `
   --activate-plugins --publish-changes
 ```
@@ -278,7 +285,7 @@ Note:
 
 ## Note
 
-- Una soluzione unmanaged non si converte in managed cambiando il flag. Per la 1.0.0.16 si riutilizza la struttura dell'export managed già presente in `dist/` e si applica l'overlay locale descritto sopra. Per nuovi export dall'ambiente, verificare che non rientrino la vecchia variabile `vm_SendingEnabled`, la canvas e la model-driven, componenti già rimossi dalle baseline locali.
+- Una soluzione unmanaged non si converte in managed cambiando il flag. Per la 1.0.0.17 si riutilizza la struttura della baseline managed già presente in `dist/` e si applica l'overlay locale descritto sopra. Per nuovi export dall'ambiente, verificare che non rientrino la vecchia variabile `vm_SendingEnabled`, la canvas e la model-driven, componenti già rimossi dalle baseline locali.
 - L'ambiente di sviluppo `prod-emea-cef2bf21` contiene ancora la soluzione precedente (1.0.0.2): il rename in Adopta è solo in `src/`.
 - La code app si aggiorna con `npx pa app push --solution-id`, seguito da export e unpack in `src/` (vedi [code-app/README.md](../code-app/README.md)).
 - Prima di esportare dall'ambiente di sviluppo, importaci le modifiche fatte in `src/`: l'unpack con `--allowDelete` sostituisce `src/` con il contenuto dell'ambiente.

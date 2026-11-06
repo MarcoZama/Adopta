@@ -49,6 +49,83 @@ function Convert-FxResult($Value) {
     }
     return $Value.ToObject()
 }
+function Convert-SchemaType($Schema) {
+    if ($Schema.type -and $Schema.type -isnot [string]) { return Convert-SchemaType $Schema.type }
+    $kind = if ($Schema.kind) { $Schema.kind } else { $Schema.type }
+    switch ($kind) {
+        'String' { return [Microsoft.PowerFx.Types.FormulaType]::String }
+        'Boolean' { return [Microsoft.PowerFx.Types.FormulaType]::Boolean }
+        'Number' { return [Microsoft.PowerFx.Types.FormulaType]::Number }
+        'DateTime' { return [Microsoft.PowerFx.Types.FormulaType]::DateTime }
+        'Any' { return [Microsoft.PowerFx.Types.FormulaType]::UntypedObject }
+        { $_ -in 'Record', 'Table' } {
+            $record = [Microsoft.PowerFx.Types.RecordType]::Empty()
+            foreach ($field in $Schema.properties.PSObject.Properties) {
+                $record = $record.Add($field.Name, (Convert-SchemaType $field.Value), $null)
+            }
+            if ($kind -eq 'Table') { return $record.ToTable() }
+            return $record
+        }
+        default { throw "Unsupported authoring schema kind: $kind" }
+    }
+}
+$typeChecks = foreach ($case in $request.typeChecks) {
+    $expression = $case.expression
+    if ($expression.StartsWith('=')) { $expression = $expression.Substring(1) }
+    $checked = $engine.Check($expression, (Convert-SchemaType $case.schema), $null)
+    @{
+        name = $case.name
+        success = $checked.IsSuccess -and @($checked.Errors).Count -eq 0
+        returnType = if ($checked.IsSuccess) { $checked.ReturnType.ToString() } else { $null }
+        errors = @($checked.Errors | ForEach-Object Message)
+    }
+}
+$semanticErrors = @()
+if ($request.semanticRoot) {
+    [void][Reflection.Assembly]::LoadFrom((Join-Path $SdkDirectory 'Microsoft.Agents.ObjectModel.PowerFx.dll'))
+    Add-Type -ReferencedAssemblies (Join-Path $SdkDirectory 'Microsoft.Agents.ObjectModel.dll') -TypeDefinition @'
+public sealed class AdoptaLocalAuthoringFeatures : Microsoft.Agents.ObjectModel.Abstractions.IFeatureConfiguration
+{
+    public bool IsEnvironmentFeatureEnabled(string name, bool defaultValue) => defaultValue;
+    public bool IsTenantFeatureEnabled(string name, bool defaultValue) => defaultValue;
+    public long GetInt64Value(string name, long defaultValue) => defaultValue;
+    public string GetStringValue(string name, string defaultValue) => defaultValue;
+}
+'@
+    $features = [AdoptaLocalAuthoringFeatures]::new()
+    $checker = [Microsoft.Agents.ObjectModel.PowerFx.PowerFxExpressionChecker]::new($features)
+    $components = [Collections.Generic.List[Microsoft.Agents.ObjectModel.BotComponentBase]]::new()
+    foreach ($folder in Get-ChildItem -LiteralPath $request.semanticRoot -Directory -Filter 'vm_Adopta.*') {
+        $override = $request.semanticOverrides.PSObject.Properties | Where-Object Name -eq $folder.Name
+        $raw = if ($override) { [string]$override.Value } else { Get-Content -Raw -LiteralPath (Join-Path $folder.FullName 'data') }
+        if ($raw -notmatch '^kind: (AdaptiveDialog|TaskDialog)') { continue }
+        $wrapped = "kind: DialogComponent`nschemaName: $($folder.Name)`ndialog:`n" +
+            (($raw -split "`n" | ForEach-Object { '  ' + $_ }) -join "`n")
+        $components.Add([Microsoft.Agents.ObjectModel.Yaml.YamlSerializer]::Deserialize[Microsoft.Agents.ObjectModel.BotComponentBase]($wrapped))
+    }
+    $entity = [Microsoft.Agents.ObjectModel.Yaml.YamlSerializer]::Deserialize[Microsoft.Agents.ObjectModel.BotEntity](
+        "kind: BotEntity`nschemaName: vm_Adopta"
+    )
+    $definition = [Microsoft.Agents.ObjectModel.BotDefinition]::Empty.WithComponents($components).WithEntity($entity)
+    $validatedDefinition = [Microsoft.Agents.ObjectModel.ValidationExtensions]::Validate[Microsoft.Agents.ObjectModel.BotDefinition](
+        $definition, $false, $checker, $features, $null, $false, $null, $null
+    )
+    $semanticErrors = @(
+        foreach ($component in $validatedDefinition.Components) {
+            if ($component.SchemaName -notin $request.semanticTargets) { continue }
+            foreach ($node in $component.DescendantsAndSelf()) {
+                foreach ($diagnostic in $node.Diagnostics) {
+                    @{
+                        component = [string]$component.SchemaName
+                        node = $node.GetType().Name
+                        code = [string]$diagnostic.ErrorCode
+                        message = $diagnostic.ErrorMessage
+                    }
+                }
+            }
+        }
+    )
+}
 $sequences = @{}
 $results = foreach ($case in $request.cases) {
     try {
@@ -73,5 +150,5 @@ $results = foreach ($case in $request.cases) {
         @{ name = $case.name; success = $false; error = $_.Exception.ToString() }
     }
 }
-@{ validated = $validated; xmlCount = @($request.xmlPaths | Where-Object { $_ }).Count; results = @($results) } |
+@{ validated = $validated; xmlCount = @($request.xmlPaths | Where-Object { $_ }).Count; results = @($results); typeChecks = @($typeChecks); semanticErrors = $semanticErrors } |
     ConvertTo-Json -Depth 80 -Compress

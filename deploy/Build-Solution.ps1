@@ -1,5 +1,5 @@
 param(
-    [string] $BaselineVersion = '1.0.0.15',
+    [string] $BaselineVersion = '1.0.0.16',
     [switch] $SkipTests
 )
 

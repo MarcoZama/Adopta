@@ -122,7 +122,7 @@ beginDialog:
                     spacing: "Medium"
                   }
                 ],
-                actions: If(Topic.SafeLink, Table({type: "Action.OpenUrl", title: If(Global.CommunicationEnglish, "Open the content", "Apri il contenuto"), url: Trim(Global.CommunicationSelectedLink)}), Filter(Table({type: "Action.OpenUrl", title: "", url: ""}), false))
+                actions: If(Topic.SafeLink, Table({type: "Action.OpenUrl", title: If(Global.CommunicationEnglish, "Open the content", "Apri il contenuto"), url: Trim(Global.CommunicationSelectedLink)}), FirstN(Table({type: "Action.OpenUrl", title: "", url: ""}), 0))
               }
 
 inputType: {}
