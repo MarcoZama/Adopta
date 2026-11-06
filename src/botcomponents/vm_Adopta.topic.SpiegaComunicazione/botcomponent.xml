@@ -1,0 +1,11 @@
+<botcomponent schemaname="vm_Adopta.topic.SpiegaComunicazione">
+  <componenttype>9</componenttype>
+  <description>Single explanation and final card for authenticated, resolved communications, whether entered from Teams cards or chat.</description>
+  <iscustomizable>0</iscustomizable>
+  <name>Explain verified communication</name>
+  <parentbotid>
+    <schemaname>vm_Adopta</schemaname>
+  </parentbotid>
+  <statecode>0</statecode>
+  <statuscode>1</statuscode>
+</botcomponent>

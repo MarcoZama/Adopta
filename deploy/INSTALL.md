@@ -1,4 +1,4 @@
-# Installare Adopta 1.0.0.15: guida passo passo
+# Installare Adopta 1.0.0.16: guida passo passo
 
 Questa guida installa la soluzione **managed** *Adopta Agents and App* in un ambiente Power Platform, dalla preparazione fino al primo invio di prova. Si fa tutto dai portali web (Power Platform admin center, Power Apps, Power Automate, Copilot Studio, Teams admin center), senza strumenti da riga di comando.
 
@@ -13,7 +13,9 @@ Il pacchetto contiene:
 | Ruoli di sicurezza | *Adopta Administrator*, *Adopta Communications Manager* |
 | Altro | prompt *ClassifyDepartment*, variabili d'ambiente `vm_AdoptaDataverseUrl` e `vm_AdoptaCoachKnowledgeUrl`, 5 connection reference |
 
-Serve solo il pacchetto `Adopta_1_0_0_15_managed.zip` (nel repository in `dist/`).
+Serve solo il pacchetto `Adopta_1_0_0_16_managed.zip` (nel repository in `dist/`).
+
+> **Stato della 1.0.0.16:** pacchetti ricostruiti e verificati localmente dai sorgenti e dalla baseline managed esistente, senza accesso all'ambiente. Import, pubblicazione e comportamento in Teams non sono stati verificati da questa build. Eseguire i test del passo 11 in un ambiente di prova prima della produzione.
 
 > **Non modificare i componenti.** La soluzione è managed: se si apre e si salva un'app, un flow o un agente in Power Apps, Power Automate o Copilot Studio, si crea un livello unmanaged e gli aggiornamenti futuri non avranno più effetto su quel componente. Tutto ciò che il cliente personalizza si imposta in *Adopta Admin (code app)*. Pubblicare gli agenti in Copilot Studio invece è previsto e non crea livelli.
 
@@ -67,7 +69,7 @@ Con l'account di servizio, in Power Automate (selezionando l'ambiente giusto) �
 ## Passo 4. Importare la soluzione
 
 1. Apri [make.powerapps.com](https://make.powerapps.com) e seleziona l'ambiente in alto a destra.
-2. *Soluzioni* → **Importa soluzione** → *Sfoglia* → `Adopta_1_0_0_15_managed.zip` → *Avanti*.
+2. *Soluzioni* → **Importa soluzione** → *Sfoglia* → `Adopta_1_0_0_16_managed.zip` → *Avanti*.
 3. **Connessioni**: per ogni connection reference scegli la connessione creata al passo 3.
 4. **Variabili d'ambiente**:
    - `Adopta - Dataverse environment URL`: l'URL dell'ambiente **senza slash finale**, per esempio `https://contoso.crm4.dynamics.com`. È in Power Platform admin center → ambiente → *URL ambiente*. Compilarla adesso fa funzionare l'agente da subito.
@@ -198,6 +200,13 @@ Usa un gruppo destinatari ristretto, con almeno un utente di prova che **non** h
   - *Dimmi di più* → l'agente risponde "Un attimo, sto preparando la risposta…" e poi con un'unica card: titolo, spiegazione, fonti consultate e pulsante **Apri il contenuto**. Non deve seguire un secondo messaggio con la stessa spiegazione;
   - *Ignora* → breve conferma.
 - [ ] Ripeti con **Lingua della card = English**: pulsanti *Tell me more* / *Ignore*, risposta in inglese e pulsante *Open the content*.
+- [ ] Invia A, poi B, quindi premi *Dimmi di più* sulla card A: l'approfondimento deve riguardare A, non B. Ripeti su una card pianificata prima dell'aggiornamento.
+- [ ] Chiedi in chat "Spiegami l'ultima comunicazione": deve usare lo stesso tipo di card, senza una seconda spiegazione. Senza un riferimento chiaro e senza una selezione precedente, "dimmi di più sulla comunicazione" deve proporre una conferma.
+- [ ] Prova una comunicazione senza link: l'approfondimento deve funzionare senza mostrare *Apri il contenuto*.
+- [ ] Con due comunicazioni aventi stesso titolo e link, la vecchia card deve chiedere quale si intende. Oltre dieci corrispondenze deve permettere di passare alle pagine successive e precedenti, senza sceglierne una automaticamente.
+- [ ] Dopo la spiegazione chiedi "quali sono i prerequisiti?": deve restare sulla stessa comunicazione. Poi chiedi "fammi un esempio per il mio lavoro": il Coach deve ricevere il contesto e non ripetere l'approfondimento.
+- [ ] Se non vengono recuperate fonti sufficienti, deve comparire un limite esplicito insieme al messaggio originale. Un errore tecnico della ricerca non deve diventare una risposta apparentemente riuscita.
+- [ ] Con un riferimento a una comunicazione non inviata all'utente autenticato, non deve essere restituito alcun contenuto. Non devono essere richiesti né accettati UPN alternativi.
 - [ ] In *Storico e risultati* la comunicazione è *Completata* o *Parzialmente riuscita*, e l'utente senza app ha l'esito **Agente non installato**. Se invece ha *Da verificare*, apri la *Diagnostica* del destinatario e invia il testo dell'errore al fornitore della soluzione.
 - [ ] Riporta gli invii su **bloccati** finché non si parte davvero.
 
@@ -215,13 +224,13 @@ Usa un gruppo destinatari ristretto, con almeno un utente di prova che **non** h
 
 | Versione installata | Come aggiornare |
 |---|---|
-| **1.0.0.12 o 1.0.0.13 managed** | Importa `Adopta_1_0_0_15_managed.zip` come al passo 4. Nelle *Impostazioni avanzate* dell'importazione lascia l'azione predefinita, quella consigliata (*Upgrade*). Poi ripubblica Adopta (passo 6). |
+| **1.0.0.12–1.0.0.15 managed** | Importa `Adopta_1_0_0_16_managed.zip` come al passo 4. Nelle *Impostazioni avanzate* dell'importazione lascia l'azione predefinita, quella consigliata (*Upgrade*). Poi ripubblica prima il Coach e poi Adopta (passo 6). |
 | **1.0.0.11 managed** | Come sopra. Poi ripubblica il Coach e Adopta (passo 6) e scegli la **Lingua predefinita** in *Adopta Admin* (passo 8). |
 | **1.0.0.10 managed o precedente** | Prima condividi le due code app con chi usava la vecchia app canvas e la model-driven (passo 7.2). Poi importa come sopra, con l'azione consigliata (*Upgrade*): così le vecchie app vengono eliminate. Con *Update* resterebbero nell'ambiente. Poi passi 6 e 8. |
 | **Unmanaged** (qualsiasi versione) | Non si può passare a managed con un aggiornamento: usa un ambiente pulito, oppure elimina prima la soluzione unmanaged e i suoi componenti. |
 | *BuddyCommunications* (1.0.0.3 o precedente) | È una soluzione diversa: Adopta si installa accanto, da zero, e i dati non vengono migrati. |
 
-Le comunicazioni già pianificate prima dell'aggiornamento mantengono la card che avevano.
+Le comunicazioni già pianificate prima dell'aggiornamento mantengono la card che avevano. Il nuovo resolver riconosce i vecchi pulsanti tramite titolo e link, verificando comunque l'invio all'utente autenticato. Se il contenuto è stato modificato o eliminato e non esiste più una corrispondenza, lo dichiara senza sostituire la comunicazione con l'ultima.
 
 ---
 

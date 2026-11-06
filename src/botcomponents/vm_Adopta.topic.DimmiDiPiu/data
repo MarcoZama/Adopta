@@ -3,200 +3,66 @@ beginDialog:
   kind: OnActivity
   id: main
   priority: 5
-  condition: =StartsWith(System.Activity.Text, "Dimmi di più sulla comunicazione «") || StartsWith(System.Activity.Text, "Tell me more about the communication «")
+  condition: =StartsWith(System.Activity.Text, "Adopta.Communication.v2|") || StartsWith(System.Activity.Text, "Dimmi di più sulla comunicazione «") || StartsWith(System.Activity.Text, "Tell me more about the communication «")
   type: Message
   actions:
     - kind: SetVariable
-      id: setVariable_Dp4kE1
-      variable: Topic.IsEnglish
-      value: =StartsWith(System.Activity.Text, "Tell me more about the communication «")
+      id: versioned
+      variable: Topic.Versioned
+      value: =StartsWith(System.Activity.Text, "Adopta.Communication.v2|")
 
     - kind: SetVariable
-      id: setVariable_Dp4kE2
+      id: parts
+      variable: Topic.Parts
+      value: =Split(System.Activity.Text, "|")
+
+    - kind: SetVariable
+      id: english
+      variable: Topic.English
+      value: =If(Topic.Versioned, CountRows(Topic.Parts) = 3 && Text(Index(Topic.Parts, 2).Value) = "en", StartsWith(System.Activity.Text, "Tell me more about the communication «"))
+
+    - kind: SetVariable
+      id: prefix
       variable: Topic.Prefix
-      value: =If(Topic.IsEnglish, "Tell me more about the communication «", "Dimmi di più sulla comunicazione «")
+      value: =If(Topic.English, "Tell me more about the communication «", "Dimmi di più sulla comunicazione «")
 
     - kind: SetVariable
-      id: setVariable_Dp4kT1
-      variable: Topic.LinkStart
-      value: "=Find(\"»: \", System.Activity.Text)"
+      id: titleEnd
+      variable: Topic.TitleEnd
+      value: |-
+        =If(!Topic.Versioned, If(EndsWith(System.Activity.Text, "»"), Len(System.Activity.Text), Find("»: ", System.Activity.Text)), Blank())
 
     - kind: ConditionGroup
-      id: conditionGroup_Dp4kT2
+      id: validReference
       conditions:
-        - id: conditionItem_Dp4kT3
-          condition: =!IsBlank(Topic.LinkStart)
+        - id: validCard
+          condition: =If(Topic.Versioned, CountRows(Topic.Parts) = 3 && (Text(Index(Topic.Parts, 2).Value) = "it" || Text(Index(Topic.Parts, 2).Value) = "en") && IsMatch(Text(Index(Topic.Parts, 3).Value), "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"), !IsBlank(Topic.TitleEnd) && Topic.TitleEnd > Len(Topic.Prefix) + 1)
           actions:
-            - kind: SetVariable
-              id: setVariable_Dp4kT4
-              variable: Topic.ContentTitle
-              value: =Trim(Mid(System.Activity.Text, Len(Topic.Prefix) + 1, Topic.LinkStart - Len(Topic.Prefix) - 1))
+            - kind: SendActivity
+              id: waiting
+              activity: "{If(Topic.English, \"One moment, I'm preparing your answer...\", \"Un attimo, sto preparando la risposta...\")}"
 
-            - kind: SetVariable
-              id: setVariable_Dp4kT5
-              variable: Topic.ContentUrl
-              value: =Trim(Mid(System.Activity.Text, Topic.LinkStart + 3))
+            - kind: BeginDialog
+              id: resolveCard
+              dialog: vm_Adopta.topic.RisolviComunicazione
+              input:
+                binding:
+                  Mode: =If(Topic.Versioned, "id", "title")
+                  CommunicationId: =If(Topic.Versioned, Text(Index(Topic.Parts, 3).Value), "")
+                  Title: =If(Topic.Versioned, "", Trim(Mid(System.Activity.Text, Len(Topic.Prefix) + 1, Topic.TitleEnd - Len(Topic.Prefix) - 1)))
+                  Link: =If(!Topic.Versioned && Topic.TitleEnd < Len(System.Activity.Text), Trim(Mid(System.Activity.Text, Topic.TitleEnd + 3)), "")
+                  MatchLink: =!Topic.Versioned
+                  Request: =If(Topic.English, "Explain this communication, how to use the feature and its documented prerequisites.", "Spiega questa comunicazione, come si usa la funzionalità e i prerequisiti documentati.")
+                  English: =Topic.English
+                  ConfirmLatest: =false
 
-            - kind: ConditionGroup
-              id: conditionGroup_Dp4kT6
-              conditions:
-                - id: conditionItem_Dp4kT7
-                  condition: =StartsWith(Lower(Topic.ContentUrl), "https://") && IsBlank(Find(" ", Topic.ContentUrl))
-                  actions:
-                    - kind: SendActivity
-                      id: sendActivity_Dp4kW1
-                      activity: |-
-                        {If(Topic.IsEnglish, "One moment, I'm preparing your answer…", "Un attimo, sto preparando la risposta…")}
+      elseActions:
+        - kind: SendActivity
+          id: invalidReference
+          activity: "{If(Topic.English, \"I cannot interpret this card's reference. Ask about a communication by its complete title; I have not selected another message.\", \"Non riesco a interpretare il riferimento della card. Indicami il titolo completo della comunicazione: non ho selezionato un altro messaggio.\")}"
 
-                    - kind: SendActivity
-                      id: sendActivity_Dp4kW2
-                      activity:
-                        kind: Activity
-                        activityType: Typing
-
-                    - kind: SearchAndSummarizeContent
-                      id: searchContent_Dp4kQ2
-                      latencyMessageSettings:
-                        allowLatencyMessage: false
-                      autoSend: false
-                      variable: Topic.Answer
-                      userInput: |-
-                        =If(Topic.IsEnglish, "What is the Microsoft 365 feature described in the communication «", "Che cos'è e come si usa la funzionalità Microsoft 365 descritta nella comunicazione «") & Topic.ContentTitle & If(Topic.IsEnglish, "» and how do I use it? Content link: ", "»? Link del contenuto: ") & Topic.ContentUrl
-                      historyType:
-                        kind: NoHistory
-                      additionalInstructions: |-
-                        Rispondi nella stessa lingua della domanda (italiano o inglese), con tono cordiale e incoraggiante. L'utente ha chiesto di approfondire una comunicazione sull'adozione di Microsoft 365 Copilot. Spiega che cos'è la funzionalità, a cosa serve, come si usa e gli eventuali prerequisiti documentati; aggiungi un esempio o un prompt solo se utile. Usa solo le informazioni delle fonti recuperate e, se non bastano, dichiara il limite: non inventare passaggi, menu, licenze, disponibilità o date e non affermare che la funzionalità sia già attiva per l'utente. Non ripetere il titolo della comunicazione, non riportare link o URL e non aggiungere un elenco di fonti. La risposta viene mostrata in una card: usa paragrafi brevi, grassetto ed elenchi puntati, senza intestazioni, tabelle o blocchi di codice.
-                      fileSearchDataSource:
-                        searchFilesMode:
-                          kind: DoNotSearchFiles
-                      publicDataSource:
-                        sites:
-                          - https://learn.microsoft.com
-                          - https://support.microsoft.com
-                          - https://blogs.microsoft.com
-                      applyModelKnowledgeSetting: false
-                      responseCaptureType: FullResponse
-
-                    - kind: ConditionGroup
-                      id: conditionGroup_Dp4kQ3
-                      conditions:
-                        - id: conditionItem_Dp4kQ4
-                          condition: =!IsBlank(Topic.Answer) && !IsBlank(Trim(Topic.Answer.Text.Content))
-                          actions:
-                            - kind: SetVariable
-                              id: setVariable_Dp4kQ5
-                              variable: Topic.Sources
-                              value: |-
-                                =Concat(Topic.Answer.Text.CitationSources, If(IsBlank(Url), Id & ". " & Name, Id & ". [" & Coalesce(Name, Url) & "](" & Url & ")"), Char(10))
-
-                            - kind: SendActivity
-                              id: sendActivity_Dp4kQ6
-                              activity:
-                                attachments:
-                                  - kind: AdaptiveCardTemplate
-                                    cardContent: |-
-                                      ={
-                                        type: "AdaptiveCard",
-                                        '$schema': "http://adaptivecards.io/schemas/adaptive-card.json",
-                                        version: "1.4",
-                                        body: [
-                                          {
-                                            type: "TextBlock",
-                                            text: If(Topic.IsEnglish, "Great choice! Here is the content", "Ottima scelta! Ecco il contenuto"),
-                                            isSubtle: true,
-                                            wrap: true
-                                          },
-                                          {
-                                            type: "TextBlock",
-                                            text: If(IsBlank(Topic.ContentTitle), If(Topic.IsEnglish, "Communication", "Comunicazione"), Topic.ContentTitle),
-                                            size: "Medium",
-                                            weight: "Bolder",
-                                            wrap: true,
-                                            spacing: "Small"
-                                          },
-                                          {
-                                            type: "TextBlock",
-                                            text: Topic.Answer.Text.Content,
-                                            wrap: true,
-                                            spacing: "Medium"
-                                          },
-                                          {
-                                            type: "TextBlock",
-                                            text: If(Topic.IsEnglish, "Sources", "Fonti consultate"),
-                                            weight: "Bolder",
-                                            wrap: true,
-                                            spacing: "Medium",
-                                            isVisible: !IsBlank(Topic.Sources)
-                                          },
-                                          {
-                                            type: "TextBlock",
-                                            text: Coalesce(Topic.Sources, " "),
-                                            size: "Small",
-                                            wrap: true,
-                                            spacing: "Small",
-                                            isVisible: !IsBlank(Topic.Sources)
-                                          },
-                                          {
-                                            type: "TextBlock",
-                                            text: If(Topic.IsEnglish, "AI-generated answer based on Microsoft sources: check important details.", "Risposta generata con l'AI dalle fonti Microsoft: verifica le informazioni importanti."),
-                                            isSubtle: true,
-                                            size: "Small",
-                                            wrap: true,
-                                            spacing: "Medium"
-                                          }
-                                        ],
-                                        actions: [
-                                          {
-                                            type: "Action.OpenUrl",
-                                            title: If(Topic.IsEnglish, "Open the content", "Apri il contenuto"),
-                                            url: Topic.ContentUrl
-                                          }
-                                        ]
-                                      }
-
-                            - kind: CancelAllDialogs
-                              id: cancelAllDialogs_Dp4kQ7
-
-                      elseActions:
-                        - kind: SendActivity
-                          id: sendActivity_Dp4kT8
-                          activity:
-                            attachments:
-                              - kind: AdaptiveCardTemplate
-                                cardContent: |-
-                                  ={
-                                    type: "AdaptiveCard",
-                                    '$schema': "http://adaptivecards.io/schemas/adaptive-card.json",
-                                    version: "1.4",
-                                    body: [
-                                      {
-                                        type: "TextBlock",
-                                        text: If(Topic.IsEnglish, "Great choice! Here is the content", "Ottima scelta! Ecco il contenuto"),
-                                        isSubtle: true,
-                                        wrap: true
-                                      },
-                                      {
-                                        type: "TextBlock",
-                                        text: If(IsBlank(Topic.ContentTitle), If(Topic.IsEnglish, "Communication", "Comunicazione"), Topic.ContentTitle),
-                                        size: "Medium",
-                                        weight: "Bolder",
-                                        wrap: true,
-                                        spacing: "Small"
-                                      },
-                                      {
-                                        type: "TextBlock",
-                                        text: If(Topic.IsEnglish, "Open it whenever you like with the button below. Meanwhile, here is a short overview of what it is and how it can help you in your everyday work.", "Aprilo quando vuoi con il pulsante qui sotto. Intanto ti spiego in breve di cosa si tratta e come può esserti utile nel lavoro di tutti i giorni."),
-                                        wrap: true
-                                      }
-                                    ],
-                                    actions: [
-                                      {
-                                        type: "Action.OpenUrl",
-                                        title: If(Topic.IsEnglish, "Open the content", "Apri il contenuto"),
-                                        url: Topic.ContentUrl
-                                      }
-                                    ]
-                                  }
+    - kind: CancelAllDialogs
+      id: finish
 
 inputType: {}
 outputType: {}

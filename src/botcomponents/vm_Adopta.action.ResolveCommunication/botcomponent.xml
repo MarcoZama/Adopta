@@ -1,0 +1,11 @@
+<botcomponent schemaname="vm_Adopta.action.ResolveCommunication">
+  <componenttype>9</componenttype>
+  <description>Internal authenticated lookup used by the shared communication topic. Recipient and query structure are fixed.</description>
+  <iscustomizable>0</iscustomizable>
+  <name>Resolve my communication</name>
+  <parentbotid>
+    <schemaname>vm_Adopta</schemaname>
+  </parentbotid>
+  <statecode>0</statecode>
+  <statuscode>1</statuscode>
+</botcomponent>

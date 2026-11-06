@@ -1,6 +1,6 @@
 <botcomponent schemaname="vm_Adopta.topic.DimmiDiPiu">
   <componenttype>9</componenttype>
-  <description>Risponde al pulsante Dimmi di più delle card con un'unica card: approfondimento generato dalle fonti Microsoft pubbliche e pulsante che apre il contenuto. Se non trova una risposta, mostra la card con il pulsante e lascia l'approfondimento all'Adoption Coach.</description>
+  <description>Recognizes versioned Teams card references and legacy Italian/English buttons, then uses the authenticated resolver and shared explanation topic.</description>
   <iscustomizable>0</iscustomizable>
   <name>Dimmi di più</name>
   <parentbotid>

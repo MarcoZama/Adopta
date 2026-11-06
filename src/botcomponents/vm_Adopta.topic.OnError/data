@@ -24,18 +24,33 @@ beginDialog:
                 Ora (UTC): {Topic.CurrentTime}
 
       elseActions:
-        - kind: SendActivity
-          id: sendMessage_dZ0gaF
-          activity:
-            text:
-              - |-
-                {If(Text(Global.UserLanguage) = "en", "Something went wrong.", "Si è verificato un errore.")}
-                {If(Text(Global.UserLanguage) = "en", "Error code", "Codice errore")}: {System.Error.Code}
-                {If(Text(Global.UserLanguage) = "en", "Conversation ID", "ID conversazione")}: {System.Conversation.Id}
-                {If(Text(Global.UserLanguage) = "en", "Time (UTC)", "Ora (UTC)")}: {Topic.CurrentTime}.
-            speak:
-              - |-
-                {If(Text(Global.UserLanguage) = "en", "Something went wrong. Please try again.", "Si è verificato un errore. Riprova.")}
+        - kind: ConditionGroup
+          id: communicationError
+          conditions:
+            - id: explainingFailed
+              condition: =Global.CommunicationExplaining = true
+              actions:
+                - kind: SendActivity
+                  id: explanationError
+                  activity: "{If(Global.CommunicationEnglish, \"The documentation search failed, so I cannot provide a verified explanation. No other communication was selected. You can try again later.\", \"La ricerca nella documentazione non è riuscita: non posso fornire un approfondimento verificato. Non è stata selezionata un'altra comunicazione. Puoi riprovare più tardi.\")}"
+          elseActions:
+            - kind: SendActivity
+              id: sendMessage_dZ0gaF
+              activity:
+                text:
+                  - |-
+                    {If(Text(Global.UserLanguage) = "en", "Something went wrong.", "Si è verificato un errore.")}
+                    {If(Text(Global.UserLanguage) = "en", "Error code", "Codice errore")}: {System.Error.Code}
+                    {If(Text(Global.UserLanguage) = "en", "Conversation ID", "ID conversazione")}: {System.Conversation.Id}
+                    {If(Text(Global.UserLanguage) = "en", "Time (UTC)", "Ora (UTC)")}: {Topic.CurrentTime}.
+                speak:
+                  - |-
+                    {If(Text(Global.UserLanguage) = "en", "Something went wrong. Please try again.", "Si è verificato un errore. Riprova.")}
+
+    - kind: SetVariable
+      id: resetExplaining
+      variable: Global.CommunicationExplaining
+      value: =false
 
     - kind: LogCustomTelemetryEvent
       id: 9KwEAn

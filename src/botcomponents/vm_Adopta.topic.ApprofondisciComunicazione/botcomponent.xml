@@ -1,0 +1,11 @@
+<botcomponent schemaname="vm_Adopta.topic.ApprofondisciComunicazione">
+  <componenttype>9</componenttype>
+  <description>Shared entry for chat explanations of the latest, selected or explicitly named communication. Practical coaching remains with Adoption Coach.</description>
+  <iscustomizable>0</iscustomizable>
+  <name>Approfondisci una comunicazione</name>
+  <parentbotid>
+    <schemaname>vm_Adopta</schemaname>
+  </parentbotid>
+  <statecode>0</statecode>
+  <statuscode>1</statuscode>
+</botcomponent>

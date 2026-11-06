@@ -3,7 +3,7 @@ beginDialog:
   kind: OnActivity
   id: main
   priority: 10
-  condition: =CountRows(Split(Trim(System.Activity.Text), " ")) >= 5 && !StartsWith(System.Activity.Text, "Dimmi di più sulla comunicazione «") && !StartsWith(System.Activity.Text, "Tell me more about the communication «") && !StartsWith(System.Activity.Text, "Ignora la comunicazione «") && !StartsWith(System.Activity.Text, "Ignore the communication «")
+  condition: =CountRows(Split(Trim(System.Activity.Text), " ")) >= 5 && !StartsWith(System.Activity.Text, "Adopta.Communication.v2|") && !StartsWith(System.Activity.Text, "Dimmi di più sulla comunicazione «") && !StartsWith(System.Activity.Text, "Tell me more about the communication «") && !StartsWith(System.Activity.Text, "Ignora la comunicazione «") && !StartsWith(System.Activity.Text, "Ignore the communication «")
   type: Message
   actions:
     - kind: SendActivity

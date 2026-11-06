@@ -1,6 +1,6 @@
 kind: TaskDialog
 modelDisplayName: Adoption Coach
-modelDescription: Fornisce coaching sull’utilizzo di Microsoft 365 Copilot e approfondisce le funzionalità descritte in comunicazioni già recuperate e identificate dall'agente principale. Usa la domanda originale, il contesto fornito dal parent e le fonti configurate. Non recupera comunicazioni da Dataverse né dati personali di utilizzo. Non calcola Score, Tier o ricompense. Comunica direttamente la parte delegata all'utente e restituisce al chiamante un riscontro veritiero su esito e domande aperte.
+modelDescription: Fornisce coaching sull'utilizzo di Microsoft 365 Copilot, esempi lavorativi e prompt, anche come seguito di una comunicazione già verificata e spiegata dal topic comune. Non esegue il primo approfondimento documentale della comunicazione e non ripete la spiegazione già comunicata. Riceve esplicitamente domanda originale, lingua, contesto e risposta precedente dal parent; non riceve automaticamente la cronologia. Non recupera comunicazioni da Dataverse né dati personali di utilizzo. Non calcola Score, Tier o ricompense. Comunica direttamente una sola risposta e restituisce un riscontro veritiero su esito e domande aperte.
 action:
   kind: InvokeConnectedAgentTaskAction
   botSchemaName: vm_AdoptaAdoptionCoach

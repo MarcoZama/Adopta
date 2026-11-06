@@ -1,10 +1,35 @@
-# Rilascio di Adopta Agents and App (v1.0.0.15)
+# Rilascio di Adopta Agents and App (v1.0.0.16)
 
 Per installare il pacchetto managed presso un cliente, passo passo: [INSTALL.md](INSTALL.md). Questo file raccoglie i dettagli tecnici e la storia delle versioni.
 
 Pacchetti:
-- `dist/Adopta_1_0_0_15_managed.zip` (**managed**): per i clienti e la produzione.
-- `dist/Adopta_1_0_0_15.zip` (unmanaged): per gli ambienti di sviluppo, generato da `src/` con `pac solution pack`.
+- `dist/Adopta_1_0_0_16_managed.zip` (**managed**): pacchetto managed ricostruito localmente dalla baseline managed 1.0.0.15.
+- `dist/Adopta_1_0_0_16.zip` (unmanaged): generato dai sorgenti aggiornati con `pac solution pack`.
+- `dist/Adopta_1_0_0_16.sha256`: hash dei due pacchetti.
+
+### 1.0.0.16: approfondimenti unificati
+
+- I nuovi pulsanti *Dimmi di più* trasportano un riferimento stabile e versionato nel `messageBack`, lasciando invariata l'etichetta visibile. Non servono nuove tabelle, connessioni o app.
+- Il resolver interno cerca soltanto consegne *Sent* all'identità autenticata. Supporta ID, ultimo invio e titolo esatto; le vecchie card usano titolo e link, anche quando il link manca. Più corrispondenze richiedono una scelta; gli elenchi sono paginati a dieci risultati senza scartare automaticamente i messaggi più vecchi.
+- Card e chat passano dallo stesso topic di spiegazione e mostrano una sola card finale. URL assente/non HTTPS: nessun pulsante di apertura. Fonti insufficienti: limite esplicito e testo originale, non una spiegazione inventata.
+- La comunicazione selezionata e la spiegazione restano nel contesto della sessione. Le spiegazioni successive rileggono quella comunicazione; esempi pratici e prompt vanno al Coach con contesto esplicito, senza dichiarare una nuova lettura.
+- Il tool che legge soltanto l'ultimo invio resta per le domande sui dati dell'ultimo invio. Non viene usato per sostituire una card precedente.
+
+**Verifiche locali, non validazione dell'ambiente:** i pacchetti sono costruiti senza interrogare o modificare Power Platform. I test verificano sintassi con l'SDK Microsoft, formule Power Fx effettive, costruzione delle card e riferimenti. Import, pubblicazione, instradamento generativo, risposta dei connettori e rendering Teams restano da verificare con la checklist di [INSTALL.md](INSTALL.md). Non considerare questi test locali un'approvazione per la produzione.
+
+### Ricostruzione completamente locale
+
+Prerequisiti: Node.js, PowerShell 7 e PAC CLI con SDK di authoring (testato con PAC 2.12.2). Dalla radice del repository:
+
+```powershell
+npm ci --ignore-scripts
+npm test
+.\deploy\Build-Solution.ps1
+```
+
+Lo script usa esclusivamente `pac solution unpack` e `pack`: nessun login, download dall'ambiente, import, export o pubblicazione. Conserva i metadati managed della baseline e applica i payload aggiornati dei topic e dei flow. Verifica versione, flag managed/unmanaged, contenuto aggiornato, asset delle code app invariati e round-trip di unpack. La baseline 1.0.0.15 resta intatta. Per evoluzioni a tabelle, ruoli, agenti o altri componenti non coperti dall'overlay occorre estendere esplicitamente lo script; non converte un export unmanaged in managed.
+
+### Provenienza della baseline 1.0.0.15
 
 I pacchetti 1.0.0.15 sono del 2026-11-05 e contengono le modifiche 1.0.0.14 e 1.0.0.15 descritte dopo la 1.0.0.13. La 1.0.0.15 non è ancora stata importata in sviluppo, quindi la managed non viene da un export:
 - è la managed 1.0.0.13, l'export managed dello sviluppo senza la vecchia variabile `vm_SendingEnabled`, la canvas e la model-driven;
@@ -12,9 +37,7 @@ I pacchetti 1.0.0.15 sono del 2026-11-05 e contengono le modifiche 1.0.0.14 e 1.
 
 Rispetto alla managed 1.0.0.13 cambiano solo quei file e `solution.xml`. Le code app sono quelle della 1.0.0.12.
 
-Prima di distribuire:
-- importa la 1.0.0.15 in sviluppo, pubblica *Adopta* e fai i test della sezione 4.6;
-- dopo l'import si può rigenerare la managed da un export, come per le versioni precedenti (vedi *Note*).
+La procedura storica prevedeva un nuovo import/export della 1.0.0.15. Per questa modifica si usano invece i pacchetti locali esistenti, senza accesso all'ambiente.
 
 In `dist/` restano i pacchetti 1.0.0.12 e 1.0.0.13. `dist/Adopta_1_0_0_14.zip` ha solo la correzione della lingua ed è superato.
 
@@ -50,7 +73,7 @@ Le due reference Dataverse possono usare la stessa connessione. L'account della 
 
 ```powershell
 pac solution import --environment https://<org>.crm4.dynamics.com `
-  --path dist\Adopta_1_0_0_12_managed.zip `
+  --path dist\Adopta_1_0_0_16_managed.zip `
   --settings-file deploy\deploymentSettings.json `
   --activate-plugins --publish-changes
 ```
@@ -213,7 +236,7 @@ Limiti:
    - In Teams chiedi "Qual è l'ultima comunicazione che ho ricevuto da Adopta?".
    - Invia una comunicazione di prova a un gruppo ristretto dopo aver abilitato gli invii in *Adopta Admin (code app)* → **Impostazioni** → *Invii in Teams*, oppure con l'interruttore di *Adopta Communications (code app)*.
    - Nella card ricevuta prova i pulsanti, che inviano un messaggio all'agente al posto dell'utente (`messageBack`):
-     - con *Dimmi di più* in chat appare "Dimmi di più". Se la comunicazione ha un link, l'agente risponde con una card con il pulsante *Apri il contenuto*. Poi segue la spiegazione del Coach;
+     - con *Dimmi di più* in chat appare "Dimmi di più". Il resolver verifica la comunicazione e il topic comune risponde con una sola card con spiegazione e fonti; il pulsante *Apri il contenuto* compare solo per un link HTTPS. Non deve seguire una seconda spiegazione del Coach;
      - con *Ignora* l'agente risponde con una breve conferma.
    - Ripeti con *Lingua della card* = English: i pulsanti sono *Tell me more* e *Ignore*, e l'agente risponde in inglese.
    - Includi nel gruppo di prova un utente che non ha l'app Teams di Adopta: nello storico deve risultare *Agente non installato*, non *Da verificare*. Se risulta *Da verificare*, apri la diagnostica del destinatario e segnala il testo dell'errore: il flow va adeguato.
@@ -255,7 +278,7 @@ Note:
 
 ## Note
 
-- Il pacchetto managed si ottiene solo con l'export managed dall'ambiente di sviluppo, dopo l'import della stessa versione: `pac solution pack` non lo genera da `src/`, che è unmanaged. Finché `vm_SendingEnabled`, la canvas e la model-driven sono nella soluzione di sviluppo, vanno tolte dall'export managed: unpack `--packagetype Managed`, eliminazione delle cartelle (`environmentvariabledefinitions/vm_SendingEnabled`, `AppModules`, `AppModuleSiteMaps`, `CanvasApps/vm_adoptacommunications_1b76d*`) e delle righe in `Other/Solution.xml` (`RootComponent` di `vm_adoptacommunications_1b76d` e `vm_AdoptaAdmin`, e la `MissingDependency` dell'icona della model-driven), poi pack `--packagetype Managed`.
+- Una soluzione unmanaged non si converte in managed cambiando il flag. Per la 1.0.0.16 si riutilizza la struttura dell'export managed già presente in `dist/` e si applica l'overlay locale descritto sopra. Per nuovi export dall'ambiente, verificare che non rientrino la vecchia variabile `vm_SendingEnabled`, la canvas e la model-driven, componenti già rimossi dalle baseline locali.
 - L'ambiente di sviluppo `prod-emea-cef2bf21` contiene ancora la soluzione precedente (1.0.0.2): il rename in Adopta è solo in `src/`.
 - La code app si aggiorna con `npx pa app push --solution-id`, seguito da export e unpack in `src/` (vedi [code-app/README.md](../code-app/README.md)).
 - Prima di esportare dall'ambiente di sviluppo, importaci le modifiche fatte in `src/`: l'unpack con `--allowDelete` sostituisce `src/` con il contenuto dell'ambiente.

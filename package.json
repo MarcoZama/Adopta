@@ -1,0 +1,12 @@
+{
+  "name": "adopta-solution-tools",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test tests/communication-details.test.mjs",
+    "validate": "node deploy/validate-solution.mjs"
+  },
+  "devDependencies": {
+    "yaml": "2.8.1"
+  }
+}
