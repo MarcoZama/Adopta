@@ -1,0 +1,11 @@
+<botcomponent schemaname="vm_Adopta.topic.IndicatoreScrittura">
+  <componenttype>9</componenttype>
+  <description>Invia subito l'indicatore di scrittura a ogni messaggio dell'utente, prima dell'inizializzazione del profilo e dell'orchestrazione.</description>
+  <iscustomizable>0</iscustomizable>
+  <name>Indicatore di scrittura</name>
+  <parentbotid>
+    <schemaname>vm_Adopta</schemaname>
+  </parentbotid>
+  <statecode>0</statecode>
+  <statuscode>1</statuscode>
+</botcomponent>

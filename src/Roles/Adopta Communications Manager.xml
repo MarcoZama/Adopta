@@ -1,0 +1,33 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Role id="{5e90a48f-f8f1-4bf1-bfe5-577590e19f4e}" name="Adopta Communications Manager" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <IsCustomizable>1</IsCustomizable>
+  <IsAutoAssigned>0</IsAutoAssigned>
+  <RolePrivileges>
+    <RolePrivilege name="prvAppendTovm_adoptaaudiencegroup" level="Global" />
+    <RolePrivilege name="prvAppendTovm_adoptacommunication" level="Global" />
+    <RolePrivilege name="prvAppendTovm_adoptacommunicationgroup" level="Global" />
+    <RolePrivilege name="prvAppendvm_adoptacommunication" level="Global" />
+    <RolePrivilege name="prvAppendvm_adoptacommunicationgroup" level="Global" />
+    <RolePrivilege name="prvAppendvm_AdoptaDispatchClaim" level="Global" />
+    <RolePrivilege name="prvCreateSharePointData" level="Global" />
+    <RolePrivilege name="prvCreatevm_adoptacommunication" level="Global" />
+    <RolePrivilege name="prvCreatevm_adoptacommunicationgroup" level="Global" />
+    <RolePrivilege name="prvCreatevm_AdoptaDispatchClaim" level="Global" />
+    <RolePrivilege name="prvDeletevm_adoptacommunication" level="Global" />
+    <RolePrivilege name="prvDeletevm_adoptacommunicationgroup" level="Global" />
+    <RolePrivilege name="prvDeletevm_AdoptaDispatchClaim" level="Global" />
+    <RolePrivilege name="prvReadEnvironmentVariableDefinition" level="Global" />
+    <RolePrivilege name="prvReadSharePointData" level="Global" />
+    <RolePrivilege name="prvReadSharePointDocument" level="Global" />
+    <RolePrivilege name="prvReadvm_adoptaaudiencegroup" level="Global" />
+    <RolePrivilege name="prvReadvm_adoptacommunication" level="Global" />
+    <RolePrivilege name="prvReadvm_adoptacommunicationgroup" level="Global" />
+    <RolePrivilege name="prvReadvm_adoptadelivery" level="Global" />
+    <RolePrivilege name="prvReadvm_AdoptaDispatchClaim" level="Global" />
+    <RolePrivilege name="prvReadvm_AdoptaSetting" level="Global" />
+    <RolePrivilege name="prvWriteSharePointData" level="Global" />
+    <RolePrivilege name="prvWritevm_adoptacommunication" level="Global" />
+    <RolePrivilege name="prvWritevm_adoptacommunicationgroup" level="Global" />
+    <RolePrivilege name="prvWritevm_AdoptaDispatchClaim" level="Global" />
+  </RolePrivileges>
+</Role>

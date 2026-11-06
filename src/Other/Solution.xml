@@ -1,0 +1,115 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ImportExportXml version="9.2.26101.177" SolutionPackageVersion="9.2" languagecode="1033" generatedBy="CrmLive" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" OrganizationVersion="9.2.26101.177" OrganizationSchemaType="Standard" CRMServerServiceabilityVersion="9.2.26101.00177">
+  <SolutionManifest>
+    <UniqueName>Adopta</UniqueName>
+    <LocalizedNames>
+      <LocalizedName description="Adopta Agents and App" languagecode="1033" />
+    </LocalizedNames>
+    <Descriptions>
+      <Description description="Scheduling console and delivery tracking for Adopta." languagecode="1033" />
+    </Descriptions>
+    <Version>1.0.0.15</Version>
+    <Managed>0</Managed>
+    <Publisher>
+      <UniqueName>vinm</UniqueName>
+      <LocalizedNames>
+        <LocalizedName description="vinm" languagecode="1033" />
+      </LocalizedNames>
+      <Descriptions />
+      <EMailAddress xsi:nil="true"></EMailAddress>
+      <SupportingWebsiteUrl xsi:nil="true"></SupportingWebsiteUrl>
+      <CustomizationPrefix>vm</CustomizationPrefix>
+      <CustomizationOptionValuePrefix>12743</CustomizationOptionValuePrefix>
+      <Addresses>
+        <Address>
+          <AddressNumber>1</AddressNumber>
+          <AddressTypeCode>1</AddressTypeCode>
+          <City xsi:nil="true"></City>
+          <County xsi:nil="true"></County>
+          <Country xsi:nil="true"></Country>
+          <Fax xsi:nil="true"></Fax>
+          <FreightTermsCode xsi:nil="true"></FreightTermsCode>
+          <ImportSequenceNumber xsi:nil="true"></ImportSequenceNumber>
+          <Latitude xsi:nil="true"></Latitude>
+          <Line1 xsi:nil="true"></Line1>
+          <Line2 xsi:nil="true"></Line2>
+          <Line3 xsi:nil="true"></Line3>
+          <Longitude xsi:nil="true"></Longitude>
+          <Name xsi:nil="true"></Name>
+          <PostalCode xsi:nil="true"></PostalCode>
+          <PostOfficeBox xsi:nil="true"></PostOfficeBox>
+          <PrimaryContactName xsi:nil="true"></PrimaryContactName>
+          <ShippingMethodCode>1</ShippingMethodCode>
+          <StateOrProvince xsi:nil="true"></StateOrProvince>
+          <Telephone1 xsi:nil="true"></Telephone1>
+          <Telephone2 xsi:nil="true"></Telephone2>
+          <Telephone3 xsi:nil="true"></Telephone3>
+          <TimeZoneRuleVersionNumber xsi:nil="true"></TimeZoneRuleVersionNumber>
+          <UPSZone xsi:nil="true"></UPSZone>
+          <UTCOffset xsi:nil="true"></UTCOffset>
+          <UTCConversionTimeZoneCode xsi:nil="true"></UTCConversionTimeZoneCode>
+        </Address>
+        <Address>
+          <AddressNumber>2</AddressNumber>
+          <AddressTypeCode>1</AddressTypeCode>
+          <City xsi:nil="true"></City>
+          <County xsi:nil="true"></County>
+          <Country xsi:nil="true"></Country>
+          <Fax xsi:nil="true"></Fax>
+          <FreightTermsCode xsi:nil="true"></FreightTermsCode>
+          <ImportSequenceNumber xsi:nil="true"></ImportSequenceNumber>
+          <Latitude xsi:nil="true"></Latitude>
+          <Line1 xsi:nil="true"></Line1>
+          <Line2 xsi:nil="true"></Line2>
+          <Line3 xsi:nil="true"></Line3>
+          <Longitude xsi:nil="true"></Longitude>
+          <Name xsi:nil="true"></Name>
+          <PostalCode xsi:nil="true"></PostalCode>
+          <PostOfficeBox xsi:nil="true"></PostOfficeBox>
+          <PrimaryContactName xsi:nil="true"></PrimaryContactName>
+          <ShippingMethodCode>1</ShippingMethodCode>
+          <StateOrProvince xsi:nil="true"></StateOrProvince>
+          <Telephone1 xsi:nil="true"></Telephone1>
+          <Telephone2 xsi:nil="true"></Telephone2>
+          <Telephone3 xsi:nil="true"></Telephone3>
+          <TimeZoneRuleVersionNumber xsi:nil="true"></TimeZoneRuleVersionNumber>
+          <UPSZone xsi:nil="true"></UPSZone>
+          <UTCOffset xsi:nil="true"></UTCOffset>
+          <UTCConversionTimeZoneCode xsi:nil="true"></UTCConversionTimeZoneCode>
+        </Address>
+      </Addresses>
+    </Publisher>
+    <RootComponents>
+      <RootComponent type="1" schemaName="vm_adoptaaudiencegroup" behavior="0" />
+      <RootComponent type="1" schemaName="vm_adoptacommunication" behavior="0" />
+      <RootComponent type="1" schemaName="vm_adoptacommunicationgroup" behavior="0" />
+      <RootComponent type="1" schemaName="vm_adoptadelivery" behavior="0" />
+      <RootComponent type="1" schemaName="vm_adoptadispatchclaim" behavior="0" />
+      <RootComponent type="1" schemaName="vm_adoptasetting" behavior="0" />
+      <RootComponent type="20" id="{5e90a48f-f8f1-4bf1-bfe5-577590e19f4e}" behavior="0" />
+      <RootComponent type="20" id="{7a15f89d-5239-4038-8591-d9c03b10a8ae}" behavior="0" />
+      <RootComponent type="29" id="{046919bc-1ae2-40fe-a68f-51000ebcc08e}" behavior="0" />
+      <RootComponent type="29" id="{2d64ce8d-dc3c-4632-954f-021b87ecab4c}" behavior="0" />
+      <RootComponent type="29" id="{4f722516-ae6f-42f7-bd6a-7d590c92b732}" behavior="0" />
+      <RootComponent type="29" id="{4fe1a26c-9ed5-4e8b-900e-23d823951c69}" behavior="0" />
+      <RootComponent type="29" id="{5869ba8c-33c4-41aa-9795-bfc5298d126b}" behavior="0" />
+      <RootComponent type="300" schemaName="vm_adoptaadmincodeapp_daf99" behavior="0" />
+      <RootComponent type="300" schemaName="vm_adoptacommunicationscodeapp_d7690" behavior="0" />
+      <RootComponent type="401" id="{db8bd9db-dcbf-4f99-93f1-d3424e0f46da}" behavior="0" />
+    </RootComponents>
+    <MissingDependencies>
+      <MissingDependency>
+        <Required type="1" schemaName="environmentvariabledefinition" displayName="Environment Variable Definition" solution="EnvironmentVariables (1.0.2406.4)">
+          <package appName="EnvironmentVariables" version="1.0.2406.4">EnvironmentVariablesSolutionAnchor (1.0.2406.4)</package>
+        </Required>
+        <Dependent type="29" displayName="AdoptaApplySettings" id="{4f722516-ae6f-42f7-bd6a-7d590c92b732}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="environmentvariablevalue" displayName="Environment Variable Value" solution="EnvironmentVariables (1.0.2406.4)">
+          <package appName="EnvironmentVariables" version="1.0.2406.4">EnvironmentVariablesSolutionAnchor (1.0.2406.4)</package>
+        </Required>
+        <Dependent type="29" displayName="AdoptaApplySettings" id="{4f722516-ae6f-42f7-bd6a-7d590c92b732}" />
+      </MissingDependency>
+    </MissingDependencies>
+  </SolutionManifest>
+</ImportExportXml>

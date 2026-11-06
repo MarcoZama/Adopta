@@ -1,0 +1,13 @@
+<environmentvariabledefinition schemaname="vm_AdoptaDataverseUrl">
+  <description default="Base URL of the Dataverse environment, without trailing slash. The flow AdoptaApplySettings writes it when the settings are saved in Adopta Admin; it can also be set at import in deploymentSettings.json, so the agents work from their first publish. The Adopta agent uses it to read settings and communications.">
+    <label description="Base URL of the Dataverse environment, without trailing slash. The flow AdoptaApplySettings writes it when the settings are saved in Adopta Admin; it can also be set at import in deploymentSettings.json, so the agents work from their first publish. The Adopta agent uses it to read settings and communications." languagecode="1033" />
+  </description>
+  <displayname default="Adopta - Dataverse environment URL">
+    <label description="Adopta - Dataverse environment URL" languagecode="1033" />
+  </displayname>
+  <introducedversion>1.0.0.3</introducedversion>
+  <iscustomizable>1</iscustomizable>
+  <isrequired>0</isrequired>
+  <secretstore>0</secretstore>
+  <type>100000000</type>
+</environmentvariabledefinition>

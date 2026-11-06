@@ -1,0 +1,5 @@
+<botcomponent_msdyn_aimodelset>
+  <botcomponent_msdyn_aimodel botcomponentid.schemaname="vm_Adopta.topic.InizializzazioneProfilo" msdyn_aimodelid.msdyn_aimodelid="db8bd9db-dcbf-4f99-93f1-d3424e0f46da">
+    <iscustomizable>1</iscustomizable>
+  </botcomponent_msdyn_aimodel>
+</botcomponent_msdyn_aimodelset>

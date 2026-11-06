@@ -1,0 +1,1198 @@
+{
+  "properties": {
+    "connectionReferences": {
+      "shared_commondataserviceforapps": {
+        "runtimeSource": "embedded",
+        "connection": {
+          "connectionReferenceLogicalName": "vm_adoptadataverse"
+        },
+        "api": {
+          "name": "shared_commondataserviceforapps"
+        }
+      },
+      "shared_office365groups": {
+        "runtimeSource": "embedded",
+        "connection": {
+          "connectionReferenceLogicalName": "vm_adoptaoffice365groups"
+        },
+        "api": {
+          "name": "shared_office365groups"
+        }
+      },
+      "shared_teams-1": {
+        "runtimeSource": "embedded",
+        "connection": {
+          "connectionReferenceLogicalName": "vm_adoptateams"
+        },
+        "api": {
+          "name": "shared_teams"
+        }
+      }
+    },
+    "definition": {
+      "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+      "contentVersion": "1.0.0.0",
+      "parameters": {
+        "$connections": {
+          "defaultValue": {},
+          "type": "Object"
+        },
+        "$authentication": {
+          "defaultValue": {},
+          "type": "SecureObject"
+        }
+      },
+      "triggers": {
+        "manual": {
+          "metadata": {
+            "operationMetadataId": "a65f8bcf-81c2-4d3a-8703-45e37be578f7"
+          },
+          "type": "Request",
+          "kind": "Button",
+          "inputs": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "text": {
+                  "type": "string",
+                  "title": "CommunicationId",
+                  "description": "Identifier of the saved communication.",
+                  "x-ms-content-hint": "TEXT",
+                  "x-ms-dynamically-added": true
+                }
+              },
+              "required": [
+                "text"
+              ]
+            }
+          }
+        }
+      },
+      "actions": {
+        "Initialize": {
+          "runAfter": {},
+          "metadata": {
+            "operationMetadataId": "fdfc83a1-4702-43bd-8926-4c11e45c21a9"
+          },
+          "type": "InitializeVariable",
+          "inputs": {
+            "variables": [
+              {
+                "name": "success",
+                "type": "boolean",
+                "value": false
+              }
+            ]
+          }
+        },
+        "Sending_enabled": {
+          "actions": {
+            "Get_scheduled": {
+              "runAfter": {},
+              "metadata": {
+                "operationMetadataId": "4319c3a6-8b5d-4eef-9e34-923870de1217"
+              },
+              "type": "OpenApiConnection",
+              "inputs": {
+                "parameters": {
+                  "entityName": "vm_adoptacommunications",
+                  "recordId": "@triggerBody()?['text']"
+                },
+                "host": {
+                  "connectionName": "shared_commondataserviceforapps",
+                  "operationId": "GetItem",
+                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps"
+                },
+                "authentication": "@parameters('$authentication')"
+              }
+            },
+            "Scheduled_and_due": {
+              "actions": {
+                "Claim_communication": {
+                  "runAfter": {},
+                  "metadata": {
+                    "operationMetadataId": "f7d6e978-fe51-4c3e-b459-379bad1709ce"
+                  },
+                  "type": "OpenApiConnection",
+                  "inputs": {
+                    "parameters": {
+                      "entityName": "vm_adoptadispatchclaims",
+                      "item/vm_adoptadispatchclaimid": "@triggerBody()?['text']",
+                      "item/vm_name": "@triggerBody()?['text']"
+                    },
+                    "host": {
+                      "connectionName": "shared_commondataserviceforapps",
+                      "operationId": "CreateRecord",
+                      "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps"
+                    },
+                    "retryPolicy": {
+                      "type": "none"
+                    },
+                    "authentication": "@parameters('$authentication')"
+                  }
+                },
+                "Mark_processing": {
+                  "runAfter": {
+                    "Claim_communication": [
+                      "Succeeded"
+                    ]
+                  },
+                  "metadata": {
+                    "operationMetadataId": "f9498cc5-2b35-4b50-98f4-66db2eec8a71"
+                  },
+                  "type": "OpenApiConnection",
+                  "inputs": {
+                    "parameters": {
+                      "entityName": "vm_adoptacommunications",
+                      "recordId": "@triggerBody()?['text']",
+                      "item/vm_communicationstatus": 100000002,
+                      "item/vm_startedat": "@utcNow()"
+                    },
+                    "host": {
+                      "connectionName": "shared_commondataserviceforapps",
+                      "operationId": "UpdateOnlyRecord",
+                      "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps"
+                    },
+                    "authentication": "@parameters('$authentication')"
+                  }
+                },
+                "Delivery_work": {
+                  "actions": {
+                    "List_groups": {
+                      "runAfter": {},
+                      "metadata": {
+                        "operationMetadataId": "d2c636f7-0158-4b06-bb27-3aabd41f1bdd"
+                      },
+                      "type": "OpenApiConnection",
+                      "inputs": {
+                        "parameters": {
+                          "entityName": "vm_adoptacommunicationgroups",
+                          "$filter": "_vm_communication_value eq @{triggerBody()?['text']}"
+                        },
+                        "host": {
+                          "connectionName": "shared_commondataserviceforapps",
+                          "operationId": "ListRecords",
+                          "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps"
+                        },
+                        "authentication": "@parameters('$authentication')"
+                      },
+                      "runtimeConfiguration": {
+                        "paginationPolicy": {
+                          "minimumItemCount": 5000
+                        }
+                      }
+                    },
+                    "Resolve_groups": {
+                      "foreach": "@body('List_groups')?['value']",
+                      "actions": {
+                        "Get_catalog_group": {
+                          "runAfter": {},
+                          "metadata": {
+                            "operationMetadataId": "3b708f80-279c-44aa-ac46-308faa6fd626"
+                          },
+                          "type": "OpenApiConnection",
+                          "inputs": {
+                            "parameters": {
+                              "entityName": "vm_adoptaaudiencegroups",
+                              "recordId": "@items('Resolve_groups')?['_vm_audiencegroup_value']"
+                            },
+                            "host": {
+                              "connectionName": "shared_commondataserviceforapps",
+                              "operationId": "GetItem",
+                              "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps"
+                            },
+                            "authentication": "@parameters('$authentication')"
+                          }
+                        },
+                        "Group_is_enabled": {
+                          "actions": {
+                            "Set_first_page": {
+                              "runAfter": {},
+                              "metadata": {
+                                "operationMetadataId": "e0bd7c67-94bc-4a05-bd3e-c1336c21d853"
+                              },
+                              "type": "SetVariable",
+                              "inputs": {
+                                "name": "nextPage",
+                                "value": "@concat('https://graph.microsoft.com/v1.0/groups/',encodeUriComponent(body('Get_catalog_group')?['vm_entraobject']),'/members/microsoft.graph.user?$select=id,userPrincipalName&$top=999')"
+                              }
+                            },
+                            "Read_all_pages": {
+                              "actions": {
+                                "Get_members_page": {
+                                  "runAfter": {},
+                                  "metadata": {
+                                    "operationMetadataId": "2ee7ee10-c3aa-4932-9307-0ca86dc7a1ab"
+                                  },
+                                  "type": "OpenApiConnection",
+                                  "inputs": {
+                                    "host": {
+                                      "connectionName": "shared_office365groups",
+                                      "operationId": "HttpRequestV2",
+                                      "apiId": "/providers/Microsoft.PowerApps/apis/shared_office365groups"
+                                    },
+                                    "parameters": {
+                                      "Uri": "@variables('nextPage')",
+                                      "Method": "GET",
+                                      "ContentType": "application/json"
+                                    },
+                                    "authentication": {
+                                      "type": "Raw",
+                                      "value": "@json(decodeBase64(triggerOutputs().headers['X-MS-APIM-Tokens']))['$ConnectionKey']"
+                                    }
+                                  }
+                                },
+                                "Collect_members": {
+                                  "foreach": "@body('Get_members_page')?['value']",
+                                  "actions": {
+                                    "Usable_user": {
+                                      "actions": {
+                                        "Remember_id": {
+                                          "runAfter": {},
+                                          "metadata": {
+                                            "operationMetadataId": "e0d915c4-5212-47e7-9d35-591dfac54345"
+                                          },
+                                          "type": "AppendToArrayVariable",
+                                          "inputs": {
+                                            "name": "recipientIds",
+                                            "value": "@items('Collect_members')?['id']"
+                                          }
+                                        },
+                                        "Remember_user": {
+                                          "runAfter": {
+                                            "Remember_id": [
+                                              "Succeeded"
+                                            ]
+                                          },
+                                          "metadata": {
+                                            "operationMetadataId": "629a9ce8-c93a-499c-8d85-97741d451180"
+                                          },
+                                          "type": "AppendToArrayVariable",
+                                          "inputs": {
+                                            "name": "recipients",
+                                            "value": {
+                                              "id": "@items('Collect_members')?['id']",
+                                              "upn": "@items('Collect_members')?['userPrincipalName']"
+                                            }
+                                          }
+                                        }
+                                      },
+                                      "runAfter": {},
+                                      "expression": "@and(not(empty(items('Collect_members')?['id'])),not(empty(items('Collect_members')?['userPrincipalName'])),not(contains(variables('recipientIds'),items('Collect_members')?['id'])))",
+                                      "metadata": {
+                                        "operationMetadataId": "e499e42f-e9b6-4e48-949c-fd4ec35a9280"
+                                      },
+                                      "type": "If"
+                                    },
+                                    "Missing_identity": {
+                                      "actions": {
+                                        "Reject_incomplete_user": {
+                                          "runAfter": {},
+                                          "metadata": {
+                                            "operationMetadataId": "6d2db67e-9927-4f7b-bba5-b69ce2edf7d3"
+                                          },
+                                          "type": "SetVariable",
+                                          "inputs": {
+                                            "name": "audiencesValid",
+                                            "value": false
+                                          }
+                                        }
+                                      },
+                                      "runAfter": {
+                                        "Usable_user": [
+                                          "Succeeded"
+                                        ]
+                                      },
+                                      "expression": "@or(empty(items('Collect_members')?['id']),empty(items('Collect_members')?['userPrincipalName']))",
+                                      "metadata": {
+                                        "operationMetadataId": "c45ee56b-f1a4-4726-a642-fb2b1e5f7ade"
+                                      },
+                                      "type": "If"
+                                    }
+                                  },
+                                  "runAfter": {
+                                    "Get_members_page": [
+                                      "Succeeded"
+                                    ]
+                                  },
+                                  "metadata": {
+                                    "operationMetadataId": "24b5d592-4c96-4e03-9a05-27a851e49284"
+                                  },
+                                  "type": "Foreach",
+                                  "runtimeConfiguration": {
+                                    "concurrency": {
+                                      "repetitions": 1
+                                    }
+                                  }
+                                },
+                                "Next_page": {
+                                  "runAfter": {
+                                    "Collect_members": [
+                                      "Succeeded"
+                                    ]
+                                  },
+                                  "metadata": {
+                                    "operationMetadataId": "54fafd35-bccb-4548-b2ae-a32a38f4de50"
+                                  },
+                                  "type": "SetVariable",
+                                  "inputs": {
+                                    "name": "nextPage",
+                                    "value": "@coalesce(body('Get_members_page')?['@odata.nextLink'],'')"
+                                  }
+                                }
+                              },
+                              "runAfter": {
+                                "Set_first_page": [
+                                  "Succeeded"
+                                ]
+                              },
+                              "expression": "@equals(variables('nextPage'),'')",
+                              "limit": {
+                                "count": 1000,
+                                "timeout": "PT1H"
+                              },
+                              "metadata": {
+                                "operationMetadataId": "18b94ad3-105e-4f65-818e-6b374c7f755c"
+                              },
+                              "type": "Until"
+                            },
+                            "Pagination_complete": {
+                              "actions": {
+                                "Incomplete": {
+                                  "runAfter": {},
+                                  "metadata": {
+                                    "operationMetadataId": "61375d32-b978-424d-a339-7fcb36d7bb15"
+                                  },
+                                  "type": "SetVariable",
+                                  "inputs": {
+                                    "name": "audiencesValid",
+                                    "value": false
+                                  }
+                                }
+                              },
+                              "runAfter": {
+                                "Read_all_pages": [
+                                  "Succeeded"
+                                ]
+                              },
+                              "expression": "@not(empty(variables('nextPage')))",
+                              "metadata": {
+                                "operationMetadataId": "774171d9-c84b-4ba4-a2cc-75865d666eea"
+                              },
+                              "type": "If"
+                            }
+                          },
+                          "runAfter": {
+                            "Get_catalog_group": [
+                              "Succeeded"
+                            ]
+                          },
+                          "else": {
+                            "actions": {
+                              "Disabled_group": {
+                                "runAfter": {},
+                                "metadata": {
+                                  "operationMetadataId": "fb94bb7c-9fce-4893-8b20-18b4b1ce33d9"
+                                },
+                                "type": "SetVariable",
+                                "inputs": {
+                                  "name": "audiencesValid",
+                                  "value": false
+                                }
+                              }
+                            }
+                          },
+                          "expression": "@and(equals(body('Get_catalog_group')?['vm_enabled'],true),not(empty(body('Get_catalog_group')?['vm_entraobject'])))",
+                          "metadata": {
+                            "operationMetadataId": "f1ff1184-1ebe-4b7f-818b-0274ff06e0df"
+                          },
+                          "type": "If"
+                        }
+                      },
+                      "runAfter": {
+                        "List_groups": [
+                          "Succeeded"
+                        ]
+                      },
+                      "metadata": {
+                        "operationMetadataId": "c4ce022f-de6c-4ae3-a46b-19f1453598a3"
+                      },
+                      "type": "Foreach",
+                      "runtimeConfiguration": {
+                        "concurrency": {
+                          "repetitions": 1
+                        }
+                      }
+                    },
+                    "Audience_resolution_ok": {
+                      "actions": {
+                        "Save_recipient_count": {
+                          "runAfter": {},
+                          "metadata": {
+                            "operationMetadataId": "391d6227-d8dd-4e1e-b029-b1723211ae7e"
+                          },
+                          "type": "OpenApiConnection",
+                          "inputs": {
+                            "parameters": {
+                              "entityName": "vm_adoptacommunications",
+                              "recordId": "@triggerBody()?['text']",
+                              "item/vm_recipientcount": "@length(variables('recipients'))"
+                            },
+                            "host": {
+                              "connectionName": "shared_commondataserviceforapps",
+                              "operationId": "UpdateOnlyRecord",
+                              "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps"
+                            },
+                            "authentication": "@parameters('$authentication')"
+                          }
+                        },
+                        "Deliver_to_users": {
+                          "foreach": "@variables('recipients')",
+                          "actions": {
+                            "Reserve_delivery": {
+                              "runAfter": {},
+                              "metadata": {
+                                "operationMetadataId": "c6cc0cd3-4289-42dc-9bd1-299a38c780d5"
+                              },
+                              "type": "OpenApiConnection",
+                              "inputs": {
+                                "parameters": {
+                                  "entityName": "vm_adoptadeliveries",
+                                  "item/vm_attempts": 1,
+                                  "item/vm_Communication@odata.bind": "vm_adoptacommunications(@{triggerBody()?['text']})",
+                                  "item/vm_deliverystatus": 100000001,
+                                  "item/vm_name": "@items('Deliver_to_users')?['id']",
+                                  "item/vm_recipientupn": "@items('Deliver_to_users')?['upn']",
+                                  "item/vm_recipientobject": "@items('Deliver_to_users')?['id']"
+                                },
+                                "host": {
+                                  "connectionName": "shared_commondataserviceforapps",
+                                  "operationId": "CreateRecord",
+                                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps"
+                                },
+                                "retryPolicy": {
+                                  "type": "none"
+                                },
+                                "authentication": "@parameters('$authentication')"
+                              }
+                            },
+                            "Send_and_log": {
+                              "actions": {
+                                "Send_Adopta_card": {
+                                  "runAfter": {},
+                                  "metadata": {
+                                    "operationMetadataId": "408e8634-7eac-48ad-8982-80e7e4590c40"
+                                  },
+                                  "type": "OpenApiConnection",
+                                  "inputs": {
+                                    "parameters": {
+                                      "poster": "Power Virtual Agents",
+                                      "location": "powerva",
+                                      "body/bot": "vm_Adopta",
+                                      "body/recipient": "@items('Deliver_to_users')?['upn']",
+                                      "body/messageBody": "@body('Get_scheduled')?['vm_cardjson']",
+                                      "body/attribution": true,
+                                      "body/activeChat": "Send",
+                                      "body/installedError": "Fail"
+                                    },
+                                    "host": {
+                                      "connectionName": "shared_teams-1",
+                                      "operationId": "PostCardToConversation",
+                                      "apiId": "/providers/Microsoft.PowerApps/apis/shared_teams"
+                                    },
+                                    "retryPolicy": {
+                                      "type": "none"
+                                    },
+                                    "authentication": "@parameters('$authentication')"
+                                  }
+                                },
+                                "Increment_sent": {
+                                  "runAfter": {
+                                    "Log_sent": [
+                                      "Succeeded"
+                                    ]
+                                  },
+                                  "metadata": {
+                                    "operationMetadataId": "d2cba639-c9c6-4859-a24f-b2a840026e23"
+                                  },
+                                  "type": "IncrementVariable",
+                                  "inputs": {
+                                    "name": "sent",
+                                    "value": 1
+                                  }
+                                },
+                                "Log_sent": {
+                                  "runAfter": {
+                                    "Send_Adopta_card": [
+                                      "Succeeded"
+                                    ]
+                                  },
+                                  "metadata": {
+                                    "operationMetadataId": "478572e8-79d1-4ee5-93ed-aa507bbab1ef"
+                                  },
+                                  "type": "OpenApiConnection",
+                                  "inputs": {
+                                    "parameters": {
+                                      "entityName": "vm_adoptadeliveries",
+                                      "recordId": "@body('Reserve_delivery')?['vm_adoptadeliveryid']",
+                                      "item/vm_deliverystatus": 100000002,
+                                      "item/vm_sentat": "@utcNow()",
+                                      "item/vm_messageidentifier": "@string(body('Send_Adopta_card'))"
+                                    },
+                                    "host": {
+                                      "connectionName": "shared_commondataserviceforapps",
+                                      "operationId": "UpdateOnlyRecord",
+                                      "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps"
+                                    },
+                                    "authentication": "@parameters('$authentication')"
+                                  }
+                                }
+                              },
+                              "runAfter": {
+                                "Reserve_delivery": [
+                                  "Succeeded"
+                                ]
+                              },
+                              "metadata": {
+                                "operationMetadataId": "53af5c2e-5bac-4ef1-b08f-a547c0ad09ce"
+                              },
+                              "type": "Scope"
+                            },
+                            "Uncertain_delivery": {
+                              "actions": {
+                                "Send_error": {
+                                  "runAfter": {},
+                                  "type": "Compose",
+                                  "description": "Error returned by Teams for this recipient, lowercase. The name of the installedError input is removed so it cannot match.",
+                                  "inputs": "@replace(toLower(concat(string(coalesce(actions('Send_Adopta_card')?['outputs']?['body'],'')),' ',string(coalesce(actions('Send_Adopta_card')?['error'],'')))),'installederror','')"
+                                },
+                                "Agent_not_installed": {
+                                  "runAfter": {
+                                    "Send_error": [
+                                      "Succeeded"
+                                    ]
+                                  },
+                                  "type": "If",
+                                  "description": "Teams rejects the card when the agent is not installed for the user (installedError = Fail). Any other failure, or a send that worked but was not logged, stays uncertain.",
+                                  "expression": "@and(equals(actions('Send_Adopta_card')?['status'],'Failed'),or(contains(outputs('Send_error'),'install'),contains(outputs('Send_error'),'roster')))",
+                                  "actions": {
+                                    "Increment_not_installed": {
+                                      "runAfter": {},
+                                      "type": "IncrementVariable",
+                                      "inputs": {
+                                        "name": "notInstalled",
+                                        "value": 1
+                                      }
+                                    },
+                                    "Log_not_installed": {
+                                      "runAfter": {
+                                        "Increment_not_installed": [
+                                          "Succeeded"
+                                        ]
+                                      },
+                                      "type": "OpenApiConnection",
+                                      "inputs": {
+                                        "parameters": {
+                                          "entityName": "vm_adoptadeliveries",
+                                          "recordId": "@body('Reserve_delivery')?['vm_adoptadeliveryid']",
+                                          "item/vm_deliverystatus": 100000006,
+                                          "item/vm_lasterror": "@take(concat('Agente non installato in Teams per questo destinatario: la card non e stata consegnata. Risposta di Teams: ',string(coalesce(actions('Send_Adopta_card')?['outputs']?['body'],actions('Send_Adopta_card')?['error'],''))),10000)"
+                                        },
+                                        "host": {
+                                          "connectionName": "shared_commondataserviceforapps",
+                                          "operationId": "UpdateOnlyRecord",
+                                          "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps"
+                                        },
+                                        "authentication": "@parameters('$authentication')"
+                                      }
+                                    }
+                                  },
+                                  "else": {
+                                    "actions": {
+                                      "Increment_uncertain": {
+                                        "runAfter": {},
+                                        "metadata": {
+                                          "operationMetadataId": "b0f50093-34dc-463c-9e0d-0c1ac3aa6bcf"
+                                        },
+                                        "type": "IncrementVariable",
+                                        "inputs": {
+                                          "name": "uncertain",
+                                          "value": 1
+                                        }
+                                      },
+                                      "Log_unknown": {
+                                        "runAfter": {
+                                          "Increment_uncertain": [
+                                            "Succeeded"
+                                          ]
+                                        },
+                                        "metadata": {
+                                          "operationMetadataId": "bdcfed31-1ed7-43cf-a3af-ac7257e39421"
+                                        },
+                                        "type": "OpenApiConnection",
+                                        "inputs": {
+                                          "parameters": {
+                                            "entityName": "vm_adoptadeliveries",
+                                            "recordId": "@body('Reserve_delivery')?['vm_adoptadeliveryid']",
+                                            "item/vm_deliverystatus": 100000004,
+                                            "item/vm_lasterror": "@take(string(result('Send_and_log')),10000)"
+                                          },
+                                          "host": {
+                                            "connectionName": "shared_commondataserviceforapps",
+                                            "operationId": "UpdateOnlyRecord",
+                                            "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps"
+                                          },
+                                          "authentication": "@parameters('$authentication')"
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+                              },
+                              "runAfter": {
+                                "Send_and_log": [
+                                  "Failed",
+                                  "TimedOut"
+                                ]
+                              },
+                              "metadata": {
+                                "operationMetadataId": "b74999bf-368b-4dd0-8eec-726c37e6c05b"
+                              },
+                              "type": "Scope"
+                            }
+                          },
+                          "runAfter": {
+                            "Save_recipient_count": [
+                              "Succeeded"
+                            ]
+                          },
+                          "metadata": {
+                            "operationMetadataId": "55ccb7ce-638e-4a65-a015-826e8dcb0287"
+                          },
+                          "type": "Foreach",
+                          "runtimeConfiguration": {
+                            "concurrency": {
+                              "repetitions": 1
+                            }
+                          }
+                        },
+                        "Mark_complete": {
+                          "runAfter": {
+                            "Deliver_to_users": [
+                              "Succeeded"
+                            ]
+                          },
+                          "metadata": {
+                            "operationMetadataId": "0c8688c7-2550-4c7e-93f5-8ea34eda3668"
+                          },
+                          "type": "OpenApiConnection",
+                          "inputs": {
+                            "parameters": {
+                              "entityName": "vm_adoptacommunications",
+                              "recordId": "@triggerBody()?['text']",
+                              "item/vm_communicationstatus": "@if(equals(add(variables('uncertain'),variables('notInstalled')),0),100000003,if(greater(variables('sent'),0),100000004,100000005))",
+                              "item/vm_completedat": "@utcNow()",
+                              "item/vm_failedcount": "@variables('uncertain')",
+                              "item/vm_lasterror": "@if(greater(variables('uncertain'),0),'Una o piu consegne hanno esito incerto. Verificare prima di reinviare.',if(greater(variables('notInstalled'),0),'Alcuni destinatari non hanno ricevuto la card perche non hanno l''agente installato in Teams.',''))",
+                              "item/vm_sentcount": "@variables('sent')",
+                              "item/vm_notinstalledcount": "@variables('notInstalled')"
+                            },
+                            "host": {
+                              "connectionName": "shared_commondataserviceforapps",
+                              "operationId": "UpdateOnlyRecord",
+                              "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps"
+                            },
+                            "authentication": "@parameters('$authentication')"
+                          }
+                        },
+                        "Set_delivery_success": {
+                          "runAfter": {
+                            "Mark_complete": [
+                              "Succeeded"
+                            ]
+                          },
+                          "metadata": {
+                            "operationMetadataId": "8145a7b1-583e-469c-a68a-b759a08d6851"
+                          },
+                          "type": "SetVariable",
+                          "inputs": {
+                            "name": "success",
+                            "value": "@equals(add(variables('uncertain'),variables('notInstalled')),0)"
+                          }
+                        },
+                        "Delivery_result": {
+                          "runAfter": {
+                            "Set_delivery_success": [
+                              "Succeeded"
+                            ]
+                          },
+                          "metadata": {
+                            "operationMetadataId": "3a36a17f-a1b6-43a7-a4eb-28fce15f4643"
+                          },
+                          "type": "SetVariable",
+                          "inputs": {
+                            "name": "message",
+                            "value": "@if(variables('success'),'Invio completato.',if(greater(variables('uncertain'),0),'Invio completato con consegne da verificare.','Invio completato: alcuni destinatari non hanno l''agente installato.'))"
+                          }
+                        }
+                      },
+                      "runAfter": {
+                        "Resolve_groups": [
+                          "Succeeded"
+                        ]
+                      },
+                      "else": {
+                        "actions": {
+                          "Reject_resolution": {
+                            "runAfter": {},
+                            "metadata": {
+                              "operationMetadataId": "d791f133-a976-49a8-988a-d9bde9db8a90"
+                            },
+                            "type": "OpenApiConnection",
+                            "inputs": {
+                              "parameters": {
+                                "entityName": "vm_adoptacommunications",
+                                "recordId": "@triggerBody()?['text']",
+                                "item/vm_communicationstatus": 100000005,
+                                "item/vm_completedat": "@utcNow()",
+                                "item/vm_lasterror": "Destinatari non validi, gruppo disabilitato o risoluzione incompleta. Nessun invio."
+                              },
+                              "host": {
+                                "connectionName": "shared_commondataserviceforapps",
+                                "operationId": "UpdateOnlyRecord",
+                                "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps"
+                              },
+                              "authentication": "@parameters('$authentication')"
+                            }
+                          },
+                          "Resolution_message": {
+                            "runAfter": {
+                              "Reject_resolution": [
+                                "Succeeded"
+                              ]
+                            },
+                            "metadata": {
+                              "operationMetadataId": "fec19bea-cca9-4f06-8c0f-6a2b43e4fbcb"
+                            },
+                            "type": "SetVariable",
+                            "inputs": {
+                              "name": "message",
+                              "value": "Risoluzione destinatari non riuscita."
+                            }
+                          }
+                        }
+                      },
+                      "expression": "@and(equals(variables('audiencesValid'),true),greater(length(body('List_groups')?['value']),0),less(length(body('List_groups')?['value']),5000),greater(length(variables('recipients')),0))",
+                      "metadata": {
+                        "operationMetadataId": "b8260dfb-a19c-46ec-809f-e4917cf1be86"
+                      },
+                      "type": "If"
+                    }
+                  },
+                  "runAfter": {
+                    "Mark_processing": [
+                      "Succeeded"
+                    ]
+                  },
+                  "metadata": {
+                    "operationMetadataId": "ad266127-074c-45dc-adea-818680aa9782"
+                  },
+                  "type": "Scope"
+                },
+                "Delivery_failed": {
+                  "actions": {
+                    "Mark_failed": {
+                      "runAfter": {},
+                      "metadata": {
+                        "operationMetadataId": "58666c3a-e933-436e-b4bd-b1f359e5d71d"
+                      },
+                      "type": "OpenApiConnection",
+                      "inputs": {
+                        "parameters": {
+                          "entityName": "vm_adoptacommunications",
+                          "recordId": "@triggerBody()?['text']",
+                          "item/vm_communicationstatus": "@if(greater(variables('sent'),0),100000004,100000005)",
+                          "item/vm_completedat": "@utcNow()",
+                          "item/vm_failedcount": "@variables('uncertain')",
+                          "item/vm_lasterror": "@take(string(result('Delivery_work')),10000)",
+                          "item/vm_sentcount": "@variables('sent')",
+                          "item/vm_notinstalledcount": "@variables('notInstalled')"
+                        },
+                        "host": {
+                          "connectionName": "shared_commondataserviceforapps",
+                          "operationId": "UpdateOnlyRecord",
+                          "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps"
+                        },
+                        "authentication": "@parameters('$authentication')"
+                      }
+                    },
+                    "Failed_message": {
+                      "runAfter": {
+                        "Mark_failed": [
+                          "Succeeded"
+                        ]
+                      },
+                      "metadata": {
+                        "operationMetadataId": "fd3c4b02-488e-4362-b1ea-ed9cb25c7a8f"
+                      },
+                      "type": "SetVariable",
+                      "inputs": {
+                        "name": "message",
+                        "value": "Errore di consegna. Nessun reinvio automatico."
+                      }
+                    }
+                  },
+                  "runAfter": {
+                    "Delivery_work": [
+                      "Failed",
+                      "TimedOut"
+                    ]
+                  },
+                  "metadata": {
+                    "operationMetadataId": "ddd5ed55-9d0f-4c40-8f2a-4e5aa5d46d44"
+                  },
+                  "type": "Scope"
+                }
+              },
+              "runAfter": {
+                "Get_scheduled": [
+                  "Succeeded"
+                ]
+              },
+              "else": {
+                "actions": {
+                  "Not_due": {
+                    "runAfter": {},
+                    "metadata": {
+                      "operationMetadataId": "432d0544-11c8-4ae6-a777-e577d848ef7f"
+                    },
+                    "type": "SetVariable",
+                    "inputs": {
+                      "name": "message",
+                      "value": "Comunicazione non pianificata, gia elaborata o non ancora in scadenza."
+                    }
+                  }
+                }
+              },
+              "expression": "@and(equals(body('Get_scheduled')?['vm_communicationstatus'],100000001),lessOrEquals(ticks(coalesce(body('Get_scheduled')?['vm_scheduledat'],'9999-12-31T00:00:00Z')),ticks(utcNow())),not(empty(body('Get_scheduled')?['vm_cardjson'])))",
+              "metadata": {
+                "operationMetadataId": "56f0be59-c8d5-44d0-b9f9-e73cbb6deb77"
+              },
+              "type": "If"
+            }
+          },
+          "runAfter": {
+            "Sending_configuration_error": [
+              "Succeeded",
+              "Skipped"
+            ]
+          },
+          "expression": "@equals(variables('sendingEnabled'),true)",
+          "metadata": {
+            "operationMetadataId": "6092e7e9-fa47-4147-a508-f415d4b102f0"
+          },
+          "type": "If"
+        },
+        "Respond": {
+          "runAfter": {
+            "Sending_enabled": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "2cfd43a2-01a1-451d-b18b-7348127fac27"
+          },
+          "type": "Response",
+          "kind": "PowerApp",
+          "inputs": {
+            "statusCode": 200,
+            "body": {},
+            "schema": {
+              "type": "object",
+              "properties": {}
+            }
+          }
+        },
+        "Read_sending_configuration": {
+          "actions": {
+            "Get_sending_setting": {
+              "runAfter": {},
+              "metadata": {
+                "operationMetadataId": "a0c5a59b-0b74-4dac-b685-a60d8c869c7c"
+              },
+              "type": "OpenApiConnection",
+              "inputs": {
+                "host": {
+                  "connectionName": "shared_commondataserviceforapps",
+                  "operationId": "ListRecords",
+                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps"
+                },
+                "parameters": {
+                  "entityName": "vm_adoptasettings",
+                  "$select": "vm_adoptasettingid,vm_sendingenabled",
+                  "$filter": "statecode eq 0",
+                  "$orderby": "createdon asc",
+                  "$top": 1
+                },
+                "authentication": "@parameters('$authentication')"
+              }
+            },
+            "Sending_setting_exists": {
+              "actions": {
+                "Apply_sending_value": {
+                  "runAfter": {},
+                  "metadata": {
+                    "operationMetadataId": "b2f1a92e-8a71-4ae9-8620-06c82ca3a60b"
+                  },
+                  "type": "SetVariable",
+                  "inputs": {
+                    "name": "sendingEnabled",
+                    "value": "@equals(first(body('Get_sending_setting')?['value'])?['vm_sendingenabled'],true)"
+                  }
+                }
+              },
+              "runAfter": {
+                "Get_sending_setting": [
+                  "Succeeded"
+                ]
+              },
+              "else": {
+                "actions": {
+                  "Missing_sending_setting": {
+                    "runAfter": {},
+                    "metadata": {
+                      "operationMetadataId": "d71c60c8-f62f-4871-9bd6-94bcb9ff18fd"
+                    },
+                    "type": "SetVariable",
+                    "inputs": {
+                      "name": "message",
+                      "value": "Configurazione assente: un amministratore deve creare il record in Adopta Admin > Impostazioni. Nessun invio."
+                    }
+                  }
+                }
+              },
+              "expression": "@equals(length(body('Get_sending_setting')?['value']),1)",
+              "metadata": {
+                "operationMetadataId": "05cf25fc-7867-4049-8dd0-1ad3db1576b7"
+              },
+              "type": "If"
+            }
+          },
+          "runAfter": {
+            "Initialize_sendingEnabled": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "2a07163f-d65c-4b3a-afff-4cc1da4c489b"
+          },
+          "type": "Scope"
+        },
+        "Sending_configuration_error": {
+          "actions": {
+            "Report_sending_configuration_error": {
+              "runAfter": {},
+              "metadata": {
+                "operationMetadataId": "5edcc3cf-9668-4418-8753-3bcfb77d8277"
+              },
+              "type": "SetVariable",
+              "inputs": {
+                "name": "message",
+                "value": "Impossibile leggere la configurazione invii (Adopta Setting) da Dataverse. Nessun invio. Controllare Read sending configuration nella cronologia e la connessione Dataverse."
+              }
+            }
+          },
+          "runAfter": {
+            "Read_sending_configuration": [
+              "Failed",
+              "TimedOut"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "66534aad-be77-4784-86c6-1d3a709a7f8f"
+          },
+          "type": "Scope"
+        },
+        "Initialize_message": {
+          "runAfter": {
+            "Initialize": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "f777bd4a-d878-4283-8f0c-f7fc998b4ec7"
+          },
+          "type": "InitializeVariable",
+          "inputs": {
+            "variables": [
+              {
+                "name": "message",
+                "type": "string",
+                "value": "Invii disabilitati."
+              }
+            ]
+          }
+        },
+        "Initialize_recipients": {
+          "runAfter": {
+            "Initialize_message": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "61bf9e94-c399-4598-b401-5acd2edb5a01"
+          },
+          "type": "InitializeVariable",
+          "inputs": {
+            "variables": [
+              {
+                "name": "recipients",
+                "type": "array",
+                "value": []
+              }
+            ]
+          }
+        },
+        "Initialize_recipientIds": {
+          "runAfter": {
+            "Initialize_recipients": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "db34b8b9-0a6b-4083-ba05-98acd3f1fc47"
+          },
+          "type": "InitializeVariable",
+          "inputs": {
+            "variables": [
+              {
+                "name": "recipientIds",
+                "type": "array",
+                "value": []
+              }
+            ]
+          }
+        },
+        "Initialize_nextPage": {
+          "runAfter": {
+            "Initialize_recipientIds": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "b25c1cb8-6b78-4b5f-84b3-13432ee9dd13"
+          },
+          "type": "InitializeVariable",
+          "inputs": {
+            "variables": [
+              {
+                "name": "nextPage",
+                "type": "string"
+              }
+            ]
+          }
+        },
+        "Initialize_audiencesValid": {
+          "runAfter": {
+            "Initialize_nextPage": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "5ebf29d2-6a42-4fbe-9d1e-c3464a705004"
+          },
+          "type": "InitializeVariable",
+          "inputs": {
+            "variables": [
+              {
+                "name": "audiencesValid",
+                "type": "boolean",
+                "value": true
+              }
+            ]
+          }
+        },
+        "Initialize_sent": {
+          "runAfter": {
+            "Initialize_audiencesValid": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "fe5e8679-dceb-4826-a0d9-7a4c29e31191"
+          },
+          "type": "InitializeVariable",
+          "inputs": {
+            "variables": [
+              {
+                "name": "sent",
+                "type": "integer",
+                "value": 0
+              }
+            ]
+          }
+        },
+        "Initialize_uncertain": {
+          "runAfter": {
+            "Initialize_sent": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "ff64b5a3-e9ae-497d-a3a8-f0ee3b72d8a7"
+          },
+          "type": "InitializeVariable",
+          "inputs": {
+            "variables": [
+              {
+                "name": "uncertain",
+                "type": "integer",
+                "value": 0
+              }
+            ]
+          }
+        },
+        "Initialize_sendingEnabled": {
+          "runAfter": {
+            "Initialize_notInstalled": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "d770287f-f513-447e-83da-65cf56fe65d1"
+          },
+          "type": "InitializeVariable",
+          "inputs": {
+            "variables": [
+              {
+                "name": "sendingEnabled",
+                "type": "boolean",
+                "value": false
+              }
+            ]
+          }
+        },
+        "Initialize_notInstalled": {
+          "runAfter": {
+            "Initialize_uncertain": [
+              "Succeeded"
+            ]
+          },
+          "type": "InitializeVariable",
+          "inputs": {
+            "variables": [
+              {
+                "name": "notInstalled",
+                "type": "integer",
+                "value": 0
+              }
+            ]
+          }
+        }
+      },
+      "outputs": {}
+    },
+    "templateName": ""
+  },
+  "schemaVersion": "1.0.0.0"
+}

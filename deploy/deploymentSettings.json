@@ -1,0 +1,39 @@
+{
+  "EnvironmentVariables": [
+    {
+      "SchemaName": "vm_AdoptaDataverseUrl",
+      "Value": ""
+    },
+    {
+      "SchemaName": "vm_AdoptaCoachKnowledgeUrl",
+      "Value": ""
+    }
+  ],
+  "ConnectionReferences": [
+    {
+      "LogicalName": "vm_adoptadataverse",
+      "ConnectionId": "",
+      "ConnectorId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps"
+    },
+    {
+      "LogicalName": "vm_adoptaoffice365groups",
+      "ConnectionId": "",
+      "ConnectorId": "/providers/Microsoft.PowerApps/apis/shared_office365groups"
+    },
+    {
+      "LogicalName": "vm_adoptateams",
+      "ConnectionId": "",
+      "ConnectorId": "/providers/Microsoft.PowerApps/apis/shared_teams"
+    },
+    {
+      "LogicalName": "vm_Adopta.shared_commondataserviceforapps.shared-commondataser-20dff04b-763e-48b2-a320-8032e76c4f21",
+      "ConnectionId": "",
+      "ConnectorId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps"
+    },
+    {
+      "LogicalName": "vm_Adopta.shared_office365users.shared-office365user-6b563d0f-a0f3-41ce-b0a9-7c9c0231b1f5",
+      "ConnectionId": "",
+      "ConnectorId": "/providers/Microsoft.PowerApps/apis/shared_office365users"
+    }
+  ]
+}

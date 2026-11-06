@@ -1,0 +1,11 @@
+<botcomponent schemaname="vm_Adopta.topic.ThankYou">
+  <componenttype>9</componenttype>
+  <description>Questo argomento si attiva quando l'utente ringrazia.</description>
+  <iscustomizable>0</iscustomizable>
+  <name>Grazie</name>
+  <parentbotid>
+    <schemaname>vm_Adopta</schemaname>
+  </parentbotid>
+  <statecode>0</statecode>
+  <statuscode>1</statuscode>
+</botcomponent>

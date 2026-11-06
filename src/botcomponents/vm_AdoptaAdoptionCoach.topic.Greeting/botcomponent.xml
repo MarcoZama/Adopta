@@ -1,0 +1,11 @@
+<botcomponent schemaname="vm_AdoptaAdoptionCoach.topic.Greeting">
+  <componenttype>9</componenttype>
+  <description>Questo argomento si attiva quando l'utente pronuncia la formula di saluto iniziale all'agente.</description>
+  <iscustomizable>0</iscustomizable>
+  <name>Salve</name>
+  <parentbotid>
+    <schemaname>vm_AdoptaAdoptionCoach</schemaname>
+  </parentbotid>
+  <statecode>0</statecode>
+  <statuscode>1</statuscode>
+</botcomponent>

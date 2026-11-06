@@ -1,0 +1,82 @@
+{
+  "version": "1.0",
+  "appId": "dbcfaf8d-0436-4734-b8ad-724eeb1f6841",
+  "appDisplayName": "Adopta Communications (code app)",
+  "region": "prod",
+  "appType": "CodeApp",
+  "environmentId": "bf52ea84-0d16-ec35-a4f2-526860910754",
+  "description": " ",
+  "buildPath": "./dist",
+  "buildEntryPoint": "index.html",
+  "localAppUrl": "http://localhost:3000",
+  "logoPath": "Default",
+  "connectionReferences": {
+    "edf085e6-36ab-4f13-ba1d-3bc8c9203e8d": {
+      "id": "/providers/Microsoft.PowerApps/apis/shared_logicflows",
+      "displayName": "Logic flows",
+      "dataSources": [
+        "adoptaschedulecommunication"
+      ],
+      "workflowDetails": {
+        "workflowEntityId": "046919bc-1ae2-40fe-a68f-51000ebcc08e",
+        "workflowDisplayName": "AdoptaScheduleCommunication",
+        "workflowName": "e309187e-60ef-23f0-6da7-8e9a67a624f0",
+        "dependencies": {
+          "shared_commondataserviceforapps": "32304b5a-c8ac-4f6c-8c39-7c8a02c83b63"
+        }
+      }
+    },
+    "d01c7b67-35fb-412a-9d66-25eba167e953": {
+      "id": "/providers/Microsoft.PowerApps/apis/shared_logicflows",
+      "displayName": "Logic flows",
+      "dataSources": [
+        "adoptamanagecommunication"
+      ],
+      "workflowDetails": {
+        "workflowEntityId": "2d64ce8d-dc3c-4632-954f-021b87ecab4c",
+        "workflowDisplayName": "AdoptaManageCommunication",
+        "workflowName": "e5a3efdc-1e8c-1444-0bc1-8a7f60bc124b",
+        "dependencies": {
+          "shared_commondataserviceforapps": "32304b5a-c8ac-4f6c-8c39-7c8a02c83b63"
+        }
+      }
+    },
+    "32304b5a-c8ac-4f6c-8c39-7c8a02c83b63": {
+      "id": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+      "displayName": "Microsoft Dataverse",
+      "dataSources": []
+    }
+  },
+  "databaseReferences": {
+    "default.cds": {
+      "dataSources": {
+        "adoptacommunications": {
+          "entitySetName": "vm_adoptacommunications",
+          "logicalName": "vm_adoptacommunication",
+          "isHidden": false
+        },
+        "adoptacommunicationgroups": {
+          "entitySetName": "vm_adoptacommunicationgroups",
+          "logicalName": "vm_adoptacommunicationgroup",
+          "isHidden": false
+        },
+        "adoptaaudiencegroups": {
+          "entitySetName": "vm_adoptaaudiencegroups",
+          "logicalName": "vm_adoptaaudiencegroup",
+          "isHidden": false
+        },
+        "adoptadeliverys": {
+          "entitySetName": "vm_adoptadeliveries",
+          "logicalName": "vm_adoptadelivery",
+          "isHidden": false
+        },
+        "adoptasettings": {
+          "entitySetName": "vm_adoptasettings",
+          "logicalName": "vm_adoptasetting",
+          "isHidden": false
+        }
+      },
+      "environmentVariableName": ""
+    }
+  }
+}

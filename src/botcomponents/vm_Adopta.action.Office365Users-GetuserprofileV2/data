@@ -1,0 +1,81 @@
+kind: TaskDialog
+inputs:
+  - kind: ManualTaskInput
+    propertyName: id
+    value: =Trim(System.User.PrincipalName)
+
+modelDisplayName: Get user profile (V2)
+modelDescription: "Retrieves the profile of a specific user. Learn more about available fields to select: https://developer.microsoft.com/en-us/graph/docs/api-reference/v1.0/resources/user#properties"
+outputs:
+  - propertyName: aboutMe
+
+  - propertyName: accountEnabled
+
+  - propertyName: birthday
+
+  - propertyName: businessPhones
+
+  - propertyName: city
+
+  - propertyName: companyName
+
+  - propertyName: country
+
+  - propertyName: department
+
+  - propertyName: displayName
+
+  - propertyName: givenName
+
+  - propertyName: hireDate
+
+  - propertyName: id
+
+  - propertyName: interests
+
+  - propertyName: jobTitle
+
+  - propertyName: mail
+
+  - propertyName: mailNickname
+
+  - propertyName: mobilePhone
+
+  - propertyName: mySite
+
+  - propertyName: officeLocation
+
+  - propertyName: pastProjects
+
+  - propertyName: postalCode
+
+  - propertyName: preferredLanguage
+
+  - propertyName: preferredName
+
+  - propertyName: responsibilities
+
+  - propertyName: schools
+
+  - propertyName: skills
+
+  - propertyName: state
+
+  - propertyName: streetAddress
+
+  - propertyName: surname
+
+  - propertyName: userPrincipalName
+
+  - propertyName: userType
+
+action:
+  kind: InvokeConnectorTaskAction
+  connectionReference: vm_Adopta.shared_office365users.shared-office365user-6b563d0f-a0f3-41ce-b0a9-7c9c0231b1f5
+  connectionProperties:
+    mode: Maker
+
+  operationId: UserProfile_V2
+
+outputMode: All
+triggerCondition: false

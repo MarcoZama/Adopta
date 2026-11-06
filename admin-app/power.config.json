@@ -1,0 +1,31 @@
+{
+  "version": "1.0",
+  "appId": "2d6ba304-055d-4859-be93-d37c1c20df66",
+  "appDisplayName": "Adopta Admin (code app)",
+  "region": "prod",
+  "appType": "CodeApp",
+  "environmentId": "bf52ea84-0d16-ec35-a4f2-526860910754",
+  "description": " ",
+  "buildPath": "./dist",
+  "buildEntryPoint": "index.html",
+  "localAppUrl": "http://localhost:3000",
+  "logoPath": "Default",
+  "connectionReferences": {},
+  "databaseReferences": {
+    "default.cds": {
+      "dataSources": {
+        "adoptasettings": {
+          "entitySetName": "vm_adoptasettings",
+          "logicalName": "vm_adoptasetting",
+          "isHidden": false
+        },
+        "adoptaaudiencegroups": {
+          "entitySetName": "vm_adoptaaudiencegroups",
+          "logicalName": "vm_adoptaaudiencegroup",
+          "isHidden": false
+        }
+      },
+      "environmentVariableName": ""
+    }
+  }
+}

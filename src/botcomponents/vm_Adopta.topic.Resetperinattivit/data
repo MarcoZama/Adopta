@@ -1,0 +1,15 @@
+kind: AdaptiveDialog
+beginDialog:
+  kind: OnInactivity
+  id: main
+  durationInSeconds: 3600
+  actions:
+    - kind: ClearAllVariables
+      id: V6k6Rd
+      variables: ConversationHistory
+
+    - kind: CancelAllDialogs
+      id: rrE1bQ
+
+inputType: {}
+outputType: {}

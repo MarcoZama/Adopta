@@ -1,0 +1,572 @@
+# ************************************************************************************************
+# Warning: YAML source code for Canvas Apps should only be used to review changes made within Power Apps Studio and for minor edits (Preview).
+# Use the maker portal to create and edit your Power Apps.
+# 
+# The schema file for Canvas Apps is available at https://go.microsoft.com/fwlink/?linkid=2304907
+# 
+# For more information, visit https://go.microsoft.com/fwlink/?linkid=2292623
+# ************************************************************************************************
+Screens:
+  Screen1:
+    Properties:
+      OnVisible: =Select(btnRefreshSending)
+    Children:
+      - lblAdoptaHeader:
+          Control: Label@2.5.1
+          Properties:
+            DisplayMode: =DisplayMode.View
+            Height: =56
+            OnSelect: =Blank()
+            Size: =28
+            Text: ="Adopta Communications"
+            Width: =432
+            X: =32
+            Y: =16
+      - lblAdoptaSubtitle:
+          Control: Label@2.5.1
+          Properties:
+            Color: =ColorValue("#526171")
+            DisplayMode: =DisplayMode.View
+            Height: =32
+            OnSelect: =Blank()
+            Text: ="Console comunicazioni | Adopta"
+            Width: =900
+            X: =32
+            Y: =68
+      - btnNewCommunication:
+          Control: Classic/Button@2.2.0
+          Properties:
+            DisplayMode: =If(varBusy, DisplayMode.Disabled, DisplayMode.Edit)
+            Fill: =ColorValue("#275DAD")
+            Height: =42
+            OnSelect: =Set(varDraft, Defaults('Adopta Communications')); Reset(txtTitle); Reset(txtBody); Reset(txtLink); Reset(txtButtonLabel); Reset(txtCardMessage); Reset(cmbAudience); Reset(dpSendDate); Reset(ddHour); Reset(ddMinute)
+            Text: ="Nuova comunicazione"
+            Width: =260
+            X: =32
+            Y: =116
+      - btnRefreshCommunications:
+          Control: Classic/Button@2.2.0
+          Properties:
+            DisplayMode: =If(varBusy, DisplayMode.Disabled, DisplayMode.Edit)
+            Height: =42
+            OnSelect: =IfError(Refresh('Adopta Communications'); Refresh('Adopta Audience Groups'); Refresh('Adopta Communication Groups'), Notify(FirstError.Message, NotificationType.Error)); Select(btnRefreshSending)
+            Text: ="Aggiorna"
+            Width: =116
+            X: =304
+            Y: =116
+      - galCommunications:
+          Control: Gallery@2.15.0
+          Variant: Vertical
+          Properties:
+            Height: =540
+            Items: =SortByColumns('Adopta Communications', "createdon", SortOrder.Descending)
+            OnSelect: =If(!varBusy, Set(varDraft, ThisItem); Reset(txtTitle); Reset(txtBody); Reset(txtLink); Reset(txtButtonLabel); Reset(txtCardMessage); Reset(cmbAudience); Reset(dpSendDate); Reset(ddHour); Reset(ddMinute))
+            TabIndex: =0
+            TemplateFill: =If(ThisItem.IsSelected, ColorValue("#E9F0FB"), ColorValue("#F7F9FC"))
+            TemplateSize: =100
+            Width: =388
+            X: =32
+            Y: =178
+          Children:
+            - lblCommunicationTitle:
+                Control: Label@2.5.1
+                Properties:
+                  FontWeight: =FontWeight.Semibold
+                  OnSelect: =Select(Parent)
+                  Size: =15
+                  Text: =ThisItem.Title
+                  Width: =340
+                  X: =12
+                  Y: =8
+            - lblCommunicationState:
+                Control: Label@2.5.1
+                Properties:
+                  Height: =32
+                  OnSelect: =Select(Parent)
+                  Size: =11
+                  Text: =Text(ThisItem.communicationstatus) & " | " & If(IsBlank(ThisItem.scheduledat), "Data non impostata", Text(ThisItem.scheduledat, "dd/mm/yyyy hh:mm"))
+                  Width: =340
+                  X: =12
+                  Y: =50
+      - lblEditorTitle:
+          Control: Label@2.5.1
+          Properties:
+            DisplayMode: =DisplayMode.View
+            FontWeight: =FontWeight.Semibold
+            OnSelect: =Blank()
+            Size: =20
+            Text: =If(IsBlank(varDraft.'Adopta Communication'), "Nuova bozza", "Comunicazione - " & Text(varDraft.communicationstatus))
+            Width: =830
+            X: =464
+            Y: =85
+      - lblTitleCaption:
+          Control: Label@2.5.1
+          Properties:
+            DisplayMode: =DisplayMode.View
+            Height: =28
+            OnSelect: =Blank()
+            Size: =12
+            Text: ="Titolo"
+            Width: =800
+            X: =464
+            Y: =122
+      - txtTitle:
+          Control: Classic/TextInput@2.3.2
+          Properties:
+            AccessibleLabel: ="Titolo della comunicazione"
+            Default: =Coalesce(varDraft.Title, "")
+            DisplayMode: =If(varBusy || (!IsBlank(varDraft.'Adopta Communication') && Text(varDraft.communicationstatus) <> "Draft"), DisplayMode.Disabled, DisplayMode.Edit)
+            HintText: ="Titolo della comunicazione"
+            MaxLength: =500
+            Size: =12
+            Width: =850
+            X: =464
+            Y: =152
+      - lblBodyCaption:
+          Control: Label@2.5.1
+          Properties:
+            DisplayMode: =DisplayMode.View
+            Height: =28
+            OnSelect: =Blank()
+            Size: =12
+            Text: ="Messaggio"
+            Width: =800
+            X: =464
+            Y: =200
+      - txtBody:
+          Control: Classic/TextInput@2.3.2
+          Properties:
+            AccessibleLabel: ="Testo del messaggio"
+            Default: =Coalesce(varDraft.'Message body', "")
+            DisplayMode: =If(varBusy || (!IsBlank(varDraft.'Adopta Communication') && Text(varDraft.communicationstatus) <> "Draft"), DisplayMode.Disabled, DisplayMode.Edit)
+            Height: =120
+            HintText: ="Scrivi il messaggio che Adopta inviera agli utenti"
+            MaxLength: =20000
+            Mode: =TextMode.MultiLine
+            Size: =12
+            Width: =850
+            X: =464
+            Y: =230
+      - lblLinkCaption:
+          Control: Label@2.5.1
+          Properties:
+            DisplayMode: =DisplayMode.View
+            Height: =28
+            OnSelect: =Blank()
+            Size: =12
+            Text: ="Link HTTPS (facoltativo)"
+            Width: =500
+            X: =464
+            Y: =358
+      - txtLink:
+          Control: Classic/TextInput@2.3.2
+          Properties:
+            AccessibleLabel: ="Link HTTPS facoltativo"
+            Default: =Coalesce(varDraft.Link, "")
+            DisplayMode: =If(varBusy || (!IsBlank(varDraft.'Adopta Communication') && Text(varDraft.communicationstatus) <> "Draft"), DisplayMode.Disabled, DisplayMode.Edit)
+            HintText: ="https://..."
+            MaxLength: =2048
+            Size: =12
+            Width: =510
+            X: =464
+            Y: =388
+      - lblAudienceCaption:
+          Control: Label@2.5.1
+          Properties:
+            DisplayMode: =DisplayMode.View
+            Height: =28
+            OnSelect: =Blank()
+            Size: =12
+            Text: ="Gruppi autorizzati M365 / Security"
+            Width: =800
+            X: =464
+            Y: =516
+      - cmbAudience:
+          Control: Classic/ComboBox@2.4.0
+          Properties:
+            AccessibleLabel: ="Gruppi destinatari autorizzati"
+            DefaultSelectedItems: "=ForAll(Filter('Adopta Communication Groups', Communication.'Adopta Communication' = varDraft.'Adopta Communication'), 'Audience group')    "
+            DisplayFields: =["vm_name"]
+            DisplayMode: =If(varBusy || (!IsBlank(varDraft.'Adopta Communication') && Text(varDraft.communicationstatus) <> "Draft"), DisplayMode.Disabled, DisplayMode.Edit)
+            Height: =32
+            InputTextPlaceholder: ="Seleziona uno o piu gruppi autorizzati"
+            Items: =Filter('Adopta Audience Groups', vm_enabled = true)
+            SearchFields: =["vm_name"]
+            Size: =12
+            Width: =510
+            X: =464
+            Y: =546
+      - lblScheduleCaption:
+          Control: Label@2.5.1
+          Properties:
+            DisplayMode: =DisplayMode.View
+            Height: =28
+            OnSelect: =Blank()
+            Size: =12
+            Text: ="Data e ora desiderate - ora locale del dispositivo"
+            Width: =800
+            X: =464
+            Y: =594
+      - dpSendDate:
+          Control: Classic/DatePicker@2.6.0
+          Properties:
+            AccessibleLabel: ="Data desiderata per l'invio"
+            DefaultDate: =Coalesce(varDraft.scheduledat, DateAdd(Today(), 1, TimeUnit.Days))
+            DisplayMode: =If(varBusy || (!IsBlank(varDraft.'Adopta Communication') && Text(varDraft.communicationstatus) <> "Draft"), DisplayMode.Disabled, DisplayMode.Edit)
+            Format: ="dd/mm/yyyy"
+            Height: =32
+            PaddingBottom: =0
+            PaddingLeft: =10
+            PaddingRight: =0
+            Size: =12
+            Width: =320
+            X: =464
+            Y: =624
+      - ddHour:
+          Control: Classic/DropDown@2.3.1
+          Properties:
+            AccessibleLabel: ="Ora desiderata per l'invio"
+            Default: =If(IsBlank(varDraft.scheduledat), "09", Text(Hour(varDraft.scheduledat), "00"))
+            DisplayMode: =If(varBusy || (!IsBlank(varDraft.'Adopta Communication') && Text(varDraft.communicationstatus) <> "Draft"), DisplayMode.Disabled, DisplayMode.Edit)
+            Height: =32
+            Items: =ForAll(Sequence(24, 0), Text(Value, "00"))
+            Items.Value: =Value
+            Size: =12
+            Width: =110
+            X: =808
+            Y: =624
+      - ddMinute:
+          Control: Classic/DropDown@2.3.1
+          Properties:
+            AccessibleLabel: ="Minuti desiderati per l'invio"
+            Default: =If(IsBlank(varDraft.scheduledat), "00", Text(Minute(varDraft.scheduledat), "00"))
+            DisplayMode: =If(varBusy || (!IsBlank(varDraft.'Adopta Communication') && Text(varDraft.communicationstatus) <> "Draft"), DisplayMode.Disabled, DisplayMode.Edit)
+            Height: =32
+            Items: =ForAll(Sequence(60, 0), Text(Value, "00"))
+            Items.Value: =Value
+            Size: =12
+            Width: =110
+            X: =936
+            Y: =624
+      - btnSaveDraft:
+          Control: Classic/Button@2.2.0
+          Properties:
+            DisplayMode: =If(varBusy || (!IsBlank(varDraft.'Adopta Communication') && Text(varDraft.communicationstatus) <> "Draft"), DisplayMode.Disabled, DisplayMode.Edit)
+            Fill: =ColorValue("#275DAD")
+            Height: =42
+            OnSelect: |-
+              =If(
+                      IsBlank(Trim(txtTitle.Text)) || IsBlank(Trim(txtBody.Text)),
+                          Notify("Inserisci titolo e messaggio.", NotificationType.Error),
+                              !IsBlank(Trim(txtLink.Text)) && !IsMatch(Trim(txtLink.Text), "https://[^\s]+", MatchOptions.Complete),
+                                  Notify("Il link deve essere un URL HTTPS valido.", NotificationType.Error),
+                                      Set(varBusy, true);
+                                          ClearCollect(colSaveAudience, cmbAudience.SelectedItems);
+                                              IfError(
+                                                      Set(varSavedDraft, Patch('Adopta Communications',
+                                                                  If(IsBlank(varDraft.'Adopta Communication'), Defaults('Adopta Communications'), varDraft),
+                                                                              {
+                                                                                              name: Left(Trim(txtTitle.Text), 100),
+                                                                                                              Title: Trim(txtTitle.Text),
+                                                                                                                              'Message body': txtBody.Text,
+                                                                                                                                              Link: Trim(txtLink.Text),
+                                                                                                                                                              buttonlabel: TrimEnds(txtButtonLabel.Text), vm_cardmessage: If(IsBlank(TrimEnds(txtCardMessage.Text)), Blank(), TrimEnds(txtCardMessage.Text)),
+                                                                                                                                                                              scheduledat: dpSendDate.SelectedDate + Time(Value(ddHour.Selected.Value), Value(ddMinute.Selected.Value), 0),
+                                                                                                                                                                                              timezone: "Device local time",
+                                                                                                                                                                                                              communicationstatus: LookUp(Choices('Adopta Communications'.communicationstatus), Text(Value) = "Draft").Value
+                                                                                                                                                                                                                          }
+                                                                                                                                                                                                                                  ));
+                                                                                                                                                                                                                                          Set(varDraft, varSavedDraft);
+                                                                                                                                                                                                                                                  RemoveIf('Adopta Communication Groups', Communication.'Adopta Communication' = varSavedDraft.'Adopta Communication');
+                                                                                                                                                                                                                                                          ForAll(colSaveAudience As audience,
+                                                                                                                                                                                                                                                                      Patch('Adopta Communication Groups', Defaults('Adopta Communication Groups'),
+                                                                                                                                                                                                                                                                                      {name: Left(audience.vm_name, 100), Communication: varSavedDraft, 'Audience group': audience}
+                                                                                                                                                                                                                                                                                                  )
+                                                                                                                                                                                                                                                                                                          );
+                                                                                                                                                                                                                                                                                                                  Refresh('Adopta Communication Groups');
+                                                                                                                                                                                                                                                                                                                          Notify("Bozza salvata. Nessun invio e stato attivato.", NotificationType.Success),
+                                                                                                                                                                                                                                                                                                                                  Notify("Salvataggio incompleto. Verifica i gruppi e riprova. " & FirstError.Message, NotificationType.Error)
+                                                                                                                                                                                                                                                                                                                                      );
+                                                                                                                                                                                                                                                                                                                                          Set(varBusy, false)
+                                                                                                                                                                                                                                                                                                                                          )
+            Text: =If(varBusy, "Attendere...", "Salva bozza")
+            Width: =220
+            X: =464
+            Y: =676
+      - btnSchedule:
+          Control: Classic/Button@2.2.0
+          Properties:
+            DisplayMode: =If(varBusy || IsBlank(varDraft.'Adopta Communication') || Text(varDraft.communicationstatus) <> "Draft", DisplayMode.Disabled, DisplayMode.Edit)
+            Height: =42
+            OnSelect: |-
+              =If(
+                      Coalesce(TrimEnds(txtCardMessage.Text), "") <> Coalesce(TrimEnds(varDraft.vm_cardmessage), "") || Trim(txtTitle.Text) <> varDraft.Title ||
+                          txtBody.Text <> varDraft.'Message body' ||
+                              Coalesce(TrimEnds(txtButtonLabel.Text), "Apri approfondimento") <> Coalesce(TrimEnds(varDraft.buttonlabel), "Apri approfondimento") ||
+                                  If(IsBlank(Trim(txtLink.Text)), !IsBlank(varDraft.Link), Trim(txtLink.Text) <> varDraft.Link) ||
+                                      dpSendDate.SelectedDate + Time(Value(ddHour.Selected.Value), Value(ddMinute.Selected.Value), 0) <> varDraft.scheduledat ||
+                                          CountRows(cmbAudience.SelectedItems) <> CountRows(Filter('Adopta Communication Groups', Communication.'Adopta Communication' = varDraft.'Adopta Communication')) ||
+                                              CountIf(cmbAudience.SelectedItems As selectedAudience,
+                                                      IsBlank(LookUp('Adopta Communication Groups',
+                                                                  Communication.'Adopta Communication' = varDraft.'Adopta Communication' &&
+                                                                              'Audience group'.vm_adoptaaudiencegroupid = selectedAudience.vm_adoptaaudiencegroupid
+                                                                                      ))
+                                                                                          ) > 0,
+                                                                                              Notify("Salva tutte le modifiche alla bozza prima di pianificare.", NotificationType.Warning),
+                                                                                                  Set(varBusy, true);
+                                                                                                      IfError(
+                                                                                                              Set(varScheduleResult, AdoptaScheduleCommunication.Run(Text(varDraft.'Adopta Communication')));
+                                                                                                                      Refresh('Adopta Communications');
+                                                                                                                              Set(varDraft, LookUp('Adopta Communications', 'Adopta Communication' = varDraft.'Adopta Communication'));
+                                                                                                                                      Notify(varScheduleResult.message, If(varScheduleResult.success, NotificationType.Success, NotificationType.Error)),
+                                                                                                                                              Notify("Pianificazione non confermata. Aggiorna lo stato prima di riprovare. " & FirstError.Message, NotificationType.Error)
+                                                                                                                                                  );
+                                                                                                                                                      Set(varBusy, false)
+                                                                                                                                                      )
+            Text: ="Pianifica invio"
+            Tooltip: ="Salva tutte le modifiche prima di pianificare. La consegna richiede dispatcher operativo e invii abilitati."
+            Width: =220
+            X: =708
+            Y: =676
+      - lblSetupNotice:
+          Control: Label@2.5.1
+          Properties:
+            Color: =ColorValue("#805400")
+            DisplayMode: =DisplayMode.View
+            Height: =32
+            OnSelect: =Blank()
+            Size: =11
+            Text: |-
+              =If(!varGateKnown, "Stato invii non disponibile: premi Aggiorna stato invii.", If(varSendingEnabled, "Invii abilitati: le pianificazioni vengono elaborate solo se il dispatcher e operativo.", "Nuovi invii bloccati. Puoi continuare a preparare e pianificare comunicazioni.")) & " Il flag e globale e non interrompe le run gia avviate."
+            Width: =877
+            X: =464
+            Y: =728
+      - lblSendingStatus:
+          Control: Label@2.5.1
+          Properties:
+            Color: =If(!varGateKnown, ColorValue("#805400"), If(varSendingEnabled, ColorValue("#166534"), ColorValue("#526171")))
+            DisplayMode: =DisplayMode.View
+            FontWeight: =FontWeight.Semibold
+            Height: =38
+            OnSelect: =Blank()
+            Text: =If(!varGateKnown, "Invii - stato non disponibile", If(varSendingEnabled, "Invii ABILITATI", "Invii BLOCCATI"))
+            Width: =280
+            X: =844
+            Y: =20
+      - tglSending:
+          Control: Classic/Toggle@2.1.0
+          Properties:
+            AccessibleLabel: ="Abilita o blocca globalmente i nuovi invii di Adopta"
+            Default: =varSendingEnabled
+            DisplayMode: =If(varBusy || !varGateKnown, DisplayMode.Disabled, DisplayMode.Edit)
+            FalseText: ="Bloccati"
+            Height: =32
+            OnChange: =If(varGateKnown && !varBusy && Self.Value <> varSendingEnabled, Set(varPendingAction, If(Self.Value, "enable", "disable")); Set(varPendingTitle, ""); Set(varConfirmOpen, true); Set(varBusy, true); Reset(tglSending))
+            Tooltip: ="Modifica il valore globale con i tuoi permessi Dataverse. Non accende il dispatcher."
+            TrueText: ="Attivi"
+            Width: =136
+            X: =980
+            Y: =23
+      - btnRefreshSending:
+          Control: Classic/Button@2.2.0
+          Properties:
+            DisplayMode: =If(varBusy, DisplayMode.Disabled, DisplayMode.Edit)
+            Height: =32
+            OnSelect: |-
+              =If(!varBusy,
+                  Set(varBusy, true);
+                  Set(varGateKnown, false);
+                  IfError(
+                      Set(varGateResult, AdoptaManageCommunication.Run("00000000-0000-0000-0000-000000000000", "status"));
+                      Set(varGateKnown, varGateResult.settingknown && varGateResult.success);
+                      Set(varSendingEnabled, varGateResult.sendingenabled);
+                      Set(varGateReadAt, Now());
+                      If(!varGateResult.success, Notify(varGateResult.message, NotificationType.Error)),
+                      Set(varGateKnown, false);
+                      Notify("Lettura stato invii non riuscita. " & FirstError.Message, NotificationType.Error)
+                  );
+                  Reset(tglSending);
+                  Set(varBusy, false)
+              )
+            Size: =11
+            Text: ="Aggiorna stato invii"
+            Width: =171
+            X: =1143
+            Y: =24
+      - lblSendingReadAt:
+          Control: Label@2.5.1
+          Properties:
+            Color: =ColorValue("#526171")
+            DisplayMode: =DisplayMode.View
+            Height: =16
+            OnSelect: =Blank()
+            Size: =10
+            Text: =If(varGateKnown, "Stato letto alle " & Text(varGateReadAt, "hh:mm:ss"), "Stato non verificato")
+            Width: =218
+            X: =844
+            Y: =56
+      - btnDeleteDraft:
+          Control: Classic/Button@2.2.0
+          Properties:
+            DisplayMode: =If(varBusy || IsBlank(varDraft.'Adopta Communication') || !(Text(varDraft.communicationstatus) = "Draft" || (Text(varDraft.communicationstatus) = "Cancelled" && IsBlank(varDraft.startedat))), DisplayMode.Disabled, DisplayMode.Edit)
+            Fill: =ColorValue("#A4262C")
+            Height: =42
+            OnSelect: =Set(varPendingAction, "delete"); Set(varPendingCommunicationId, varDraft.'Adopta Communication'); Set(varPendingTitle, varDraft.Title); Set(varConfirmOpen, true); Set(varBusy, true)
+            Size: =12
+            Text: ="Elimina comunicazione"
+            Tooltip: ="Elimina definitivamente una bozza o una comunicazione annullata dall'app, mai elaborata e senza log."
+            Width: =166
+            X: =950
+            Y: =676
+      - btnCancelScheduled:
+          Control: Classic/Button@2.2.0
+          Properties:
+            DisplayMode: =If(varBusy || IsBlank(varDraft.'Adopta Communication') || Text(varDraft.communicationstatus) <> "Scheduled", DisplayMode.Disabled, DisplayMode.Edit)
+            Fill: =ColorValue("#805400")
+            Height: =42
+            OnSelect: =Set(varPendingAction, "cancel"); Set(varPendingCommunicationId, varDraft.'Adopta Communication'); Set(varPendingTitle, varDraft.Title); Set(varConfirmOpen, true); Set(varBusy, true)
+            Size: =11
+            Text: ="Annulla pianificazione"
+            Width: =184
+            X: =1130
+            Y: =676
+      - rectConfirmBackdrop:
+          Control: Rectangle@2.3.0
+          Properties:
+            Fill: =RGBA(0, 0, 0, 0.45)
+            Height: =Parent.Height
+            OnSelect: =Blank()
+            Visible: =varConfirmOpen
+            Width: =Parent.Width
+      - lblConfirmMessage:
+          Control: Label@2.5.1
+          Properties:
+            Fill: =Color.White
+            Height: =230
+            OnSelect: =Blank()
+            PaddingLeft: =28
+            PaddingRight: =28
+            PaddingTop: =24
+            Size: =17
+            Text: =Switch(varPendingAction, "enable", "Abilitare globalmente i nuovi invii? Se il dispatcher e operativo, anche le comunicazioni gia scadute possono partire. Questa azione non accende il dispatcher.", "disable", "Bloccare globalmente i nuovi invii? Le run che hanno gia letto Si possono proseguire. Non vengono richiamati messaggi gia inviati.", "delete", "Eliminare definitivamente la comunicazione """ & varPendingTitle & """ e i collegamenti ai gruppi? Consentito solo per bozze o annullate mai elaborate, senza log. Le modifiche non salvate saranno scartate. L'operazione non e reversibile.", "cancel", "Annullare la pianificazione di """ & varPendingTitle & """? Comunicazione e storico verranno conservati. Se l'elaborazione e gia iniziata, l'annullamento verra rifiutato.", "Operazione non valida.")
+            VerticalAlign: =VerticalAlign.Top
+            Visible: =varConfirmOpen
+            Width: =600
+            X: =383
+            Y: =210
+      - btnDismissConfirmation:
+          Control: Classic/Button@2.2.0
+          Properties:
+            DisplayMode: =If(varActionRunning, DisplayMode.Disabled, DisplayMode.Edit)
+            Height: =42
+            OnSelect: =Set(varConfirmOpen, false); Set(varBusy, false); Reset(tglSending)
+            Text: ="Indietro"
+            Visible: =varConfirmOpen
+            Width: =220
+            X: =425
+            Y: =376
+      - btnConfirmAction:
+          Control: Classic/Button@2.2.0
+          Properties:
+            DisplayMode: =If(varActionRunning, DisplayMode.Disabled, DisplayMode.Edit)
+            Height: =42
+            OnSelect: |-
+              =Set(varActionRunning, true);
+              IfError(
+                  Set(varManageResult, AdoptaManageCommunication.Run(
+                          If(varPendingAction = "enable" || varPendingAction = "disable",
+                                      "00000000-0000-0000-0000-000000000000", Text(varPendingCommunicationId)),
+                                              varPendingAction
+                                                  ));
+                                                      If(varPendingAction = "enable" || varPendingAction = "disable",
+                                                              Set(varGateKnown, varManageResult.settingknown);
+                                                                      Set(varSendingEnabled, varManageResult.sendingenabled);
+                                                                              Set(varGateReadAt, Now());
+                                                                                      Reset(tglSending),
+                                                                                              Refresh('Adopta Communications');
+                                                                                                      Refresh('Adopta Communication Groups');
+                                                                                                              Set(varDraft, If(varManageResult.success && varPendingAction = "delete",
+                                                                                                                          Defaults('Adopta Communications'),
+                                                                                                                                      LookUp('Adopta Communications', 'Adopta Communication' = varPendingCommunicationId)));
+                                                                                                                                              Reset(txtTitle); Reset(txtBody); Reset(txtLink); Reset(txtButtonLabel); Reset(txtCardMessage); Reset(cmbAudience);
+                                                                                                                                                      Reset(dpSendDate); Reset(ddHour); Reset(ddMinute)
+                                                                                                                                                          );
+                                                                                                                                                              Notify(varManageResult.message, If(varManageResult.success, NotificationType.Success, NotificationType.Error)),
+                                                                                                                                                                  If(varPendingAction = "enable" || varPendingAction = "disable", Set(varGateKnown, false));
+                                                                                                                                                                      Notify("Operazione non confermata. Aggiorna lo stato prima di riprovare. " & FirstError.Message, NotificationType.Error)
+                                                                                                                                                                      );
+                                                                                                                                                                      Set(varConfirmOpen, false);
+                                                                                                                                                                      Set(varActionRunning, false);
+                                                                                                                                                                      Set(varBusy, false)
+            Text: =If(varActionRunning, "Attendere...", "Conferma")
+            Visible: =varConfirmOpen
+            Width: =220
+            X: =705
+            Y: =376
+      - lblButtonLabelCaption:
+          Control: Label@2.5.1
+          Properties:
+            DisplayMode: =DisplayMode.View
+            Height: =28
+            Size: =12
+            Text: ="Testo del pulsante (facoltativo)"
+            Visible: =!varConfirmOpen
+            Width: =320
+            X: =994
+            Y: =358
+      - txtButtonLabel:
+          Control: Classic/TextInput@2.3.2
+          Properties:
+            AccessibleLabel: ="Testo del pulsante del link, facoltativo"
+            Default: =Coalesce(varDraft.buttonlabel, "Apri approfondimento")
+            DisplayMode: =If(varBusy || (!IsBlank(varDraft.'Adopta Communication') && Text(varDraft.communicationstatus) <> "Draft") || IsBlank(Trim(txtLink.Text)), DisplayMode.Disabled, DisplayMode.Edit)
+            HintText: ="Apri approfondimento"
+            MaxLength: =100
+            Size: =12
+            Tooltip: ="Se vuoto usa Apri approfondimento. Il pulsante compare solo con un link HTTPS."
+            Visible: =!varConfirmOpen
+            X: =994
+            Y: =388
+      - btnOpenHistory:
+          Control: Classic/Button@2.2.0
+          Properties:
+            Color: =RGBA(255, 255, 255, 1)
+            DisplayMode: =If(varBusy, DisplayMode.Disabled, DisplayMode.Edit)
+            Fill: =RGBA(52, 152, 47, 1)
+            Height: =32
+            OnSelect: =Navigate(History, ScreenTransition.None)
+            Size: =12
+            Text: ="Storico e risultati"
+            Tooltip: ="Apri storico comunicazioni e risultati degli invii"
+            Visible: =!varConfirmOpen
+            Width: =220
+            X: =590
+            Y: =24
+      - txtCardMessage:
+          Control: Classic/TextInput@2.3.2
+          Properties:
+            AccessibleLabel: ="Messaggio facoltativo sotto il link della card"
+            Default: =Coalesce(varDraft.vm_cardmessage, "")
+            DisplayMode: =If(varBusy || (!IsBlank(varDraft.vm_adoptacommunicationid) && Text(varDraft.vm_communicationstatus) <> "Draft"), DisplayMode.Disabled, DisplayMode.Edit)
+            HintText: ="Es. Scrivi ad Adopta per approfondire"
+            MaxLength: =2000
+            Mode: =TextMode.MultiLine
+            PaddingLeft: =10
+            PaddingTop: =10
+            Size: =12
+            Tooltip: ="Se vuoto non aggiunge testo. Senza link compare dopo il messaggio."
+            Visible: =!varConfirmOpen
+            Width: =850
+            X: =464
+            Y: =467
+      - lblCardMessageCaption:
+          Control: Label@2.5.1
+          Properties:
+            DisplayMode: =DisplayMode.View
+            Height: =28
+            Size: =12
+            Text: ="Messaggio dopo il link (facoltativo)"
+            Visible: =!varConfirmOpen
+            Width: =320
+            X: =464
+            Y: =435

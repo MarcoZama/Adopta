@@ -1,0 +1,56 @@
+kind: TaskDialog
+inputs:
+  - kind: ManualTaskInput
+    propertyName: organization
+    value: =Env.vm_AdoptaDataverseUrl
+
+  - kind: ManualTaskInput
+    propertyName: entityName
+    value: vm_adoptasettings
+
+  - kind: ManualTaskInput
+    propertyName: fetchXml
+    value: <fetch top='1'><entity name='vm_adoptasetting'><attribute name='vm_adoptasettingid'/><attribute name='vm_agentname'/><attribute name='vm_defaultlanguage'/><filter type='and'><condition attribute='statecode' operator='eq' value='0'/></filter><order attribute='createdon' descending='false'/></entity></fetch>
+
+modelDisplayName: Get Branding
+modelDescription: Internal initialization only. Reads the agent display name and default language configured by the customer. Never use it to answer the user.
+outputs:
+  - propertyName: value
+    name: value
+
+action:
+  kind: InvokeConnectorTaskAction
+  connectionReference: vm_Adopta.shared_commondataserviceforapps.shared-commondataser-20dff04b-763e-48b2-a320-8032e76c4f21
+  connectionProperties:
+    mode: Maker
+
+  operationId: ListRecordsWithOrganization
+  dynamicOutputSchema:
+    kind: Record
+    properties:
+      value:
+        order: 0
+        type:
+          kind: Table
+          properties:
+            vm_adoptasettingid:
+              displayName: Adopta Setting
+              description: Unique identifier for entity instances
+              visibility: Advanced
+              order: 0
+              type: String
+
+            vm_agentname:
+              displayName: Agent name
+              visibility: Advanced
+              order: 1
+              type: String
+
+            vm_defaultlanguage:
+              displayName: Default language
+              visibility: Advanced
+              order: 2
+              type: String
+
+outputMode: All
+triggerCondition: false

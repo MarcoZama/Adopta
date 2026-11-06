@@ -1,0 +1,11 @@
+<botcomponent schemaname="vm_AdoptaAdoptionCoach.topic.MicrosoftBlogannuncienovit_B1w7IMYGoX3zxlMqJip3R">
+  <componenttype>16</componenttype>
+  <description>This knowledge source searches information on the web found in https://blogs.microsoft.com website</description>
+  <iscustomizable>0</iscustomizable>
+  <name>Microsoft Blog — annunci e novità</name>
+  <parentbotid>
+    <schemaname>vm_AdoptaAdoptionCoach</schemaname>
+  </parentbotid>
+  <statecode>0</statecode>
+  <statuscode>1</statuscode>
+</botcomponent>

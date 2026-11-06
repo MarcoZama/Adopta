@@ -1,0 +1,11 @@
+<botcomponent schemaname="vm_AdoptaAdoptionCoach.topic.Adopta_I5C2yF__Bmoltpwat4hWD">
+  <componenttype>16</componenttype>
+  <description>This knowledge source provides information found in Adopta SharePoint.</description>
+  <iscustomizable>0</iscustomizable>
+  <name>Adopta</name>
+  <parentbotid>
+    <schemaname>vm_AdoptaAdoptionCoach</schemaname>
+  </parentbotid>
+  <statecode>0</statecode>
+  <statuscode>1</statuscode>
+</botcomponent>

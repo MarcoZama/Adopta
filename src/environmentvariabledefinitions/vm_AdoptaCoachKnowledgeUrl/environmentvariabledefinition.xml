@@ -1,0 +1,13 @@
+<environmentvariabledefinition schemaname="vm_AdoptaCoachKnowledgeUrl">
+  <description default="SharePoint folder or library that Adopta - Adoption Coach uses as knowledge. Do not set it by hand: the admin enters it in Adopta Admin (Settings, Coach knowledge URL) and the flow AdoptaApplySettings copies it here. Republish the agents after a change.">
+    <label description="SharePoint folder or library that Adopta - Adoption Coach uses as knowledge. Do not set it by hand: the admin enters it in Adopta Admin (Settings, Coach knowledge URL) and the flow AdoptaApplySettings copies it here. Republish the agents after a change." languagecode="1033" />
+  </description>
+  <displayname default="Adopta - Coach SharePoint knowledge URL">
+    <label description="Adopta - Coach SharePoint knowledge URL" languagecode="1033" />
+  </displayname>
+  <introducedversion>1.0.0.7</introducedversion>
+  <iscustomizable>1</iscustomizable>
+  <isrequired>0</isrequired>
+  <secretstore>0</secretstore>
+  <type>100000000</type>
+</environmentvariabledefinition>

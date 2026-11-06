@@ -1,0 +1,11 @@
+<botcomponent_connectionreferenceset>
+  <botcomponent_connectionreference botcomponentid.schemaname="vm_Adopta.action.MicrosoftDataverse-GetBranding" connectionreferenceid.connectionreferencelogicalname="vm_Adopta.shared_commondataserviceforapps.shared-commondataser-20dff04b-763e-48b2-a320-8032e76c4f21">
+    <iscustomizable>1</iscustomizable>
+  </botcomponent_connectionreference>
+  <botcomponent_connectionreference botcomponentid.schemaname="vm_Adopta.action.MicrosoftDataverse-Listrowsfromselectedenvironment" connectionreferenceid.connectionreferencelogicalname="vm_Adopta.shared_commondataserviceforapps.shared-commondataser-20dff04b-763e-48b2-a320-8032e76c4f21">
+    <iscustomizable>1</iscustomizable>
+  </botcomponent_connectionreference>
+  <botcomponent_connectionreference botcomponentid.schemaname="vm_Adopta.action.Office365Users-GetuserprofileV2" connectionreferenceid.connectionreferencelogicalname="vm_Adopta.shared_office365users.shared-office365user-6b563d0f-a0f3-41ce-b0a9-7c9c0231b1f5">
+    <iscustomizable>1</iscustomizable>
+  </botcomponent_connectionreference>
+</botcomponent_connectionreferenceset>

@@ -1,0 +1,19 @@
+kind: AdaptiveDialog
+beginDialog:
+  kind: OnRecognizedIntent
+  id: main
+  intent:
+    displayName: Grazie
+    includeInOnSelectIntent: false
+    triggerQueries:
+      - ti ringrazio
+      - grazie
+      - grazie mille
+      - thanks
+      - thank you
+
+  actions:
+    - kind: SendActivity
+      id: sendMessage_9iz6v7
+      activity: |-
+        {If(Text(Global.UserLanguage) = "en", "You're welcome!", "Prego!")}

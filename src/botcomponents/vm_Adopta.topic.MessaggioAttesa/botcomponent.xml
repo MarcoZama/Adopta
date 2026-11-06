@@ -1,0 +1,11 @@
+<botcomponent schemaname="vm_Adopta.topic.MessaggioAttesa">
+  <componenttype>9</componenttype>
+  <description>Per le richieste di almeno cinque parole avvisa l'utente che la risposta è in preparazione, nella sua lingua. Esclude i pulsanti delle card.</description>
+  <iscustomizable>0</iscustomizable>
+  <name>Messaggio di attesa</name>
+  <parentbotid>
+    <schemaname>vm_Adopta</schemaname>
+  </parentbotid>
+  <statecode>0</statecode>
+  <statuscode>1</statuscode>
+</botcomponent>

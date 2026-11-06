@@ -1,0 +1,11 @@
+<botcomponent schemaname="vm_AdoptaAdoptionCoach.topic.MicrosoftLearndocumentazione_P0VJHXOksmDlWjh8fzGmm">
+  <componenttype>16</componenttype>
+  <description>This knowledge source searches information on the web found in https://learn.microsoft.com website</description>
+  <iscustomizable>0</iscustomizable>
+  <name>Microsoft Learn — documentazione</name>
+  <parentbotid>
+    <schemaname>vm_AdoptaAdoptionCoach</schemaname>
+  </parentbotid>
+  <statecode>0</statecode>
+  <statuscode>1</statuscode>
+</botcomponent>

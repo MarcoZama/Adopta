@@ -1,0 +1,11 @@
+<botcomponent_environmentvariabledefinitionset>
+  <botcomponent_environmentvariabledefinition botcomponentid.schemaname="vm_Adopta.action.MicrosoftDataverse-GetBranding" environmentvariabledefinitionid.schemaname="vm_AdoptaDataverseUrl">
+    <iscustomizable>1</iscustomizable>
+  </botcomponent_environmentvariabledefinition>
+  <botcomponent_environmentvariabledefinition botcomponentid.schemaname="vm_Adopta.action.MicrosoftDataverse-Listrowsfromselectedenvironment" environmentvariabledefinitionid.schemaname="vm_AdoptaDataverseUrl">
+    <iscustomizable>1</iscustomizable>
+  </botcomponent_environmentvariabledefinition>
+  <botcomponent_environmentvariabledefinition botcomponentid.schemaname="vm_AdoptaAdoptionCoach.topic.Adopta_I5C2yF__Bmoltpwat4hWD" environmentvariabledefinitionid.schemaname="vm_AdoptaCoachKnowledgeUrl">
+    <iscustomizable>1</iscustomizable>
+  </botcomponent_environmentvariabledefinition>
+</botcomponent_environmentvariabledefinitionset>

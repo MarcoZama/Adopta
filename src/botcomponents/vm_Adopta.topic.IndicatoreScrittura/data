@@ -1,0 +1,16 @@
+kind: AdaptiveDialog
+beginDialog:
+  kind: OnActivity
+  id: main
+  priority: -10
+  condition: =!IsBlank(Trim(System.Activity.Text))
+  type: Message
+  actions:
+    - kind: SendActivity
+      id: sendActivity_Ty7kA1
+      activity:
+        kind: Activity
+        activityType: Typing
+
+inputType: {}
+outputType: {}

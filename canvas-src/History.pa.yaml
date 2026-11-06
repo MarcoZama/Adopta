@@ -1,0 +1,376 @@
+# ************************************************************************************************
+# Warning: YAML source code for Canvas Apps should only be used to review changes made within Power Apps Studio and for minor edits (Preview).
+# Use the maker portal to create and edit your Power Apps.
+# 
+# The schema file for Canvas Apps is available at https://go.microsoft.com/fwlink/?linkid=2304907
+# 
+# For more information, visit https://go.microsoft.com/fwlink/?linkid=2292623
+# ************************************************************************************************
+Screens:
+  History:
+    Properties:
+      OnVisible: =Select(btnRefreshHistory)
+    Children:
+      - lblHistoryHeader:
+          Control: Label@2.5.1
+          Properties:
+            DisplayMode: =DisplayMode.View
+            Height: =52
+            Size: =28
+            Text: ="Storico e risultati"
+            Width: =880
+            X: =32
+            Y: =16
+      - btnHistoryBack:
+          Control: Classic/Button@2.2.0
+          Properties:
+            Height: =38
+            OnSelect: =Navigate(Screen1, ScreenTransition.None)
+            Size: =12
+            Text: ="Torna alle bozze"
+            Tooltip: ="Torna alla composizione senza modificare la bozza"
+            Width: =180
+            X: =940
+            Y: =24
+      - btnRefreshHistory:
+          Control: Classic/Button@2.2.0
+          Properties:
+            DisplayMode: =If(varHistoryLoading, DisplayMode.Disabled, DisplayMode.Edit)
+            Height: =38
+            OnSelect: |-
+              =Set(varHistoryLoading, true);
+              Set(varHistoryReady, false);
+              Set(varHistoryError, "");
+              Set(varHistoryCommunication, Blank());
+              Set(varHistoryDelivery, Blank());
+              Set(varHistoryProcessing, LookUp(Choices('Adopta Communications'.communicationstatus), Text(Value) = "Processing").Value);
+              Set(varHistoryCompleted, LookUp(Choices('Adopta Communications'.communicationstatus), Text(Value) = "Completed").Value);
+              Set(varHistoryPartial, LookUp(Choices('Adopta Communications'.communicationstatus), Text(Value) = "PartiallyFailed").Value);
+              Set(varHistoryFailed, LookUp(Choices('Adopta Communications'.communicationstatus), Text(Value) = "Failed").Value);
+              IfError(
+                  Refresh('Adopta Communications');
+                  Refresh('Adopta Deliverys');
+                  Set(varHistoryReadAt, Now());
+                  Set(varHistoryReady, true),
+                  Set(varHistoryError, "Lettura storico non riuscita. " & FirstError.Message);
+                  Notify(varHistoryError, NotificationType.Error)
+              );
+              Set(varHistoryLoading, false)
+            Size: =12
+            Text: =If(varHistoryLoading, "Attendere...", "Aggiorna risultati")
+            Tooltip: ="Rileggi comunicazioni e log di invio da Dataverse"
+            Width: =190
+            X: =1138
+            Y: =24
+      - lblHistoryNotice:
+          Control: Label@2.5.1
+          Properties:
+            Color: =ColorValue("#805400")
+            DisplayMode: =DisplayMode.View
+            Height: =44
+            Size: =12
+            Text: ="Esiti tecnici, non ricevute di lettura. Unknown = da verificare, non mancato recapito certo. I log possono essere incompleti se il flow si interrompe."
+            Width: =1296
+            X: =32
+            Y: =76
+      - txtHistorySearch:
+          Control: Classic/TextInput@2.3.2
+          Properties:
+            AccessibleLabel: ="Filtra comunicazioni per inizio del titolo"
+            Default: =""
+            DelayOutput: =true
+            Height: =38
+            HintText: |-
+              ="Titolo: inizia con..."
+            OnChange: =Set(varHistoryCommunication, Blank()); Set(varHistoryDelivery, Blank())
+            Width: =412
+            X: =32
+            Y: =134
+      - ddHistoryStatus:
+          Control: Classic/DropDown@2.3.1
+          Properties:
+            AccessibleLabel: ="Filtra per stato della comunicazione"
+            Default: ="Tutti gli esiti"
+            Height: =38
+            Items: =["Tutti gli esiti", "Completate", "Parzialmente riuscite", "Fallite", "In elaborazione"]
+            Items.Value: =Value
+            OnChange: =Set(varHistoryCommunication, Blank()); Set(varHistoryDelivery, Blank())
+            Width: =412
+            X: =32
+            Y: =182
+      - lblHistoryDates:
+          Control: Label@2.5.1
+          Properties:
+            DisplayMode: =DisplayMode.View
+            Height: =24
+            Size: =11
+            Text: |-
+              ="Data pianificata: dal                         al"
+            Width: =412
+            X: =32
+            Y: =226
+      - dpHistoryFrom:
+          Control: Classic/DatePicker@2.6.0
+          Properties:
+            AccessibleLabel: ="Filtra dalla data pianificata, inclusa"
+            DefaultDate: =Blank()
+            Format: ="dd/mm/yyyy"
+            Height: =38
+            OnChange: =Set(varHistoryCommunication, Blank()); Set(varHistoryDelivery, Blank())
+            Width: =196
+            X: =32
+            Y: =254
+      - dpHistoryTo:
+          Control: Classic/DatePicker@2.6.0
+          Properties:
+            AccessibleLabel: ="Filtra fino alla data pianificata, inclusa"
+            DefaultDate: =Blank()
+            Format: ="dd/mm/yyyy"
+            Height: =38
+            OnChange: =Set(varHistoryCommunication, Blank()); Set(varHistoryDelivery, Blank())
+            Width: =196
+            X: =248
+            Y: =254
+      - btnResetHistoryFilters:
+          Control: Classic/Button@2.2.0
+          Properties:
+            Height: =34
+            OnSelect: =Reset(txtHistorySearch); Reset(ddHistoryStatus); Reset(dpHistoryFrom); Reset(dpHistoryTo); Reset(txtRecipientSearch); Reset(ddDeliveryStatus); Set(varHistoryCommunication, Blank()); Set(varHistoryDelivery, Blank())
+            Size: =12
+            Text: ="Azzera filtri"
+            Tooltip: ="Azzera tutti i filtri e la selezione dello storico"
+            X: =32
+            Y: =304
+      - lblHistoryDateError:
+          Control: Label@2.5.1
+          Properties:
+            Color: =ColorValue("#A4262C")
+            DisplayMode: =DisplayMode.View
+            Height: =46
+            Size: =10
+            Text: ="La data finale precede quella iniziale."
+            Visible: =!IsBlank(dpHistoryFrom.SelectedDate) && !IsBlank(dpHistoryTo.SelectedDate) && dpHistoryFrom.SelectedDate > dpHistoryTo.SelectedDate
+            Width: =240
+            X: =204
+            Y: =299
+      - galHistory:
+          Control: Gallery@2.15.0
+          Variant: Vertical
+          Properties:
+            AccessibleLabel: ="Comunicazioni elaborate o in elaborazione; seleziona per vedere i destinatari"
+            Height: =352
+            Items: |-
+              =If(varHistoryReady,
+                  SortByColumns(
+                      Filter('Adopta Communications',
+                          communicationstatus = varHistoryProcessing || communicationstatus = varHistoryCompleted || communicationstatus = varHistoryPartial || communicationstatus = varHistoryFailed,
+                          ddHistoryStatus.Selected.Value = "Tutti gli esiti" || communicationstatus = Switch(ddHistoryStatus.Selected.Value, "Completate", varHistoryCompleted, "Parzialmente riuscite", varHistoryPartial, "Fallite", varHistoryFailed, varHistoryProcessing),
+                          StartsWith(Title, txtHistorySearch.Text),
+                          IsBlank(dpHistoryFrom.SelectedDate) || scheduledat >= dpHistoryFrom.SelectedDate,
+                          IsBlank(dpHistoryTo.SelectedDate) || scheduledat < DateAdd(dpHistoryTo.SelectedDate, 1, TimeUnit.Days)
+                      ), "vm_scheduledat", SortOrder.Descending
+                  )
+              )
+            OnSelect: =Set(varHistoryCommunication, ThisItem); Set(varHistoryDelivery, Blank()); Reset(txtRecipientSearch); Reset(ddDeliveryStatus)
+            TabIndex: =0
+            TemplateFill: =If(ThisItem.'Adopta Communication' = varHistoryCommunication.'Adopta Communication', ColorValue("#E9F0FB"), ColorValue("#F7F9FC"))
+            TemplateSize: =96
+            Width: =412
+            X: =32
+            Y: =354
+          Children:
+            - lblHistoryRowTitle:
+                Control: Label@2.5.1
+                Properties:
+                  FontWeight: =FontWeight.Semibold
+                  Height: =44
+                  OnSelect: =Select(Parent)
+                  Size: =14
+                  Text: =ThisItem.Title
+                  Width: =376
+                  X: =12
+                  Y: =4
+            - lblHistoryRowStatus:
+                Control: Label@2.5.1
+                Properties:
+                  Height: =32
+                  OnSelect: =Select(Parent)
+                  Size: =11
+                  Text: =Text(ThisItem.communicationstatus) & " | " & Text(ThisItem.scheduledat, "dd/mm/yyyy hh:mm")
+                  Width: =376
+                  X: =12
+                  Y: =50
+      - lblHistoryEmpty:
+          Control: Label@2.5.1
+          Properties:
+            DisplayMode: =DisplayMode.View
+            Height: =130
+            Text: ="Nessuna comunicazione visibile con questi filtri. Bozze, pianificate e annullate restano nella pagina di composizione."
+            Visible: =varHistoryReady && IsEmpty(galHistory.AllItems)
+            Width: =380
+            X: =44
+            Y: =370
+      - lblHistoryTitle:
+          Control: Label@2.5.1
+          Properties:
+            DisplayMode: =DisplayMode.View
+            FontWeight: =FontWeight.Semibold
+            Height: =56
+            Size: =20
+            Text: =If(IsBlank(varHistoryCommunication.'Adopta Communication'), "Seleziona una comunicazione", varHistoryCommunication.Title)
+            Width: =848
+            X: =480
+            Y: =134
+      - lblHistoryTiming:
+          Control: Label@2.5.1
+          Properties:
+            DisplayMode: =DisplayMode.View
+            Height: =48
+            Size: =12
+            Text: =If(!IsBlank(varHistoryCommunication.'Adopta Communication'), Text(varHistoryCommunication.communicationstatus) & " | Pianificata " & Text(varHistoryCommunication.scheduledat, "dd/mm/yyyy hh:mm") & Char(10) & "Inizio " & Coalesce(Text(varHistoryCommunication.startedat, "dd/mm/yyyy hh:mm"), "-") & " | Fine " & Coalesce(Text(varHistoryCommunication.completedat, "dd/mm/yyyy hh:mm"), "-") & " (ora locale)")
+            Width: =848
+            X: =480
+            Y: =194
+      - lblHistoryCounts:
+          Control: Label@2.5.1
+          Properties:
+            DisplayMode: =DisplayMode.View
+            Fill: =ColorValue("#E9F0FB")
+            Height: =54
+            Size: =12
+            Text: |-
+              =If(!IsBlank(varHistoryCommunication.'Adopta Communication'), "Destinatari risolti: " & Coalesce(Text(varHistoryCommunication.recipientcount), "-") & "   |   Invii riusciti: " & Coalesce(Text(varHistoryCommunication.sentcount), "-") & "   |   Esiti da verificare: " & Coalesce(Text(varHistoryCommunication.failedcount), "-") & Char(10) & "Contatori salvati dal flow, anche parziali. Non sono il conteggio dei log filtrati.")
+            Width: =848
+            X: =480
+            Y: =246
+      - txtRecipientSearch:
+          Control: Classic/TextInput@2.3.2
+          Properties:
+            AccessibleLabel: ="Filtra destinatari per inizio UPN"
+            Default: =""
+            DelayOutput: =true
+            DisplayMode: =If(IsBlank(varHistoryCommunication.'Adopta Communication'), DisplayMode.Disabled, DisplayMode.Edit)
+            Height: =38
+            HintText: |-
+              ="Destinatario UPN: inizia con..."
+            OnChange: =Set(varHistoryDelivery, Blank())
+            Width: =456
+            X: =480
+            Y: =310
+      - ddDeliveryStatus:
+          Control: Classic/DropDown@2.3.1
+          Properties:
+            AccessibleLabel: ="Filtra destinatari per esito tecnico"
+            Default: ="Tutti gli esiti"
+            DisplayMode: =If(IsBlank(varHistoryCommunication.'Adopta Communication'), DisplayMode.Disabled, DisplayMode.Edit)
+            Height: =38
+            Items: =["Tutti gli esiti", "Invio riuscito", "Da verificare", "Invio fallito", "In invio", "In attesa", "Saltato"]
+            Items.Value: =Value
+            OnChange: =Set(varHistoryDelivery, Blank())
+            Width: =372
+            X: =956
+            Y: =310
+      - galDeliveryHistory:
+          Control: Gallery@2.15.0
+          Variant: Vertical
+          Properties:
+            AccessibleLabel: ="Esiti individuali; seleziona un destinatario per il dettaglio diagnostico"
+            Height: =222
+            Items: |-
+              =If(varHistoryReady && !IsBlank(varHistoryCommunication.'Adopta Communication'),
+                  SortByColumns(
+                      Filter('Adopta Deliverys',
+                          Communication.'Adopta Communication' = varHistoryCommunication.'Adopta Communication',
+                          IsBlank(txtRecipientSearch.Text) || StartsWith('Recipient UPN', txtRecipientSearch.Text),
+                          ddDeliveryStatus.Selected.Value = "Tutti gli esiti" || deliverystatus = LookUp(Choices('Adopta Deliverys'.deliverystatus), Text(Value) = Switch(ddDeliveryStatus.Selected.Value, "Invio riuscito", "Sent", "Da verificare", "Unknown", "Invio fallito", "Failed", "In invio", "Sending", "In attesa", "Pending", "Skipped")).Value
+                      ), "vm_recipientupn", SortOrder.Ascending
+                  )
+              )
+            OnSelect: =Set(varHistoryDelivery, ThisItem)
+            TabIndex: =0
+            TemplateFill: =If(ThisItem.'Adopta Delivery' = varHistoryDelivery.'Adopta Delivery', ColorValue("#E9F0FB"), ColorValue("#F7F9FC"))
+            TemplateSize: =76
+            Width: =848
+            X: =480
+            Y: =360
+          Children:
+            - lblRecipientIdentity:
+                Control: Label@2.5.1
+                Properties:
+                  FontWeight: =FontWeight.Semibold
+                  Height: =32
+                  OnSelect: =Select(Parent)
+                  Size: =12
+                  Text: =Coalesce(ThisItem.'Recipient UPN', ThisItem.recipientobject, "Destinatario non identificato")
+                  Width: =526
+                  X: =12
+                  Y: =4
+            - lblRecipientOutcome:
+                Control: Label@2.5.1
+                Properties:
+                  Color: =Switch(Text(ThisItem.deliverystatus), "Sent", ColorValue("#166534"), "Unknown", ColorValue("#805400"), "Failed", ColorValue("#A4262C"), ColorValue("#526171"))
+                  Height: =32
+                  OnSelect: =Select(Parent)
+                  Size: =12
+                  Text: =Switch(Text(ThisItem.deliverystatus), "Sent", "Invio riuscito", "Unknown", "Da verificare", "Failed", "Invio fallito", "Sending", "In invio", "Pending", "In attesa", "Skipped", "Saltato", "Stato non riconosciuto")
+                  Width: =266
+                  X: =552
+                  Y: =4
+            - lblRecipientTime:
+                Control: Label@2.5.1
+                Properties:
+                  Height: =28
+                  OnSelect: =Select(Parent)
+                  Size: =10
+                  Text: |-
+                    ="Invio riuscito registrato: " & Coalesce(Text(ThisItem.sentat, "dd/mm/yyyy hh:mm:ss"), "-") & " | Tentativi registrati: " & Coalesce(Text(ThisItem.attempts), "-")
+                  Width: =800
+                  X: =12
+                  Y: =38
+      - lblDeliveryEmpty:
+          Control: Label@2.5.1
+          Properties:
+            DisplayMode: =DisplayMode.View
+            Height: =96
+            Text: |-
+              ="Nessun log visibile con questi filtri. L'assenza di un log non prova il mancato invio: verificare la run del flow."
+            Visible: =varHistoryReady && !IsBlank(varHistoryCommunication.'Adopta Communication') && IsEmpty(galDeliveryHistory.AllItems)
+            Width: =800
+            X: =492
+            Y: =380
+      - lblDiagnosticCaption:
+          Control: Label@2.5.1
+          Properties:
+            DisplayMode: =DisplayMode.View
+            Height: =26
+            Size: =11
+            Text: |-
+              =If(IsBlank(varHistoryDelivery.'Adopta Delivery'), "Diagnostica comunicazione | Seleziona un destinatario per i suoi dettagli", "Diagnostica destinatario: " & Coalesce(varHistoryDelivery.'Recipient UPN', varHistoryDelivery.recipientobject))
+            Width: =848
+            X: =480
+            Y: =596
+      - txtHistoryDiagnostic:
+          Control: Classic/TextInput@2.3.2
+          Properties:
+            AccessibleLabel: ="Dettagli diagnostici in sola lettura; possono contenere dati personali e contenuto del messaggio"
+            Default: |-
+              =If(IsBlank(varHistoryCommunication.'Adopta Communication'), "", IsBlank(varHistoryDelivery.'Adopta Delivery'), Coalesce(varHistoryCommunication.'Last error', "Nessun errore registrato per la comunicazione."), "Stato tecnico: " & Text(varHistoryDelivery.deliverystatus) & Char(10) & "Object ID: " & varHistoryDelivery.recipientobject & Char(10) & Coalesce(varHistoryDelivery.'Last error', "Nessun dettaglio di errore registrato."))
+            DisplayMode: =DisplayMode.View
+            Height: =88
+            Mode: =TextMode.MultiLine
+            Size: =11
+            Width: =848
+            X: =480
+            Y: =628
+      - lblHistoryReadAt:
+          Control: Label@2.5.1
+          Properties:
+            Color: =If(!IsBlank(varHistoryError), ColorValue("#A4262C"), ColorValue("#526171"))
+            DisplayMode: =DisplayMode.View
+            Height: =36
+            Size: =11
+            Text: |-
+              =If(varHistoryLoading, "Caricamento storico...", !IsBlank(varHistoryError), varHistoryError, varHistoryReady, "Ultimo aggiornamento: " & Text(varHistoryReadAt, "dd/mm/yyyy hh:mm:ss") & " | Sola consultazione. Dati visibili secondo i tuoi permessi Dataverse.", "Apri lo storico per caricare i dati.")
+            Width: =1296
+            X: =32
+            Y: =724
