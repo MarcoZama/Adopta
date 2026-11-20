@@ -1,5 +1,11 @@
 # Adopta IT / EN: sorgenti ed export nativi 1.0.0.20
 
+Per la descrizione del prodotto: [README principale](../README.md).
+La pipeline GitHub crea nuovi export nativi IT/EN dopo il merge in `main`:
+[configurazione CI e download delle Release](CI.md).
+Le sezioni seguenti documentano anche le verifiche storiche, non l'esito
+delle future esecuzioni CI.
+
 ## File versionati e artefatti locali
 
 Git conserva i sorgenti IT/EN, i test, gli script, i lockfile npm e i metadati

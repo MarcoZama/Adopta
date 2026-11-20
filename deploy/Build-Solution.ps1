@@ -1,6 +1,7 @@
 param(
     [ValidateSet('it', 'en')] [string] $Edition = 'it',
     [ValidateSet('Unmanaged', 'Managed')] [string] $PackageType = 'Unmanaged',
+    [ValidatePattern('^\d+\.\d+\.\d+\.\d+$')] [string] $ReleaseVersion,
     [switch] $SkipTests
 )
 
@@ -37,8 +38,13 @@ try {
     $stage = Join-Path $work 'source'
     $null = New-Item -ItemType Directory -Path $work
     Invoke-Checked 'node' @('deploy\prepare-solution.mjs', $Edition, $stage)
+    $manifestPath = Join-Path $stage 'Other\Solution.xml'
+    [xml]$manifest = Get-Content -Raw -LiteralPath $manifestPath
+    if ($ReleaseVersion) {
+        $manifest.ImportExportXml.SolutionManifest.Version = $ReleaseVersion
+        $manifest.Save($manifestPath)
+    }
     Invoke-Checked 'node' @('deploy\validate-solution.mjs', $Edition, $stage)
-    [xml]$manifest = Get-Content -Raw -LiteralPath (Join-Path $stage 'Other\Solution.xml')
     $version = [string]$manifest.ImportExportXml.SolutionManifest.Version
     if ($manifest.ImportExportXml.SolutionManifest.UniqueName -cne $profile.solution -or
         $manifest.ImportExportXml.SolutionManifest.Managed -ne '0' -or

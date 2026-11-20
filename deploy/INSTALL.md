@@ -40,6 +40,9 @@ e regressione Teams.
 ## Installazione dei pacchetti nativi
 
 Usare gli [export nativi managed/unmanaged](README.md) della rispettiva edizione.
+I nuovi rilasci automatici sono scaricabili dalle
+[GitHub Releases](https://github.com/MarcoZama/Adopta/releases) dopo la
+[configurazione iniziale della pipeline](CI.md).
 Pacchetti, hash e manifest in `dist` sono artefatti locali esclusi da Git:
 un clone del repository non li contiene. Procurarsi separatamente gli export
 nativi verificati; gli ZIP in `dist/local` sono invece bozze locali di authoring.

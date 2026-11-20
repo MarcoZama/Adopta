@@ -1,0 +1,155 @@
+name: Build and release Adopta
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: adopta-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+defaults:
+  run:
+    shell: pwsh
+
+jobs:
+  build:
+    name: Test and package IT / EN
+    runs-on: windows-2025
+    timeout-minutes: 30
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            admin-app/package-lock.json
+            code-app/package-lock.json
+      - uses: actions/setup-dotnet@26b0ec14cb23fa6904739307f278c14f94c95bf1 # v5
+        with:
+          dotnet-version: '10.0.x'
+      - name: Install PAC and locked dependencies
+        run: |
+          dotnet tool install Microsoft.PowerApps.CLI.Tool --version 2.12.2 --tool-path "$env:RUNNER_TEMP\pac"
+          if ($LASTEXITCODE -ne 0) { throw 'PAC installation failed.' }
+          "$env:RUNNER_TEMP\pac" >> $env:GITHUB_PATH
+          foreach ($project in '.', 'admin-app', 'code-app') {
+            npm --prefix $project ci
+            if ($LASTEXITCODE -ne 0) { throw "npm ci failed: $project" }
+          }
+      - name: Compute release version
+        id: version
+        run: |
+          [xml]$it = Get-Content -Raw .\src\Other\Solution.xml
+          [xml]$en = Get-Content -Raw .\src-en\Other\Solution.xml
+          if ($it.ImportExportXml.SolutionManifest.Version -cne $en.ImportExportXml.SolutionManifest.Version) {
+            throw 'IT and EN source versions must match.'
+          }
+          $source = [version]$it.ImportExportXml.SolutionManifest.Version
+          foreach ($part in $source.Major, $source.Minor, [int]$env:GITHUB_RUN_NUMBER, [int]$env:GITHUB_RUN_ATTEMPT) {
+            if ($part -lt 0 -or $part -gt 65535) { throw 'Solution version component outside 0..65535.' }
+          }
+          "version=$($source.Major).$($source.Minor).$env:GITHUB_RUN_NUMBER.$env:GITHUB_RUN_ATTEMPT" >> $env:GITHUB_OUTPUT
+      - name: Run regression tests
+        run: npm test
+      - name: Build all apps and unmanaged import candidates
+        env:
+          RELEASE_VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          .\deploy\Build-Solution.ps1 -Edition it -ReleaseVersion $env:RELEASE_VERSION -SkipTests
+          .\deploy\Build-Solution.ps1 -Edition en -ReleaseVersion $env:RELEASE_VERSION -SkipTests
+      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: adopta-import-candidates
+          path: |
+            dist/local/*.zip
+            dist/local/*.sha256
+          if-no-files-found: error
+          retention-days: 7
+
+  export:
+    name: Native managed / unmanaged exports
+    needs: build
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    runs-on: windows-2025
+    timeout-minutes: 150
+    environment: power-platform-build
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-dotnet@26b0ec14cb23fa6904739307f278c14f94c95bf1 # v5
+        with:
+          dotnet-version: '10.0.x'
+      - name: Install PAC
+        run: |
+          dotnet tool install Microsoft.PowerApps.CLI.Tool --version 2.12.2 --tool-path "$env:RUNNER_TEMP\pac"
+          if ($LASTEXITCODE -ne 0) { throw 'PAC installation failed.' }
+          "$env:RUNNER_TEMP\pac" >> $env:GITHUB_PATH
+      - uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # v6
+        with:
+          name: adopta-import-candidates
+          path: dist/local
+      - name: Import commit and export four native packages
+        env:
+          RELEASE_VERSION: ${{ needs.build.outputs.version }}
+          PP_BUILD_ENVIRONMENT_URL: ${{ vars.PP_BUILD_ENVIRONMENT_URL }}
+          PP_BUILD_ENVIRONMENT_ID: ${{ vars.PP_BUILD_ENVIRONMENT_ID }}
+          PP_TENANT_ID: ${{ vars.PP_TENANT_ID }}
+          PP_CLIENT_ID: ${{ vars.PP_CLIENT_ID }}
+          PP_BUILD_SETTINGS_IT: ${{ secrets.PP_BUILD_SETTINGS_IT }}
+          PP_BUILD_SETTINGS_EN: ${{ secrets.PP_BUILD_SETTINGS_EN }}
+        run: .\deploy\Export-Release.ps1 -Version $env:RELEASE_VERSION
+      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: adopta-native-release
+          path: |
+            dist/release/*.zip
+            dist/release/SHA256SUMS.txt
+            dist/release/release.json
+          if-no-files-found: error
+          retention-days: 30
+
+  publish:
+    name: Publish downloadable GitHub Release
+    needs: [build, export]
+    runs-on: windows-2025
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # v6
+        with:
+          name: adopta-native-release
+          path: release
+      - name: Create complete release before making it public
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          RELEASE_VERSION: ${{ needs.build.outputs.version }}
+        run: |
+          $tag = "v$env:RELEASE_VERSION"
+          $files = @(Get-ChildItem -LiteralPath .\release -File)
+          if ($files.Count -ne 6) { throw 'Expected four ZIPs, SHA256SUMS.txt and release.json.' }
+          gh release create $tag @($files.FullName) --draft --target $env:GITHUB_SHA `
+            --title "Adopta $env:RELEASE_VERSION" `
+            --notes "Native IT/EN managed and unmanaged exports from commit $env:GITHUB_SHA. See README for installation and acceptance checks."
+          if ($LASTEXITCODE -ne 0) { throw 'Draft release creation or asset upload failed. Re-run all jobs to use a new version.' }
+          gh release edit $tag --draft=false --latest
+          if ($LASTEXITCODE -ne 0) { throw 'Publishing the complete release failed.' }
+          "### Download packages`nhttps://github.com/$env:GH_REPO/releases/tag/$tag" >> $env:GITHUB_STEP_SUMMARY
