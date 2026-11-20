@@ -1,0 +1,11 @@
+<botcomponent schemaname="vm_AdoptaEN.InvokeConnectedAgentTaskAction.Adopta-AdoptionCoach">
+  <componenttype>9</componenttype>
+  <description>The Coach owns coaching, prompts, clarifications and progress notices before research. Does not retrieve communications or telemetry or perform the initial explanation. Reports userMessageSent and awaitingUser in implicit feedback so the parent does not ask or answer twice.</description>
+  <iscustomizable>0</iscustomizable>
+  <name>Adoption Coach</name>
+  <parentbotid>
+    <schemaname>vm_AdoptaEN</schemaname>
+  </parentbotid>
+  <statecode>0</statecode>
+  <statuscode>1</statuscode>
+</botcomponent>

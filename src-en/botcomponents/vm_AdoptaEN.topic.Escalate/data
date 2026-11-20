@@ -1,0 +1,22 @@
+kind: AdaptiveDialog
+startBehavior: CancelOtherTopics
+beginDialog:
+  kind: OnEscalate
+  id: main
+  intent:
+    displayName: Escalate
+    includeInOnSelectIntent: false
+    triggerQueries:
+      - Talk to a person
+      - Talk to an agent
+      - Speak to a human
+      - I need customer support
+      - Contact support
+  actions:
+    - kind: SendActivity
+      id: sendMessage_s39DCt
+      conversationOutcome: Escalated
+      activity: |-
+        Escalation to a representative isn't set up for this agent yet, but here the agent can tell you how to get in touch with someone in another way.
+
+        Is there anything else I can do for you?

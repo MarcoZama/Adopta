@@ -1,0 +1,12 @@
+kind: AdaptiveDialog
+beginDialog:
+  kind: OnConversationStart
+  id: main
+  actions:
+    - kind: SendActivity
+      id: sendMessage_M0LuhV
+      activity:
+        text:
+          - Hello, I'm {System.Bot.Name}. How can I help you?
+        speak:
+          - Hello, and thank you for calling {System.Bot.Name}. Some answers are AI-generated and may need checking for accuracy. How can I help you today?

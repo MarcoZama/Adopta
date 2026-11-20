@@ -1,0 +1,60 @@
+kind: AdaptiveDialog
+inputs:
+  - kind: AutomaticTaskInput
+    propertyName: ReadyToResearch
+    description: Vero solo se il contesto necessario e' disponibile e stai per avviare una ricerca effettiva nelle fonti. Falso se devi chiedere ruolo, obiettivo o altri chiarimenti.
+    entity: BooleanPrebuiltEntity
+    shouldPromptUser: false
+    defaultValue: =false
+  - kind: AutomaticTaskInput
+    propertyName: ResearchQuery
+    description: La ricerca concreta che stai per eseguire, non una domanda di chiarimento o una semplice risposta conversazionale.
+    entity: StringPrebuiltEntity
+    shouldPromptUser: false
+    defaultValue: =""
+modelDescription: "Avviso interno prima di una ricerca effettiva per il coaching, solo dopo aver raccolto il contesto necessario. Non usarlo per domande di chiarimento, saluti o risposte immediate. Invia al massimo un avviso per attivita' e restituisce WaitingMessageSent. Non risponde alla richiesta e non esegue la ricerca: prosegui subito con le fonti, senza aggiungere altri avvisi."
+beginDialog:
+  kind: OnRecognizedIntent
+  id: main
+  intent:
+    displayName: Preparazione della risposta
+    includeInOnSelectIntent: false
+  actions:
+    - kind: SetVariable
+      id: initializeStatus
+      variable: Topic.WaitingMessageSent
+      value: =false
+    - kind: ConditionGroup
+      id: researchReady
+      conditions:
+        - id: shouldNotify
+          condition: =Topic.ReadyToResearch && !IsBlank(Trim(Topic.ResearchQuery)) && !IsBlank(System.Recognizer.TriggeringMessage.Id) && Coalesce(Global.CoachWaitMessageId, "") <> System.Recognizer.TriggeringMessage.Id
+          actions:
+            - kind: SendActivity
+              id: typing
+              activity:
+                kind: Activity
+                activityType: Typing
+            - kind: SendActivity
+              id: waiting
+              activity: Un attimo, sto preparando la risposta...
+            - kind: SetVariable
+              id: rememberActivity
+              variable: Global.CoachWaitMessageId
+              value: =System.Recognizer.TriggeringMessage.Id
+            - kind: SetVariable
+              id: notified
+              variable: Topic.WaitingMessageSent
+              value: =true
+    - kind: EndDialog
+      id: continueResearch
+inputType:
+  properties:
+    ReadyToResearch:
+      type: Boolean
+    ResearchQuery:
+      type: String
+outputType:
+  properties:
+    WaitingMessageSent:
+      type: Boolean

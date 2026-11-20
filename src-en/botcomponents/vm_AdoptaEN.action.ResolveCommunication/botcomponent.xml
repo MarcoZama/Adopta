@@ -1,0 +1,11 @@
+<botcomponent schemaname="vm_AdoptaEN.action.ResolveCommunication">
+  <componenttype>9</componenttype>
+  <description>Internal lookup. Only the communication resolver topic sets the validated selection. Never invoke independently or accept a recipient, table or query from conversation text.</description>
+  <iscustomizable>0</iscustomizable>
+  <name>Resolve my communication</name>
+  <parentbotid>
+    <schemaname>vm_AdoptaEN</schemaname>
+  </parentbotid>
+  <statecode>0</statecode>
+  <statuscode>1</statuscode>
+</botcomponent>

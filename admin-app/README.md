@@ -1,12 +1,29 @@
 # Adopta Admin: code app
 
+## Edizioni IT / EN (sorgenti 1.0.0.18)
+
+Le stesse schermate sono compilate per due istanze autonome con
+`npm run build:it` (`dist-it`) e `npm run build:en` (`dist-en`).
+Il selettore IT/EN cambia soltanto la lingua dell'interfaccia. Impostazioni,
+logo, gruppi, knowledge e blocco invii appartengono sempre all'edizione mostrata
+nell'intestazione.
+
+I binding SDK e la normalizzazione degli ID sono condivisi con Communications
+in [shared](../shared/), senza duplicare il frontend. I messaggi tecnici dei flow
+restano compatibili con il protocollo esistente, inclusi i prefissi italiani
+interpretati da `applyOutcome`; non sono stati tradotti indiscriminatamente.
+
+Il `power.config.json` esistente e `npm run build` sono IT. Non usarli per
+pubblicare EN. La registrazione delle app EN e il setup nei loro contesti
+separati richiedono un ambiente autorizzato: vedi [stato del rilascio](../deploy/README.md).
+
 App minimale per configurare tutto da un'unica pagina. Dalla 1.0.0.11 sostituisce l'app model-driven *Adopta Admin*, che non è più nella soluzione. È scritta in React e TypeScript con la [Power Apps client library](https://learn.microsoft.com/power-apps/developer/code-apps/overview) e Fluent UI 9, come la code app delle comunicazioni.
 
 Ha due schede:
 
 - **Impostazioni**: il record di *Adopta Setting* usato da app, agente e flow, cioè il primo attivo per data di creazione. Se non esiste, l'app lo crea al primo salvataggio.
   - titolo dell'app, nome dell'agente, nome della configurazione;
-  - lingua predefinita, italiano o inglese: lingua iniziale delle nuove comunicazioni e delle app, e lingua dei testi fissi dell'agente per gli utenti il cui profilo non è in italiano né in inglese;
+  - lingua di riserva delle app, italiano o inglese: usata solo senza scelta dell'utente o lingua browser supportata. Non cambia la lingua degli agenti o delle nuove card;
   - logo: si carica o si rimuove subito, senza salvare;
   - URL della knowledge SharePoint dell'Adoption Coach, solo `https://`;
   - interruttore globale degli invii.
@@ -45,7 +62,7 @@ Dopo il push, esporta la soluzione e riportala in `src/` come descritto in [code
 
 | Cosa | Dove |
 |---|---|
-| Accesso ai dati | `src/data/admin.ts`, che importa i servizi generati in `src/generated/services` |
+| Accesso ai dati | `src/data/admin.ts`, tramite i metadati SDK generati e l'adattatore tipizzato condiviso in `shared/power-apps.ts` |
 | Schede | `src/components/SettingsView.tsx` e `src/components/GroupsView.tsx`. Restano montate entrambe: cambiando scheda le modifiche non salvate non si perdono |
 | Esito del flow | Letto da *Apply status*. Un testo che inizia con "Configurazione applicata" è un esito positivo; se contiene anche "Variabili aggiornate" l'app chiede di ripubblicare gli agenti. Il resto è un avviso |
 | Interfaccia | `src/app.css` sui token di Fluent, con gli stessi componenti della code app delle comunicazioni (`Section`, `PageHeader`, `ConfirmDialog`, `EmptyState`) |

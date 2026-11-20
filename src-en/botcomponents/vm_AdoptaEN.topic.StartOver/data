@@ -1,0 +1,31 @@
+kind: AdaptiveDialog
+beginDialog:
+  kind: OnRecognizedIntent
+  id: main
+  intent:
+    displayName: Start over
+    includeInOnSelectIntent: false
+    triggerQueries:
+      - Start over
+      - Restart the conversation
+      - Let's start again
+  actions:
+    - kind: Question
+      id: question_zguoVV
+      alwaysPrompt: false
+      variable: init:Topic.Confirm
+      prompt: Do you want to start over?
+      entity: BooleanPrebuiltEntity
+    - kind: ConditionGroup
+      id: conditionGroup_lvx2zV
+      conditions:
+        - id: conditionItem_sVQtHa
+          condition: =Topic.Confirm = true
+          actions:
+            - kind: BeginDialog
+              id: 0YKYsy
+              dialog: vm_AdoptaEN.topic.ResetConversation
+      elseActions:
+        - kind: SendActivity
+          id: sendMessage_lk2CyQ
+          activity: OK. Let's carry on.

@@ -1,0 +1,79 @@
+kind: AdaptiveDialog
+beginDialog:
+  kind: OnActivity
+  id: main
+  condition: =IsBlank(Global.ProfileInitialized) && System.User.IsLoggedIn && !IsBlank(Trim(System.User.PrincipalName))
+  type: Message
+  actions:
+    - kind: SetVariable
+      id: setVariable_Pf7kQ2
+      variable: Global.ProfileInitialized
+      value: =true
+    - kind: BeginDialog
+      id: oOj33p
+      input: {}
+      dialog: vm_AdoptaEN.action.Office365Users-GetuserprofileV2
+      output:
+        binding:
+          aboutMe: Topic.aboutMe
+          accountEnabled: Topic.accountEnabled
+          birthday: Topic.birthday
+          businessPhones: Topic.businessPhones
+          city: Topic.city
+          companyName: Topic.companyName
+          country: Topic.country
+          department: Topic.department
+          displayName: Topic.displayName
+          givenName: Topic.givenName
+          hireDate: Topic.hireDate
+          id: Topic.id
+          interests: Topic.interests
+          jobTitle: Topic.jobTitle
+          mail: Topic.mail
+          mailNickname: Topic.mailNickname
+          mobilePhone: Topic.mobilePhone
+          mySite: Topic.mySite
+          officeLocation: Topic.officeLocation
+          pastProjects: Topic.pastProjects
+          postalCode: Topic.postalCode
+          preferredName: Topic.preferredName
+          responsibilities: Topic.responsibilities
+          schools: Topic.schools
+          skills: Topic.skills
+          state: Topic.state
+          streetAddress: Topic.streetAddress
+          surname: Topic.surname
+          userPrincipalName: Topic.userPrincipalName
+          userType: Topic.userType
+    - kind: ConditionGroup
+      id: hxvqhM
+      conditions:
+        - id: K1C0iU
+          condition: =!IsBlank(Topic.department)
+          actions:
+            - kind: InvokeAIBuilderModelAction
+              id: x5MbMs
+              input:
+                binding:
+                  department: =Trim(Topic.department)
+              output:
+                binding:
+                  predictionOutput: Topic.ClassifyDepOutput
+              aIModelId: 18d7ca29-7460-4d39-90f8-7990800c497c
+            - kind: SetVariable
+              id: EW7BxL
+              variable: Global.UserRole
+              value: =Topic.ClassifyDepOutput.text
+    - kind: BeginDialog
+      id: PNaioN
+      input: {}
+      dialog: vm_AdoptaEN.action.MicrosoftDataverse-GetBranding
+      output:
+        binding:
+          value: Topic.BrandingRows
+    - kind: SetVariable
+      id: fnSZWG
+      variable: Global.AgentName
+      value: =Coalesce(Trim(First(Topic.BrandingRows).vm_agentname), System.Bot.Name)
+inputType: {}
+outputType: {}

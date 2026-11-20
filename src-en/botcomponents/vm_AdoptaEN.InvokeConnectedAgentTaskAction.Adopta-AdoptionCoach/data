@@ -1,0 +1,8 @@
+kind: TaskDialog
+modelDisplayName: Adoption Coach
+modelDescription: "Provides Microsoft 365 Copilot coaching, examples and prompts, including practical follow-ups after a verified communication explanation. Delegate even when role is missing: the Coach owns clarifications, without a preliminary parent question. Does not perform the initial documentary explanation or retrieve communications, telemetry, Score or Tier. Receives the original request and explicit context, not history. Communicates one answer or question in English and reports userMessageSent, awaitingUser, interactionSummary and openQuestions in implicit feedback. If it already asked a clarification, wait for the user rather than repeating it. A progress notice alone is not an answer."
+action:
+  kind: InvokeConnectedAgentTaskAction
+  botSchemaName: vm_AdoptaENAdoptionCoach
+  historyType:
+    kind: NoHistory

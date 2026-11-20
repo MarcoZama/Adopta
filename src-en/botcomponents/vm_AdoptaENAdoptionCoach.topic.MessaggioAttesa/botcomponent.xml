@@ -1,0 +1,11 @@
+<botcomponent schemaname="vm_AdoptaENAdoptionCoach.topic.MessaggioAttesa">
+  <componenttype>9</componenttype>
+  <description>Explicit Coach progress notice before a search, with sufficient context and no duplicate in the same activity. Never precedes a clarification question.</description>
+  <iscustomizable>0</iscustomizable>
+  <name>Preparing an answer</name>
+  <parentbotid>
+    <schemaname>vm_AdoptaENAdoptionCoach</schemaname>
+  </parentbotid>
+  <statecode>0</statecode>
+  <statuscode>1</statuscode>
+</botcomponent>

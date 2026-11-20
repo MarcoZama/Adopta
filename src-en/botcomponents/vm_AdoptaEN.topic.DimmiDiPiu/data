@@ -1,0 +1,53 @@
+kind: AdaptiveDialog
+beginDialog:
+  kind: OnActivity
+  id: main
+  priority: 5
+  condition: =StartsWith(System.Activity.Text, "Adopta.Communication.v2|") || StartsWith(System.Activity.Text, "Dimmi di più sulla comunicazione «") || StartsWith(System.Activity.Text, "Tell me more about the communication «")
+  type: Message
+  actions:
+    - kind: SetVariable
+      id: versioned
+      variable: Topic.Versioned
+      value: =StartsWith(System.Activity.Text, "Adopta.Communication.v2|")
+    - kind: SetVariable
+      id: parts
+      variable: Topic.Parts
+      value: =Split(System.Activity.Text, "|")
+    - kind: SetVariable
+      id: prefix
+      variable: Topic.Prefix
+      value: =If(StartsWith(System.Activity.Text, "Tell me more about the communication «"), "Tell me more about the communication «", "Dimmi di più sulla comunicazione «")
+    - kind: SetVariable
+      id: titleEnd
+      variable: Topic.TitleEnd
+      value: '=If(!Topic.Versioned, If(EndsWith(System.Activity.Text, "»"), Len(System.Activity.Text), Find("»: ", System.Activity.Text)), Blank())'
+    - kind: ConditionGroup
+      id: validReference
+      conditions:
+        - id: validCard
+          condition: =If(Topic.Versioned, CountRows(Topic.Parts) = 3 && (Text(Index(Topic.Parts, 2).Value) = "it" || Text(Index(Topic.Parts, 2).Value) = "en") && IsMatch(Text(Index(Topic.Parts, 3).Value), "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"), !IsBlank(Topic.TitleEnd) && Topic.TitleEnd > Len(Topic.Prefix) + 1)
+          actions:
+            - kind: SendActivity
+              id: waiting
+              activity: One moment, I'm preparing your answer...
+            - kind: BeginDialog
+              id: resolveCard
+              dialog: vm_AdoptaEN.topic.RisolviComunicazione
+              input:
+                binding:
+                  Mode: =If(Topic.Versioned, "id", "title")
+                  CommunicationId: =If(Topic.Versioned, Text(Index(Topic.Parts, 3).Value), "")
+                  Title: =If(Topic.Versioned, "", Trim(Mid(System.Activity.Text, Len(Topic.Prefix) + 1, Topic.TitleEnd - Len(Topic.Prefix) - 1)))
+                  Link: =If(!Topic.Versioned && Topic.TitleEnd < Len(System.Activity.Text), Trim(Mid(System.Activity.Text, Topic.TitleEnd + 3)), "")
+                  MatchLink: =!Topic.Versioned
+                  Request: ="Explain this communication, how to use the feature and its documented prerequisites."
+                  ConfirmLatest: =false
+      elseActions:
+        - kind: SendActivity
+          id: invalidReference
+          activity: I cannot interpret this card's reference. Ask about a communication by its complete title; I have not selected another message.
+    - kind: CancelAllDialogs
+      id: finish
+inputType: {}
+outputType: {}

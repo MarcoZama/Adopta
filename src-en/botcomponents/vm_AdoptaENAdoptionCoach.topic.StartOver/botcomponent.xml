@@ -1,0 +1,10 @@
+<botcomponent schemaname="vm_AdoptaENAdoptionCoach.topic.StartOver">
+  <componenttype>9</componenttype>
+  <iscustomizable>0</iscustomizable>
+  <name>Start over</name>
+  <parentbotid>
+    <schemaname>vm_AdoptaENAdoptionCoach</schemaname>
+  </parentbotid>
+  <statecode>0</statecode>
+  <statuscode>1</statuscode>
+</botcomponent>

@@ -10,21 +10,13 @@ beginDialog:
       - Buongiorno
       - Ciao
       - Ehi
-      - Hello
-      - Hi
-      - Good morning
-      - Good afternoon
-
   actions:
     - kind: SendActivity
       id: sendMessage_abmysR
       activity:
         text:
-          - |-
-            {If(Text(Global.UserLanguage) = "en", "Hi, how can I help you today?", "Ciao, come posso aiutarti oggi?")}
+          - Ciao, come posso aiutarti oggi?
         speak:
-          - |-
-            {If(Text(Global.UserLanguage) = "en", "Hi, how can I help you?", "Ciao, come posso aiutarti?")}
-
+          - Ciao, come posso aiutarti?
     - kind: CancelAllDialogs
       id: cancelAllDialogs_01At22

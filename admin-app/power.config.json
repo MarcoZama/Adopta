@@ -6,7 +6,7 @@
   "appType": "CodeApp",
   "environmentId": "bf52ea84-0d16-ec35-a4f2-526860910754",
   "description": " ",
-  "buildPath": "./dist",
+  "buildPath": "./dist-it",
   "buildEntryPoint": "index.html",
   "localAppUrl": "http://localhost:3000",
   "logoPath": "Default",

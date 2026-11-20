@@ -1,0 +1,9 @@
+kind: AdaptiveDialog
+beginDialog:
+  kind: OnRedirect
+  id: main
+  actions:
+    - kind: EndDialog
+      id: retired
+inputType: {}
+outputType: {}

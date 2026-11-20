@@ -1,0 +1,10 @@
+<botcomponent schemaname="vm_AdoptaEN.action.Office365Users-GetuserprofileV2">
+  <componenttype>9</componenttype>
+  <iscustomizable>0</iscustomizable>
+  <name>Get user profile</name>
+  <parentbotid>
+    <schemaname>vm_AdoptaEN</schemaname>
+  </parentbotid>
+  <statecode>0</statecode>
+  <statuscode>1</statuscode>
+</botcomponent>

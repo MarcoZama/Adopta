@@ -1,0 +1,74 @@
+kind: TaskDialog
+inputs:
+  - kind: ManualTaskInput
+    propertyName: organization
+    value: =Env.vm_AdoptaDataverseUrl
+
+  - kind: ManualTaskInput
+    propertyName: entityName
+    value: vm_adoptadeliveries
+
+  - kind: ManualTaskInput
+    propertyName: fetchXml
+    value: |-
+      =With(
+        {
+          recipient: Substitute(Substitute(Substitute(Substitute(Substitute(Trim(System.User.PrincipalName), "&", "&amp;"), "<", "&lt;"), ">", "&gt;"), "'", "&apos;"), Char(34), "&quot;"),
+          title: Substitute(Substitute(Substitute(Substitute(Substitute(Global.CommunicationLookupTitle, "&", "&amp;"), "<", "&lt;"), ">", "&gt;"), "'", "&apos;"), Char(34), "&quot;"),
+          link: Substitute(Substitute(Substitute(Substitute(Substitute(Global.CommunicationLookupLink, "&", "&amp;"), "<", "&lt;"), ">", "&gt;"), "'", "&apos;"), Char(34), "&quot;"),
+          validId: IsMatch(Global.CommunicationLookupId, "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$")
+        },
+        If(Global.CommunicationLookupMode = "title", "<fetch count='10' page='" & Text(Global.CommunicationLookupPage, "0") & "'>", "<fetch top='1'>") & "<entity name='vm_adoptadelivery'><attribute name='vm_adoptadeliveryid'/><attribute name='vm_sentat'/><order attribute='vm_sentat' descending='true'/><order attribute='vm_adoptadeliveryid' descending='false'/><filter type='and'><condition attribute='vm_deliverystatus' operator='eq' value='100000002'/>" &
+        If(System.User.IsLoggedIn && !IsBlank(Trim(System.User.PrincipalName)), "<condition attribute='vm_recipientupn' operator='eq' value='" & recipient & "'/>", "<condition attribute='vm_adoptadeliveryid' operator='null'/>") &
+        "</filter><link-entity name='vm_adoptacommunication' from='vm_adoptacommunicationid' to='vm_communication' link-type='inner' alias='communication'><attribute name='vm_adoptacommunicationid' alias='communicationid'/><attribute name='vm_title' alias='communicationtitle'/><attribute name='vm_body' alias='communicationbody'/><attribute name='vm_link' alias='communicationlink'/><filter type='and'>" &
+        Switch(
+          Global.CommunicationLookupMode,
+          "latest", "",
+          "id", If(validId, "<condition attribute='vm_adoptacommunicationid' operator='eq' value='" & Global.CommunicationLookupId & "'/>", "<condition attribute='vm_adoptacommunicationid' operator='null'/>"),
+          "title", If(!IsBlank(Trim(Global.CommunicationLookupTitle)), "<condition attribute='vm_title' operator='eq' value='" & title & "'/>" & If(Global.CommunicationLookupMatchLink, If(IsBlank(Trim(Global.CommunicationLookupLink)), "<filter type='or'><condition attribute='vm_link' operator='null'/><condition attribute='vm_link' operator='eq' value=''/></filter>", "<condition attribute='vm_link' operator='eq' value='" & link & "'/>"), ""), "<condition attribute='vm_adoptacommunicationid' operator='null'/>"),
+          "<condition attribute='vm_adoptacommunicationid' operator='null'/>"
+        ) &
+        "</filter></link-entity></entity></fetch>"
+      )
+
+modelDisplayName: Resolve my communication
+modelDescription: Internal lookup. Only the communication resolver topic sets the validated selection. Never invoke independently or accept a recipient, table or query from conversation text.
+outputs:
+  - propertyName: value
+    name: value
+
+action:
+  kind: InvokeConnectorTaskAction
+  connectionReference: vm_Adopta.shared_commondataserviceforapps.shared-commondataser-20dff04b-763e-48b2-a320-8032e76c4f21
+  connectionProperties:
+    mode: Maker
+  operationId: ListRecordsWithOrganization
+  dynamicOutputSchema:
+    kind: Record
+    properties:
+      value:
+        order: 0
+        type:
+          kind: Table
+          properties:
+            vm_adoptadeliveryid:
+              order: 0
+              type: String
+            vm_sentat:
+              order: 1
+              type: String
+            communicationid:
+              order: 2
+              type: String
+            communicationtitle:
+              order: 3
+              type: String
+            communicationbody:
+              order: 4
+              type: String
+            communicationlink:
+              order: 5
+              type: String
+
+outputMode: All
+triggerCondition: false

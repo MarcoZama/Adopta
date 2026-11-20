@@ -3,12 +3,12 @@
   <SolutionManifest>
     <UniqueName>Adopta</UniqueName>
     <LocalizedNames>
-      <LocalizedName description="Adopta Agents and App" languagecode="1033" />
+      <LocalizedName description="Adopta IT" languagecode="1033" />
     </LocalizedNames>
     <Descriptions>
       <Description description="Scheduling console and delivery tracking for Adopta." languagecode="1033" />
     </Descriptions>
-    <Version>1.0.0.15</Version>
+    <Version>1.0.0.20</Version>
     <Managed>0</Managed>
     <Publisher>
       <UniqueName>vinm</UniqueName>

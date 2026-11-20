@@ -219,14 +219,29 @@
                       "actions": {
                         "Card_texts": {
                           "type": "Compose",
-                          "description": "Button labels and messageBack texts in the communication language. The agent topic DimmiDiPiu and the agent instructions recognize both languages.",
-                          "inputs": "@if(equals(toLower(trim(coalesce(body('Get_communication')?['vm_language'],''))),'en'),json('{\"more\":\"Tell me more\",\"moreText\":\"Tell me more about the communication «\",\"ignore\":\"Ignore\",\"ignoreText\":\"Ignore the communication «\"}'),json('{\"more\":\"Dimmi di più\",\"moreText\":\"Dimmi di più sulla comunicazione «\",\"ignore\":\"Ignora\",\"ignoreText\":\"Ignora la comunicazione «\"}'))"
+                          "description": "Fixed labels for this edition, independent of the app language.",
+                          "inputs": {
+                            "more": "Dimmi di più",
+                            "moreText": "Dimmi di più sulla comunicazione «",
+                            "ignore": "Ignora",
+                            "ignoreText": "Ignora la comunicazione «"
+                          }
+                        },
+                        "Card_reference": {
+                          "type": "Compose",
+                          "description": "Stable, versioned reference carried by the existing messageBack text; displayText remains the localized button label. The agent verifies the recipient in Dataverse.",
+                          "inputs": "@concat('Adopta.Communication.v2|it|',body('Get_communication')?['vm_adoptacommunicationid'])",
+                          "runAfter": {
+                            "Card_texts": [
+                              "Succeeded"
+                            ]
+                          }
                         },
                         "Build_card": {
                           "type": "Compose",
-                          "inputs": "@setProperty(json('{\"$schema\":\"http://adaptivecards.io/schemas/adaptive-card.json\",\"type\":\"AdaptiveCard\",\"version\":\"1.4\"}'),'body',union(createArray(addProperty(json('{\"type\":\"TextBlock\",\"size\":\"Large\",\"weight\":\"Bolder\",\"wrap\":true}'),'text',body('Get_communication')?['vm_title']),addProperty(json('{\"type\":\"TextBlock\",\"wrap\":true}'),'text',body('Get_communication')?['vm_body']),addProperty(json('{\"type\":\"ActionSet\"}'),'actions',union(createArray(addProperty(addProperty(json('{\"type\":\"Action.Submit\"}'),'title',outputs('Card_texts')?['more']),'data',addProperty(json('{}'),'msteams',addProperty(addProperty(json('{\"type\":\"messageBack\"}'),'displayText',outputs('Card_texts')?['more']),'text',concat(outputs('Card_texts')?['moreText'],trim(coalesce(body('Get_communication')?['vm_title'],'')),'»',if(empty(trim(coalesce(body('Get_communication')?['vm_link'],''))),'',concat(': ',trim(coalesce(body('Get_communication')?['vm_link'],''))))))))),createArray(addProperty(addProperty(json('{\"type\":\"Action.Submit\"}'),'title',outputs('Card_texts')?['ignore']),'data',addProperty(json('{}'),'msteams',addProperty(addProperty(json('{\"type\":\"messageBack\"}'),'displayText',outputs('Card_texts')?['ignore']),'text',concat(outputs('Card_texts')?['ignoreText'],trim(coalesce(body('Get_communication')?['vm_title'],'')),'»')))))))),if(empty(trim(coalesce(body('Get_communication')?['vm_cardmessage'],''))),json('[]'),createArray(addProperty(json('{\"type\":\"TextBlock\",\"wrap\":true,\"spacing\":\"Medium\",\"separator\":true}'),'text',body('Get_communication')?['vm_cardmessage'])))))",
+                          "inputs": "@setProperty(json('{\"$schema\":\"http://adaptivecards.io/schemas/adaptive-card.json\",\"type\":\"AdaptiveCard\",\"version\":\"1.4\"}'),'body',union(createArray(addProperty(json('{\"type\":\"TextBlock\",\"size\":\"Large\",\"weight\":\"Bolder\",\"wrap\":true}'),'text',body('Get_communication')?['vm_title']),addProperty(json('{\"type\":\"TextBlock\",\"wrap\":true}'),'text',body('Get_communication')?['vm_body']),addProperty(json('{\"type\":\"ActionSet\"}'),'actions',union(createArray(addProperty(addProperty(json('{\"type\":\"Action.Submit\"}'),'title',outputs('Card_texts')?['more']),'data',addProperty(json('{}'),'msteams',addProperty(addProperty(json('{\"type\":\"messageBack\"}'),'displayText',outputs('Card_texts')?['more']),'text',outputs('Card_reference'))))),createArray(addProperty(addProperty(json('{\"type\":\"Action.Submit\"}'),'title',outputs('Card_texts')?['ignore']),'data',addProperty(json('{}'),'msteams',addProperty(addProperty(json('{\"type\":\"messageBack\"}'),'displayText',outputs('Card_texts')?['ignore']),'text',concat(outputs('Card_texts')?['ignoreText'],trim(coalesce(body('Get_communication')?['vm_title'],'')),'»')))))))),if(empty(trim(coalesce(body('Get_communication')?['vm_cardmessage'],''))),json('[]'),createArray(addProperty(json('{\"type\":\"TextBlock\",\"wrap\":true,\"spacing\":\"Medium\",\"separator\":true}'),'text',body('Get_communication')?['vm_cardmessage'])))))",
                           "runAfter": {
-                            "Card_texts": [
+                            "Card_reference": [
                               "Succeeded"
                             ]
                           }
@@ -242,6 +257,7 @@
                                   "entityName": "vm_adoptacommunications",
                                   "recordId": "@triggerBody()?['text']",
                                   "item/vm_cardjson": "@string(outputs('Build_card'))",
+                                  "item/vm_language": "it",
                                   "item/vm_communicationstatus": 100000001,
                                   "item/vm_failedcount": 0,
                                   "item/vm_lasterror": "",

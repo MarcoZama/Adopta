@@ -7,6 +7,7 @@ import { useI18n } from "../i18n";
 import { formatTime } from "../lib/format";
 import { ConfirmDialog } from "./ConfirmDialog";
 import { LanguageSwitch } from "./LanguageSwitch";
+import { edition } from "../../../shared/edition";
 
 export type View = "compose" | "history";
 
@@ -49,7 +50,7 @@ export function Sidebar({ branding, view, onNavigate, gate, busy }: SidebarProps
           <Text weight="semibold" className="brand-title">
             {branding.appTitle}
           </Text>
-          <Caption1 className="muted brand-subtitle">{t.sidebar.console(branding.agentName)}</Caption1>
+          <Caption1 className="muted brand-subtitle">{edition().label} - {t.sidebar.console(branding.agentName)}</Caption1>
         </div>
       </div>
 

@@ -10,6 +10,7 @@
   .\setup.ps1 -EnvironmentId 00000000-0000-0000-0000-000000000000
 #>
 param(
+    [ValidateSet('it', 'en')] [string] $Edition = 'it',
     [Parameter(Mandatory)] [string] $EnvironmentId,
     # Optional: the CLI resolves the Dataverse URL from the environment.
     [string] $OrgUrl,
@@ -19,6 +20,14 @@ param(
 
 $ErrorActionPreference = 'Stop'
 Set-Location $PSScriptRoot
+
+if ($Edition -ne 'it') {
+    throw 'English setup requires its own registered Power Apps context. Do not reuse the Italian power.config.json. Create and export the English apps in an authorized development environment first; see deploy/README.md.'
+}
+if (Test-Path -LiteralPath 'power.config.json') {
+    $existing = Get-Content -Raw -LiteralPath 'power.config.json' | ConvertFrom-Json
+    if ($existing.environmentId -ne $EnvironmentId) { throw 'Environment mismatch: use a separate Power Apps project context, not the existing Italian app configuration.' }
+}
 
 # Power Apps CLI from the project devDependencies (@microsoft/power-apps-cli).
 function Invoke-Pa {

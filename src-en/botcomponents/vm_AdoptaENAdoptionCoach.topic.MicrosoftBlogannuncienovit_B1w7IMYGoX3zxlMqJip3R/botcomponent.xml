@@ -1,0 +1,11 @@
+<botcomponent schemaname="vm_AdoptaENAdoptionCoach.topic.MicrosoftBlogannuncienovit_B1w7IMYGoX3zxlMqJip3R">
+  <componenttype>16</componenttype>
+  <description>English-only microsoft blog - announcements component for Adopta EN.</description>
+  <iscustomizable>0</iscustomizable>
+  <name>Microsoft Blog - announcements</name>
+  <parentbotid>
+    <schemaname>vm_AdoptaENAdoptionCoach</schemaname>
+  </parentbotid>
+  <statecode>0</statecode>
+  <statuscode>1</statuscode>
+</botcomponent>

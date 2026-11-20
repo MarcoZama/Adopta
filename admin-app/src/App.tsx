@@ -6,6 +6,7 @@ import { LanguageSwitch } from "./components/LanguageSwitch";
 import { SettingsView, type Branding } from "./components/SettingsView";
 import { I18nProvider, useI18n } from "./i18n";
 import type { Notify } from "./lib/notify";
+import { edition } from "../../shared/edition";
 
 type View = "settings" | "groups";
 
@@ -54,7 +55,7 @@ function Shell({ branding, onBrandingChange }: { branding: Branding; onBrandingC
           )}
           <div className="brand-text">
             <Text weight="semibold" className="brand-title">
-              {t.app.title}
+              {t.app.title} - {edition().label}
             </Text>
             <Caption1 className="muted">{branding.appTitle || t.app.subtitle}</Caption1>
           </div>

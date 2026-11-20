@@ -1,0 +1,87 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<forms xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <systemform>
+    <formid>{c1ac4705-f24e-4e92-ae03-08745d7a4bd2}</formid>
+    <IntroducedVersion>1.0</IntroducedVersion>
+    <FormPresentation>1</FormPresentation>
+    <FormActivationState>1</FormActivationState>
+    <form>
+      <tabs>
+        <tab verticallayout="true" id="{c05e3b67-f0d4-44d9-a2e0-536d85b7d040}" IsUserDefined="1">
+          <labels>
+            <label description="General" languagecode="1033" />
+          </labels>
+          <columns>
+            <column width="100%">
+              <sections>
+                <section showlabel="false" showbar="false" IsUserDefined="0" id="{0a67eb1c-247d-4d06-9c73-67810fed0b3e}">
+                  <labels>
+                    <label description="General" languagecode="1033" />
+                  </labels>
+                  <rows>
+                    <row>
+                      <cell id="{2086c7fc-1aa0-4a77-859f-c658ed35502f}">
+                        <labels>
+                          <label description="name" languagecode="1033" />
+                        </labels>
+                        <control id="vm_name" classid="{4273EDBD-AC1D-40d3-9FB2-095C621B552D}" datafieldname="vm_name" />
+                      </cell>
+                    </row>
+                    <row>
+                      <cell id="{bf87fb64-9945-4182-8442-d24460719326}">
+                        <labels>
+                          <label description="Owner" languagecode="1033" />
+                        </labels>
+                        <control id="ownerid" classid="{270BD3DB-D9AF-4782-9025-509E298DEC0A}" datafieldname="ownerid" />
+                      </cell>
+                    </row>
+                    <row>
+                      <cell id="{42920f4e-1223-4a14-9422-24eb7770a936}">
+                        <labels>
+                          <label description="recipientobject" languagecode="1033" />
+                        </labels>
+                        <control id="vm_recipientobject" classid="{4273edbd-ac1d-40d3-9fb2-095c621b552d}" datafieldname="vm_recipientobject" />
+                      </cell>
+                    </row>
+                    <row>
+                      <cell id="{38e16b5a-f5b4-4d00-8272-0933d055d71f}">
+                        <labels>
+                          <label description="deliverystatus" languagecode="1033" />
+                        </labels>
+                        <control id="vm_deliverystatus" classid="{3ef39988-22bb-4f0b-bbbe-64b5a3748aee}" datafieldname="vm_deliverystatus" />
+                      </cell>
+                    </row>
+                    <row>
+                      <cell id="{77a2e6d5-de8d-4c8f-ae60-81410e17de65}">
+                        <labels>
+                          <label description="attempts" languagecode="1033" />
+                        </labels>
+                        <control id="vm_attempts" classid="{c6d124ca-7eda-4a60-aea9-7fb8d318b68f}" datafieldname="vm_attempts" />
+                      </cell>
+                    </row>
+                    <row>
+                      <cell id="{27fe0f67-0a8b-497f-946d-21fd4ac2a9ee}">
+                        <labels>
+                          <label description="sentat" languagecode="1033" />
+                        </labels>
+                        <control id="vm_sentat" classid="{5b773807-9fb2-42db-97c3-7a91eff8adff}" datafieldname="vm_sentat" />
+                      </cell>
+                    </row>
+                  </rows>
+                </section>
+              </sections>
+            </column>
+          </columns>
+        </tab>
+      </tabs>
+    </form>
+    <IsCustomizable>1</IsCustomizable>
+    <CanBeDeleted>1</CanBeDeleted>
+    <LocalizedNames>
+      <LocalizedName description="Information" languagecode="1033" />
+    </LocalizedNames>
+    <Descriptions>
+      <Description description="A form for this entity." languagecode="1033" />
+    </Descriptions>
+  </systemform>
+</forms>

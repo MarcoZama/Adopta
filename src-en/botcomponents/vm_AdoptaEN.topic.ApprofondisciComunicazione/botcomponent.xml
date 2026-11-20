@@ -1,0 +1,11 @@
+<botcomponent schemaname="vm_AdoptaEN.topic.ApprofondisciComunicazione">
+  <componenttype>9</componenttype>
+  <description>Explain a received communication or its Microsoft 365 feature, usage or prerequisites, using the same verified pipeline as Teams cards. Use for explicit latest requests, an exact title, or explanatory follow-ups on the selected communication. Do not use for generic Microsoft 365 questions or practical prompts and work scenarios, which belong to Adoption Coach. This topic sends the final answer itself; do not add another answer.</description>
+  <iscustomizable>0</iscustomizable>
+  <name>Explain a communication</name>
+  <parentbotid>
+    <schemaname>vm_AdoptaEN</schemaname>
+  </parentbotid>
+  <statecode>0</statecode>
+  <statuscode>1</statuscode>
+</botcomponent>

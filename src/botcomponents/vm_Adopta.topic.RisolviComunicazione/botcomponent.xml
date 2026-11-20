@@ -1,0 +1,11 @@
+<botcomponent schemaname="vm_Adopta.topic.RisolviComunicazione">
+  <componenttype>9</componenttype>
+  <description>Resolves a communication only among Sent deliveries to the authenticated user, handles legacy ambiguity and invokes the shared explanation.</description>
+  <iscustomizable>0</iscustomizable>
+  <name>Resolve communication</name>
+  <parentbotid>
+    <schemaname>vm_Adopta</schemaname>
+  </parentbotid>
+  <statecode>0</statecode>
+  <statuscode>1</statuscode>
+</botcomponent>

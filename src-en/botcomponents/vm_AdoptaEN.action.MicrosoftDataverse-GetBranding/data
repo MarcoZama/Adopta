@@ -1,0 +1,43 @@
+kind: TaskDialog
+inputs:
+  - kind: ManualTaskInput
+    propertyName: organization
+    value: =Env.vm_AdoptaENDataverseUrl
+  - kind: ManualTaskInput
+    propertyName: entityName
+    value: vm_adoptaensettings
+  - kind: ManualTaskInput
+    propertyName: fetchXml
+    value: <fetch top='1'><entity name='vm_adoptaensetting'><attribute name='vm_adoptaensettingid'/><attribute name='vm_agentname'/><filter type='and'><condition attribute='statecode' operator='eq' value='0'/></filter><order attribute='createdon' descending='false'/></entity></fetch>
+modelDisplayName: Get Branding
+modelDescription: Internal initialization only. Reads the customer-configured agent display name. Never use to answer a user.
+outputs:
+  - propertyName: value
+    name: value
+action:
+  kind: InvokeConnectorTaskAction
+  connectionReference: vm_AdoptaEN.shared_commondataserviceforapps.shared-commondataser-6e49f493-498a-4491-a695-495acadecad3
+  connectionProperties:
+    mode: Maker
+  operationId: ListRecordsWithOrganization
+  dynamicOutputSchema:
+    kind: Record
+    properties:
+      value:
+        order: 0
+        type:
+          kind: Table
+          properties:
+            vm_adoptaensettingid:
+              displayName: Adopta Setting
+              description: Unique identifier for entity instances
+              visibility: Advanced
+              order: 0
+              type: String
+            vm_agentname:
+              displayName: Agent name
+              visibility: Advanced
+              order: 1
+              type: String
+outputMode: All
+triggerCondition: false

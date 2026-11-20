@@ -1,21 +1,9 @@
 kind: AdaptiveDialog
 beginDialog:
-  kind: OnActivity
+  kind: OnRedirect
   id: main
-  priority: 10
-  condition: =CountRows(Split(Trim(System.Activity.Text), " ")) >= 5 && !StartsWith(System.Activity.Text, "Dimmi di più sulla comunicazione «") && !StartsWith(System.Activity.Text, "Tell me more about the communication «") && !StartsWith(System.Activity.Text, "Ignora la comunicazione «") && !StartsWith(System.Activity.Text, "Ignore the communication «")
-  type: Message
   actions:
-    - kind: SendActivity
-      id: sendActivity_Wm7kA1
-      activity: |-
-        {If(Text(Global.UserLanguage) = "en", "One moment, I'm preparing your answer…", "Un attimo, sto preparando la risposta…")}
-
-    - kind: SendActivity
-      id: sendActivity_Wm7kA2
-      activity:
-        kind: Activity
-        activityType: Typing
-
+    - kind: EndDialog
+      id: retired
 inputType: {}
 outputType: {}

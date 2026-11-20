@@ -1,0 +1,108 @@
+{
+  "properties": {
+    "connectionReferences": {
+      "shared_commondataserviceforapps": {
+        "runtimeSource": "embedded",
+        "connection": {
+          "connectionReferenceLogicalName": "vm_adoptaendataverse"
+        },
+        "api": {
+          "name": "shared_commondataserviceforapps"
+        }
+      }
+    },
+    "definition": {
+      "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+      "contentVersion": "1.0.0.0",
+      "parameters": {
+        "$connections": {
+          "defaultValue": {},
+          "type": "Object"
+        },
+        "$authentication": {
+          "defaultValue": {},
+          "type": "SecureObject"
+        }
+      },
+      "triggers": {
+        "Recurrence": {
+          "recurrence": {
+            "frequency": "Minute",
+            "interval": 5
+          },
+          "metadata": {
+            "operationMetadataId": "85a24bd4-6952-44f0-8f66-0f7a6727eaaa"
+          },
+          "type": "Recurrence",
+          "runtimeConfiguration": {
+            "concurrency": {
+              "runs": 1
+            }
+          }
+        }
+      },
+      "actions": {
+        "List_due": {
+          "runAfter": {},
+          "metadata": {
+            "operationMetadataId": "be476e86-d440-489e-9cce-19d68fcf38a0"
+          },
+          "type": "OpenApiConnection",
+          "inputs": {
+            "host": {
+              "connectionName": "shared_commondataserviceforapps",
+              "operationId": "ListRecords",
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps"
+            },
+            "parameters": {
+              "entityName": "vm_adoptaencommunications",
+              "$filter": "vm_communicationstatus eq 100000001 and vm_scheduledat le @{utcNow()}"
+            }
+          },
+          "runtimeConfiguration": {
+            "paginationPolicy": {
+              "minimumItemCount": 5000
+            }
+          }
+        },
+        "Dispatch_due": {
+          "foreach": "@body('List_due')?['value']",
+          "actions": {
+            "Run_delivery": {
+              "runAfter": {},
+              "metadata": {
+                "operationMetadataId": "6e080ec2-74ef-4073-ad71-8096be1b09ef"
+              },
+              "type": "Workflow",
+              "inputs": {
+                "host": {
+                  "workflowReferenceName": "5e121266-6755-405e-b1e0-d11449aefe79"
+                },
+                "body": {
+                  "text": "@items('Dispatch_due')?['vm_adoptaencommunicationid']"
+                }
+              }
+            }
+          },
+          "runAfter": {
+            "List_due": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "c63cb768-c214-4640-9481-0548e25e9e61"
+          },
+          "type": "Foreach",
+          "runtimeConfiguration": {
+            "concurrency": {
+              "repetitions": 1
+            }
+          }
+        }
+      },
+      "outputs": {}
+    },
+    "templateName": ""
+  },
+  "schemaVersion": "1.0.0.0"
+}

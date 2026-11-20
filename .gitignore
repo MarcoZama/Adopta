@@ -1,0 +1,55 @@
+# Dependencies and package-manager caches
+node_modules/
+.npm/
+.pnpm-store/
+
+# Builds, solution exports and test output
+dist/
+dist-it/
+dist-en/
+.solution-build/
+/*.zip
+*.tsbuildinfo
+coverage/
+.nyc_output/
+playwright-report/
+test-results/
+.vite/
+.cache/
+
+# Local configuration, credentials and deployment values
+.env
+.env.*
+!.env.example
+!.env.sample
+!.env.template
+*.local
+*.local.*
+*.pem
+*.key
+*.pfx
+*.p12
+environmentvariablevalues.json
+
+# Power Platform local state; SDK schemas are required to build the apps
+.pac/
+**/.power/*
+!**/.power/schemas/
+
+# Logs and temporary or recovery files
+*.log
+*.tmp
+*.temp
+*.bak
+*.orig
+*.rej
+*~
+
+# Editor and operating-system state
+.vs/
+.idea/
+**/.vscode/*
+!**/.vscode/extensions.json
+.DS_Store
+Thumbs.db
+Desktop.ini

@@ -1,0 +1,34 @@
+kind: AdaptiveDialog
+startBehavior: CancelOtherTopics
+beginDialog:
+  kind: OnRecognizedIntent
+  id: main
+  intent:
+    displayName: Goodbye
+    includeInOnSelectIntent: false
+    triggerQueries:
+      - Goodbye
+      - Bye
+      - See you later
+      - No thanks, goodbye
+  actions:
+    - kind: Question
+      id: question_zf2HhP
+      variable: Topic.EndConversation
+      prompt: Do you want to end the conversation?
+      entity: BooleanPrebuiltEntity
+    - kind: ConditionGroup
+      id: condition_DGc1Wy
+      conditions:
+        - id: condition_DGc1Wy-item-0
+          condition: =Topic.EndConversation = true
+          actions:
+            - kind: BeginDialog
+              id: dn94DC
+              dialog: vm_AdoptaENAdoptionCoach.topic.EndofConversation
+        - id: condition_DGc1Wy-item-1
+          condition: =Topic.EndConversation = false
+          actions:
+            - kind: SendActivity
+              id: sendMessage_LdLhmf
+              activity: Go ahead. I'm listening.

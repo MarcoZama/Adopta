@@ -1,6 +1,6 @@
 <botcomponent schemaname="vm_Adopta.InvokeConnectedAgentTaskAction.Adopta-AdoptionCoach">
   <componenttype>9</componenttype>
-  <description>Fornisce coaching sull’utilizzo di Microsoft 365 Copilot e approfondisce le funzionalità descritte in comunicazioni già recuperate e identificate dall'agente principale. Usa la domanda originale, il contesto fornito dal parent e le fonti configurate. Non recupera comunicazioni da Dataverse né dati personali di utilizzo. Non calcola Score, Tier o ricompense</description>
+  <description>Il Coach gestisce coaching, prompt, chiarimenti e attesa prima della ricerca. Non recupera comunicazioni o telemetria e non esegue il primo approfondimento. Riporta userMessageSent e awaitingUser nel riscontro implicito per evitare una seconda domanda o risposta del principale.</description>
   <iscustomizable>0</iscustomizable>
   <name>Adoption Coach</name>
   <parentbotid>

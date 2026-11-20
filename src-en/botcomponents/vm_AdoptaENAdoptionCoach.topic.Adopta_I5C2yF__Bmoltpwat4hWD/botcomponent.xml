@@ -1,0 +1,11 @@
+<botcomponent schemaname="vm_AdoptaENAdoptionCoach.topic.Adopta_I5C2yF__Bmoltpwat4hWD">
+  <componenttype>16</componenttype>
+  <description>English-only adoption library component for Adopta EN.</description>
+  <iscustomizable>0</iscustomizable>
+  <name>Adoption library</name>
+  <parentbotid>
+    <schemaname>vm_AdoptaENAdoptionCoach</schemaname>
+  </parentbotid>
+  <statecode>0</statecode>
+  <statuscode>1</statuscode>
+</botcomponent>

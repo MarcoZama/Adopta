@@ -1,4 +1,87 @@
-# Installare Adopta 1.0.0.15: guida passo passo
+# Installare Adopta IT / EN
+
+## Aggiornamento nativo 1.0.0.20
+
+Importare i pacchetti **1.0.0.20** della rispettiva edizione, senza disinstallare
+la soluzione o cancellare dati. Le 1.0.0.18/19 hanno un errore di packaging:
+il player puo' mostrare `edition.json` anziche' l'app. La 1.0.0.20 ripristina
+`index.html` come primo asset ed esclude quel diagnostico dal pacchetto.
+Chiudere e riaprire il player dopo l'aggiornamento.
+
+Le due managed sono installate in Adopta-V3; avvio e lettura iniziale delle
+quattro app sono verificati. Le Admin non hanno configurazione e gli invii
+rimangono bloccati. Non sono stati collaudati salvataggi o consegne Teams.
+Il figlio e il dispatcher IT che avevano causato il warning sono stati attivati
+con successo dall'elenco nativo, nell'ordine figlio-parent, senza salvare
+definizioni e senza creare livelli unmanaged.
+
+### Modifiche agli agenti introdotte nella 1.0.0.19
+
+La modifica dell'attesa e dei chiarimenti del Coach e' disponibile nei sorgenti,
+nelle build locali e negli export nativi managed/unmanaged 1.0.0.20.
+E' stata importata in sviluppo e le personalizzazioni Dataverse sono pubblicate.
+La CLI non ha confermato la pubblicazione di tutti gli agenti: controllarla
+in Copilot Studio, nell'ordine Coach-principale per entrambe le edizioni.
+
+Dopo l'import di sviluppo e la pubblicazione Coach-principale verificare:
+
+- richiesta di caso d'uso con ruolo mancante: una sola domanda del Coach,
+  nessun avviso di attesa e nessuna copia della domanda dal principale;
+- risposta al chiarimento: ripresa della richiesta originale con il ruolo fornito;
+- contesto completo e ricerca: al massimo un avviso del Coach per messaggio;
+- saluti o risposte immediate: nessun avviso;
+- card comunicazioni: attesa e pipeline esistenti invariate;
+- stesse verifiche in inglese e controllo dei messaggi nell'activity map.
+
+Il topic di attesa del principale e' ritirato ma mantiene la propria identita'
+per gli aggiornamenti. Restano da verificare pubblicazione live completa
+e regressione Teams.
+
+## Installazione dei pacchetti nativi
+
+Usare gli [export nativi managed/unmanaged](README.md) della rispettiva edizione.
+Pacchetti, hash e manifest in `dist` sono artefatti locali esclusi da Git:
+un clone del repository non li contiene. Procurarsi separatamente gli export
+nativi verificati; gli ZIP in `dist/local` sono invece bozze locali di authoring.
+
+1. Preparare un ambiente di destinazione con Dataverse, Copilot Studio,
+   connessioni e code app abilitate, con i prerequisiti descritti sotto.
+2. Importare il managed IT, EN o entrambi, selezionando le cinque connessioni
+   della relativa soluzione. **Non importare managed sopra l'omonima unmanaged
+   usata in sviluppo.** Non eliminare soluzioni contenenti dati per cambiare tipo.
+3. Verificare le sei tabelle di ciascuna edizione e pubblicare le personalizzazioni.
+   Se un flow fallisce sui metadati, controllare che le tabelle esistano prima
+   di modificare i componenti o sostituire ID. Un GUID citato da
+   `GetMetadataForGetEntity` puo' essere l'ID metadata generato nel target,
+   non un riferimento da sostituire nello ZIP. Se presente ma non ancora risolto
+   dal connettore, pubblicare e reimportare lo stesso managed con le connessioni
+   corrette, mantenendo gli invii bloccati.
+4. Per ogni edizione verificare nell'ordine DeliverCommunication, ApplySettings,
+   ManageCommunication e ScheduleCommunication. Usare **Attiva / Turn on**
+   nell'elenco della soluzione e verificare il successo effettivo, non soltanto
+   l'esito dell'import. Il figlio DeliverCommunication deve essere attivo prima
+   del parent DispatchScheduled, altrimenti si ottiene `ChildFlowNeverPublished`.
+   **Non salvare la definizione di un flow managed nell'editor:** creerebbe un
+   livello unmanaged. Se l'attivazione continua a fallire, conservare il log e
+   interrompere il collaudo; non dichiarare l'installazione pronta. Verificare
+   anche `Personalizzato / Customized: No`. Lasciare DispatchScheduled spento
+   fino al collaudo.
+5. Configurare separatamente impostazioni, knowledge e gruppi nelle due app Admin,
+   mantenendo il flag Invii bloccato. Pubblicare prima il Coach e poi il principale
+   di ciascuna edizione, e distribuire le due app Teams corrette.
+6. Collaudare app, autorizzazioni, card, selezione delle comunicazioni e conversazioni.
+   Il selettore IT/EN riguarda solo l'interfaccia: agenti e nuove card rimangono
+   nella lingua fissa dell'edizione. Le vecchie card conservano il payload,
+   ma la risposta segue sempre la lingua fissa dell'agente.
+7. Abilitare dispatcher e flag Invii solo quando si vuole avviare la consegna.
+   Le run gia' avviate non vengono richiamate disabilitando il flag.
+
+L'aggiornamento managed e l'avvio delle quattro app sono verificati in Adopta-V3.
+Questo non dimostra l'assenza dei warning su una nuova installazione pulita:
+verificare sempre metadati, connessioni e attivazione figlio-parent.
+Le prove end-to-end in Teams restano da collaudare.
+
+## Guida storica della baseline 1.0.0.17
 
 Questa guida installa la soluzione **managed** *Adopta Agents and App* in un ambiente Power Platform, dalla preparazione fino al primo invio di prova. Si fa tutto dai portali web (Power Platform admin center, Power Apps, Power Automate, Copilot Studio, Teams admin center), senza strumenti da riga di comando.
 
@@ -13,7 +96,9 @@ Il pacchetto contiene:
 | Ruoli di sicurezza | *Adopta Administrator*, *Adopta Communications Manager* |
 | Altro | prompt *ClassifyDepartment*, variabili d'ambiente `vm_AdoptaDataverseUrl` e `vm_AdoptaCoachKnowledgeUrl`, 5 connection reference |
 
-Serve solo il pacchetto `Adopta_1_0_0_15_managed.zip` (nel repository in `dist/`).
+Serve solo il pacchetto `Adopta_1_0_0_17_managed.zip` (nel repository in `dist/`).
+
+> **Stato della 1.0.0.17:** corregge i 22 errori di authoring di *Resolve communication* e quello di *Explain verified communication* della 1.0.0.16, riprodotti con il validatore semantico Microsoft locale e assenti sui sorgenti corretti. I pacchetti sono ricostruiti localmente senza accesso all'ambiente. Import, pubblicazione e comportamento in Teams non sono stati verificati da questa build. Eseguire i test del passo 11 in un ambiente di prova prima della produzione.
 
 > **Non modificare i componenti.** La soluzione è managed: se si apre e si salva un'app, un flow o un agente in Power Apps, Power Automate o Copilot Studio, si crea un livello unmanaged e gli aggiornamenti futuri non avranno più effetto su quel componente. Tutto ciò che il cliente personalizza si imposta in *Adopta Admin (code app)*. Pubblicare gli agenti in Copilot Studio invece è previsto e non crea livelli.
 
@@ -67,7 +152,7 @@ Con l'account di servizio, in Power Automate (selezionando l'ambiente giusto) �
 ## Passo 4. Importare la soluzione
 
 1. Apri [make.powerapps.com](https://make.powerapps.com) e seleziona l'ambiente in alto a destra.
-2. *Soluzioni* → **Importa soluzione** → *Sfoglia* → `Adopta_1_0_0_15_managed.zip` → *Avanti*.
+2. *Soluzioni* → **Importa soluzione** → *Sfoglia* → `Adopta_1_0_0_17_managed.zip` → *Avanti*.
 3. **Connessioni**: per ogni connection reference scegli la connessione creata al passo 3.
 4. **Variabili d'ambiente**:
    - `Adopta - Dataverse environment URL`: l'URL dell'ambiente **senza slash finale**, per esempio `https://contoso.crm4.dynamics.com`. È in Power Platform admin center → ambiente → *URL ambiente*. Compilarla adesso fa funzionare l'agente da subito.
@@ -198,6 +283,13 @@ Usa un gruppo destinatari ristretto, con almeno un utente di prova che **non** h
   - *Dimmi di più* → l'agente risponde "Un attimo, sto preparando la risposta…" e poi con un'unica card: titolo, spiegazione, fonti consultate e pulsante **Apri il contenuto**. Non deve seguire un secondo messaggio con la stessa spiegazione;
   - *Ignora* → breve conferma.
 - [ ] Ripeti con **Lingua della card = English**: pulsanti *Tell me more* / *Ignore*, risposta in inglese e pulsante *Open the content*.
+- [ ] Invia A, poi B, quindi premi *Dimmi di più* sulla card A: l'approfondimento deve riguardare A, non B. Ripeti su una card pianificata prima dell'aggiornamento.
+- [ ] Chiedi in chat "Spiegami l'ultima comunicazione": deve usare lo stesso tipo di card, senza una seconda spiegazione. Senza un riferimento chiaro e senza una selezione precedente, "dimmi di più sulla comunicazione" deve proporre una conferma.
+- [ ] Prova una comunicazione senza link: l'approfondimento deve funzionare senza mostrare *Apri il contenuto*.
+- [ ] Con due comunicazioni aventi stesso titolo e link, la vecchia card deve chiedere quale si intende. Oltre dieci corrispondenze deve permettere di passare alle pagine successive e precedenti, senza sceglierne una automaticamente.
+- [ ] Dopo la spiegazione chiedi "quali sono i prerequisiti?": deve restare sulla stessa comunicazione. Poi chiedi "fammi un esempio per il mio lavoro": il Coach deve ricevere il contesto e non ripetere l'approfondimento.
+- [ ] Se non vengono recuperate fonti sufficienti, deve comparire un limite esplicito insieme al messaggio originale. Un errore tecnico della ricerca non deve diventare una risposta apparentemente riuscita.
+- [ ] Con un riferimento a una comunicazione non inviata all'utente autenticato, non deve essere restituito alcun contenuto. Non devono essere richiesti né accettati UPN alternativi.
 - [ ] In *Storico e risultati* la comunicazione è *Completata* o *Parzialmente riuscita*, e l'utente senza app ha l'esito **Agente non installato**. Se invece ha *Da verificare*, apri la *Diagnostica* del destinatario e invia il testo dell'errore al fornitore della soluzione.
 - [ ] Riporta gli invii su **bloccati** finché non si parte davvero.
 
@@ -215,13 +307,13 @@ Usa un gruppo destinatari ristretto, con almeno un utente di prova che **non** h
 
 | Versione installata | Come aggiornare |
 |---|---|
-| **1.0.0.12 o 1.0.0.13 managed** | Importa `Adopta_1_0_0_15_managed.zip` come al passo 4. Nelle *Impostazioni avanzate* dell'importazione lascia l'azione predefinita, quella consigliata (*Upgrade*). Poi ripubblica Adopta (passo 6). |
+| **1.0.0.12–1.0.0.16 managed** | Importa `Adopta_1_0_0_17_managed.zip` come al passo 4. Nelle *Impostazioni avanzate* dell'importazione lascia l'azione predefinita, quella consigliata (*Upgrade*). Poi ripubblica prima il Coach e poi Adopta (passo 6). |
 | **1.0.0.11 managed** | Come sopra. Poi ripubblica il Coach e Adopta (passo 6) e scegli la **Lingua predefinita** in *Adopta Admin* (passo 8). |
 | **1.0.0.10 managed o precedente** | Prima condividi le due code app con chi usava la vecchia app canvas e la model-driven (passo 7.2). Poi importa come sopra, con l'azione consigliata (*Upgrade*): così le vecchie app vengono eliminate. Con *Update* resterebbero nell'ambiente. Poi passi 6 e 8. |
 | **Unmanaged** (qualsiasi versione) | Non si può passare a managed con un aggiornamento: usa un ambiente pulito, oppure elimina prima la soluzione unmanaged e i suoi componenti. |
 | *BuddyCommunications* (1.0.0.3 o precedente) | È una soluzione diversa: Adopta si installa accanto, da zero, e i dati non vengono migrati. |
 
-Le comunicazioni già pianificate prima dell'aggiornamento mantengono la card che avevano.
+Le comunicazioni già pianificate prima dell'aggiornamento mantengono la card che avevano. Il nuovo resolver riconosce i vecchi pulsanti tramite titolo e link, verificando comunque l'invio all'utente autenticato. Se il contenuto è stato modificato o eliminato e non esiste più una corrispondenza, lo dichiara senza sostituire la comunicazione con l'ultima.
 
 ---
 

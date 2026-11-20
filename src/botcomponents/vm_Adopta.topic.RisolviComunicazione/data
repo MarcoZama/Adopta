@@ -1,0 +1,265 @@
+kind: AdaptiveDialog
+beginDialog:
+  kind: OnRedirect
+  id: main
+  actions:
+    - kind: SetVariable
+      id: lookupMode
+      variable: Global.CommunicationLookupMode
+      value: =Topic.Mode
+    - kind: SetVariable
+      id: lookupId
+      variable: Global.CommunicationLookupId
+      value: =Trim(Topic.CommunicationId)
+    - kind: SetVariable
+      id: lookupTitle
+      variable: Global.CommunicationLookupTitle
+      value: =Trim(Topic.Title)
+    - kind: SetVariable
+      id: lookupLink
+      variable: Global.CommunicationLookupLink
+      value: =Trim(Topic.Link)
+    - kind: SetVariable
+      id: lookupMatchLink
+      variable: Global.CommunicationLookupMatchLink
+      value: =Topic.MatchLink
+    - kind: SetVariable
+      id: lookupPage
+      variable: Global.CommunicationLookupPage
+      value: =1
+    - kind: SetVariable
+      id: request
+      variable: Global.CommunicationRequest
+      value: =Topic.Request
+    - kind: SetVariable
+      id: clearSelectedId
+      variable: Global.CommunicationSelectedId
+      value: =""
+    - kind: SetVariable
+      id: clearSelectedTitle
+      variable: Global.CommunicationSelectedTitle
+      value: =""
+    - kind: SetVariable
+      id: clearSelectedBody
+      variable: Global.CommunicationSelectedBody
+      value: =""
+    - kind: SetVariable
+      id: clearSelectedLink
+      variable: Global.CommunicationSelectedLink
+      value: =""
+    - kind: SetVariable
+      id: clearSelectedDate
+      variable: Global.CommunicationSelectedSentAt
+      value: =""
+    - kind: SetVariable
+      id: clearSelectedAnswer
+      variable: Global.CommunicationLastAnswer
+      value: =""
+    - kind: BeginDialog
+      id: lookup
+      dialog: vm_Adopta.action.ResolveCommunication
+      output:
+        binding:
+          value: Topic.Rows
+    - kind: ConditionGroup
+      id: lookupResult
+      conditions:
+        - id: emptyNextPage
+          condition: =IsEmpty(Topic.Rows) && Global.CommunicationLookupPage > 1
+          actions:
+            - kind: SendActivity
+              id: noMorePages
+              activity: Non ci sono altre corrispondenze nella pagina successiva. Scegli dalla pagina precedente.
+            - kind: SetVariable
+              id: lastAvailablePage
+              variable: Global.CommunicationLookupPage
+              value: =Global.CommunicationLookupPage - 1
+            - kind: GotoAction
+              id: reloadPreviousPage
+              actionId: lookup
+        - id: noRows
+          condition: =IsEmpty(Topic.Rows)
+          actions:
+            - kind: SendActivity
+              id: unavailable
+              activity: Non riesco a verificare questa comunicazione tra gli invii al tuo account autenticato. Potrebbe essere stata modificata o rimossa. Non ho selezionato una comunicazione diversa.
+      elseActions:
+        - kind: SetVariable
+          id: initialCandidate
+          variable: Topic.CandidateId
+          value: =Text(First(Topic.Rows).communicationid)
+        - kind: SetVariable
+          id: initialApproval
+          variable: Topic.Approved
+          value: =true
+        - kind: SetVariable
+          id: initialRecheck
+          variable: Topic.Recheck
+          value: =false
+        - kind: ConditionGroup
+          id: disambiguate
+          conditions:
+            - id: multipleRows
+              condition: =CountRows(Topic.Rows) > 1 || Global.CommunicationLookupPage > 1
+              actions:
+                - kind: SetVariable
+                  id: choices
+                  variable: Topic.Choices
+                  value: '=ForAll(Topic.Rows, {DisplayName: Text(communicationtitle) & " (" & Text(vm_sentat) & " UTC)", CommunicationId: Text(communicationid)})'
+                - kind: ConditionGroup
+                  id: nextNavigation
+                  conditions:
+                    - id: pageIsFull
+                      condition: =CountRows(Topic.Rows) = 10
+                      actions:
+                        - kind: EditTable
+                          id: addNavigation
+                          changeType: Add
+                          itemsVariable: Topic.Choices
+                          value: '={DisplayName: "Pagina successiva", CommunicationId: "next"}'
+                - kind: ConditionGroup
+                  id: previousNavigation
+                  conditions:
+                    - id: previousPageExists
+                      condition: =Global.CommunicationLookupPage > 1
+                      actions:
+                        - kind: EditTable
+                          id: addPrevious
+                          changeType: Add
+                          itemsVariable: Topic.Choices
+                          value: '={DisplayName: "Pagina precedente", CommunicationId: "previous"}'
+                - kind: EditTable
+                  id: addNone
+                  changeType: Add
+                  itemsVariable: Topic.Choices
+                  value: '={DisplayName: "Nessuna di queste", CommunicationId: ""}'
+                - kind: Question
+                  id: chooseCommunication
+                  interruptionPolicy:
+                    allowInterruption: false
+                  alwaysPrompt: true
+                  variable: Topic.Choice
+                  prompt: '{"Corrispondono più comunicazioni. Quale intendi? Le date sono in UTC. Pagina " & Text(Global.CommunicationLookupPage)}'
+                  entity:
+                    kind: DynamicClosedListEntity
+                    items: =Topic.Choices
+                - kind: ConditionGroup
+                  id: changePage
+                  conditions:
+                    - id: navigationChoice
+                      condition: =Topic.Choice.CommunicationId = "next" || Topic.Choice.CommunicationId = "previous"
+                      actions:
+                        - kind: SetVariable
+                          id: selectedPage
+                          variable: Global.CommunicationLookupPage
+                          value: =Max(1, Global.CommunicationLookupPage + If(Topic.Choice.CommunicationId = "next", 1, -1))
+                        - kind: GotoAction
+                          id: reloadPage
+                          actionId: lookup
+                - kind: SetVariable
+                  id: chosenId
+                  variable: Topic.CandidateId
+                  value: =Topic.Choice.CommunicationId
+                - kind: SetVariable
+                  id: chosenApproval
+                  variable: Topic.Approved
+                  value: =!IsBlank(Topic.CandidateId)
+                - kind: SetVariable
+                  id: chosenRecheck
+                  variable: Topic.Recheck
+                  value: =true
+            - id: confirmLatest
+              condition: =Topic.ConfirmLatest
+              actions:
+                - kind: Question
+                  id: confirmCandidate
+                  interruptionPolicy:
+                    allowInterruption: false
+                  alwaysPrompt: true
+                  variable: Topic.Approved
+                  prompt: '{"Intendi questa comunicazione: " & Text(First(Topic.Rows).communicationtitle) & " (" & Text(First(Topic.Rows).vm_sentat) & " UTC)?"}'
+                  entity: BooleanPrebuiltEntity
+                - kind: SetVariable
+                  id: confirmedRecheck
+                  variable: Topic.Recheck
+                  value: =true
+        - kind: ConditionGroup
+          id: approval
+          conditions:
+            - id: approved
+              condition: =Topic.Approved
+              actions:
+                - kind: ConditionGroup
+                  id: recheck
+                  conditions:
+                    - id: needsRecheck
+                      condition: =Topic.Recheck
+                      actions:
+                        - kind: SetVariable
+                          id: recheckMode
+                          variable: Global.CommunicationLookupMode
+                          value: ="id"
+                        - kind: SetVariable
+                          id: recheckId
+                          variable: Global.CommunicationLookupId
+                          value: =Topic.CandidateId
+                        - kind: BeginDialog
+                          id: readConfirmed
+                          dialog: vm_Adopta.action.ResolveCommunication
+                          output:
+                            binding:
+                              value: Topic.Rows
+                - kind: ConditionGroup
+                  id: verifiedSelection
+                  conditions:
+                    - id: selectedRow
+                      condition: =CountRows(Topic.Rows) = 1 && Text(First(Topic.Rows).communicationid) = Topic.CandidateId
+                      actions:
+                        - kind: SetVariable
+                          id: selectedId
+                          variable: Global.CommunicationSelectedId
+                          value: =Topic.CandidateId
+                        - kind: SetVariable
+                          id: selectedTitle
+                          variable: Global.CommunicationSelectedTitle
+                          value: =Text(First(Topic.Rows).communicationtitle)
+                        - kind: SetVariable
+                          id: selectedBody
+                          variable: Global.CommunicationSelectedBody
+                          value: =Text(First(Topic.Rows).communicationbody)
+                        - kind: SetVariable
+                          id: selectedLink
+                          variable: Global.CommunicationSelectedLink
+                          value: =Text(First(Topic.Rows).communicationlink)
+                        - kind: SetVariable
+                          id: selectedDate
+                          variable: Global.CommunicationSelectedSentAt
+                          value: =Text(First(Topic.Rows).vm_sentat)
+                        - kind: BeginDialog
+                          id: explain
+                          dialog: vm_Adopta.topic.SpiegaComunicazione
+                  elseActions:
+                    - kind: SendActivity
+                      id: selectionChanged
+                      activity: Non riesco più a verificare la comunicazione selezionata. Non l'ho sostituita con un altro messaggio.
+          elseActions:
+            - kind: SendActivity
+              id: selectionDeclined
+              activity: Va bene. Indicami il titolo della comunicazione oppure usa la sua card in Teams.
+inputType:
+  properties:
+    Mode:
+      type: String
+    CommunicationId:
+      type: String
+    Title:
+      type: String
+    Link:
+      type: String
+    MatchLink:
+      type: Boolean
+    Request:
+      type: String
+    ConfirmLatest:
+      type: Boolean
+outputType: {}

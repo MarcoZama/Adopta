@@ -11,9 +11,8 @@ beginDialog:
           actions:
             - kind: SendActivity
               id: sendMessage_1jHUNO
-              activity: Ciao! Per poterti aiutare, ho bisogno che tu effettui l'accesso. / Hi! To help you, I need you to sign in.
-
+              activity: Ciao! Per poterti aiutare, ho bisogno che tu effettui l'accesso.
     - kind: OAuthInput
       id: gOjhZA
       title: Accesso / Sign in
-      text: Per continuare, effettua l'accesso. / To continue, please sign in.
+      text: Per continuare, effettua l'accesso.

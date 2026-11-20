@@ -1,0 +1,53 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<savedqueries xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <savedquery>
+    <IsCustomizable>1</IsCustomizable>
+    <CanBeDeleted>0</CanBeDeleted>
+    <isquickfindquery>0</isquickfindquery>
+    <isprivate>0</isprivate>
+    <isdefault>1</isdefault>
+    <savedqueryid>{88a61772-21ea-4e78-87c8-9e931249f1b5}</savedqueryid>
+    <layoutxml>
+      <grid name="resultset" jump="vm_name" select="1" icon="1" preview="1">
+        <row name="result" id="vm_adoptaencommunicationid">
+          <cell name="vm_name" width="300" />
+          <cell name="createdon" width="125" />
+          <cell name="vm_scheduledat" width="150" />
+          <cell name="vm_timezone" width="150" />
+          <cell name="vm_communicationstatus" width="150" />
+          <cell name="vm_startedat" width="150" />
+          <cell name="vm_completedat" width="150" />
+          <cell name="vm_recipientcount" width="150" />
+          <cell name="vm_sentcount" width="150" />
+          <cell name="vm_failedcount" width="150" />
+        </row>
+      </grid>
+    </layoutxml>
+    <querytype>0</querytype>
+    <fetchxml>
+      <fetch version="1.0" mapping="logical">
+        <entity name="vm_adoptaencommunication">
+          <attribute name="vm_adoptaencommunicationid" />
+          <attribute name="vm_name" />
+          <attribute name="createdon" />
+          <order attribute="vm_name" descending="false" />
+          <filter type="and">
+            <condition attribute="statecode" operator="eq" value="0" />
+          </filter>
+          <attribute name="vm_scheduledat" />
+          <attribute name="vm_timezone" />
+          <attribute name="vm_communicationstatus" />
+          <attribute name="vm_startedat" />
+          <attribute name="vm_completedat" />
+          <attribute name="vm_recipientcount" />
+          <attribute name="vm_sentcount" />
+          <attribute name="vm_failedcount" />
+        </entity>
+      </fetch>
+    </fetchxml>
+    <IntroducedVersion>1.0</IntroducedVersion>
+    <LocalizedNames>
+      <LocalizedName description="Active Adopta Communications" languagecode="1033" />
+    </LocalizedNames>
+  </savedquery>
+</savedqueries>

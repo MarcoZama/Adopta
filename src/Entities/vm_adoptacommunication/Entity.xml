@@ -1062,7 +1062,7 @@
             <displayname description="Language" languagecode="1033" />
           </displaynames>
           <Descriptions>
-            <Description description="Language of the card buttons and of the agent texts for this communication: it or en. Empty means it." languagecode="1033" />
+            <Description description="Archived card language. New scheduled cards are fixed to the installation edition. Existing scheduled cards retain their original payload; the agent always replies in its own fixed language." languagecode="1033" />
           </Descriptions>
         </attribute>
         <attribute PhysicalName="vm_lasterror">

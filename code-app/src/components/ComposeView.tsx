@@ -40,7 +40,8 @@ import {
   syncAudience,
 } from "../data/repository";
 import { CommunicationStatus, type AudienceGroup, type Branding, type CardLanguage, type Communication } from "../data/types";
-import { LANGUAGES, toLanguage, useI18n } from "../i18n";
+import { toLanguage, useI18n } from "../i18n";
+import { edition } from "../../../shared/edition";
 import { addDays, combineLocal, formatDateTime, HOURS, HTTPS_LINK, MINUTES, toDateInput, twoDigits } from "../lib/format";
 import { errorMessage, type Notify } from "../lib/notify";
 import { CardPreview } from "./CardPreview";
@@ -84,7 +85,9 @@ function formFrom(item: Communication, audienceIds: string[]): FormState {
     link: item.vm_link ?? "",
     cardMessage: item.vm_cardmessage ?? "",
     // Communications created before 1.0.0.12 have no language: their card is Italian.
-    language: toLanguage(item.vm_language) ?? "it",
+    language: item.vm_communicationstatus === CommunicationStatus.Draft
+      ? edition().language
+      : toLanguage(item.vm_language) ?? "it",
     audienceIds,
     date: toDateInput(scheduled ?? addDays(new Date(), 1)),
     hour: scheduled ? twoDigits(scheduled.getHours()) : "09",
@@ -118,10 +121,9 @@ interface ComposeViewProps {
 }
 
 export function ComposeView({ branding, busy, setBusy, notify, onRefreshGate, onDirtyChange }: ComposeViewProps) {
-  const { t, language: appLanguage, flowText } = useI18n();
+  const { t, flowText } = useI18n();
   const agentName = branding.agentName;
-  // New communications start in the default language of Adopta Setting, or else in the app language.
-  const newLanguage = branding.defaultLanguage ?? appLanguage;
+  const newLanguage = edition().language;
   const [items, setItems] = useState<Communication[]>([]);
   const [groups, setGroups] = useState<AudienceGroup[]>([]);
   const [loading, setLoading] = useState(true);
@@ -436,13 +438,7 @@ export function ComposeView({ branding, busy, setBusy, notify, onRefreshGate, on
                 />
               </Field>
               <Field label={t.compose.cardLanguage} hint={t.compose.cardLanguageHint}>
-                <Select value={form.language} onChange={(_, d) => update({ language: toLanguage(d.value) ?? "it" })}>
-                  {LANGUAGES.map((option) => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </Select>
+                <Input readOnly value={form.language === "en" ? "English" : "Italiano"} />
               </Field>
             </fieldset>
           </Section>

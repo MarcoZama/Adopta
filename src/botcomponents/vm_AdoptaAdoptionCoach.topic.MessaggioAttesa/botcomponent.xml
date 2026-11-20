@@ -1,0 +1,11 @@
+<botcomponent schemaname="vm_AdoptaAdoptionCoach.topic.MessaggioAttesa">
+  <componenttype>9</componenttype>
+  <description>Avviso esplicito del Coach prima di una ricerca, con contesto sufficiente e senza ripetizioni nella stessa attivita'. Non precede le domande di chiarimento.</description>
+  <iscustomizable>0</iscustomizable>
+  <name>Preparazione della risposta</name>
+  <parentbotid>
+    <schemaname>vm_AdoptaAdoptionCoach</schemaname>
+  </parentbotid>
+  <statecode>0</statecode>
+  <statuscode>1</statuscode>
+</botcomponent>

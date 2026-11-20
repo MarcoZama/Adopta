@@ -11,9 +11,7 @@ beginDialog:
       - grazie mille
       - thanks
       - thank you
-
   actions:
     - kind: SendActivity
       id: sendMessage_9iz6v7
-      activity: |-
-        {If(Text(Global.UserLanguage) = "en", "You're welcome!", "Prego!")}
+      activity: Prego!

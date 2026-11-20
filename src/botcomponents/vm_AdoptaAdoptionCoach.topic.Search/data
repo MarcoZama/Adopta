@@ -4,8 +4,17 @@ beginDialog:
   id: main
   priority: -1
   actions:
+    - kind: BeginDialog
+      id: prepareSearch
+      dialog: vm_AdoptaAdoptionCoach.topic.MessaggioAttesa
+      input:
+        binding:
+          ReadyToResearch: =true
+          ResearchQuery: =System.Activity.Text
     - kind: SearchAndSummarizeContent
       id: search-content
+      latencyMessageSettings:
+        allowLatencyMessage: false
       variable: Topic.Answer
       userInput: =System.Activity.Text
 

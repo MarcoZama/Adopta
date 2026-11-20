@@ -1,0 +1,21 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Role id="{5bdae664-d1b1-4c9f-8fb4-4b4bebb4e0d1}" name="Adopta EN Administrator" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <IsCustomizable>1</IsCustomizable>
+  <IsAutoAssigned>0</IsAutoAssigned>
+  <RolePrivileges>
+    <RolePrivilege name="prvAppendTovm_adoptaenaudiencegroup" level="Global" />
+    <RolePrivilege name="prvAppendvm_adoptaenaudiencegroup" level="Global" />
+    <RolePrivilege name="prvCreateSharePointData" level="Global" />
+    <RolePrivilege name="prvCreatevm_adoptaenaudiencegroup" level="Global" />
+    <RolePrivilege name="prvCreatevm_AdoptaENSetting" level="Global" />
+    <RolePrivilege name="prvDeletevm_adoptaenaudiencegroup" level="Global" />
+    <RolePrivilege name="prvDeletevm_AdoptaENSetting" level="Global" />
+    <RolePrivilege name="prvReadSharePointData" level="Global" />
+    <RolePrivilege name="prvReadSharePointDocument" level="Global" />
+    <RolePrivilege name="prvReadvm_adoptaenaudiencegroup" level="Global" />
+    <RolePrivilege name="prvReadvm_AdoptaENSetting" level="Global" />
+    <RolePrivilege name="prvWriteSharePointData" level="Global" />
+    <RolePrivilege name="prvWritevm_adoptaenaudiencegroup" level="Global" />
+    <RolePrivilege name="prvWritevm_AdoptaENSetting" level="Global" />
+  </RolePrivileges>
+</Role>
