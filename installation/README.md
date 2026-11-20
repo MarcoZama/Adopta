@@ -1,5 +1,7 @@
 # Installing Adopta IT and EN
 
+**English** | [Italiano](README.it.md)
+
 This guide covers version **1.0.0.20**. You can install either edition on its own
 or both in the same Power Platform environment.
 

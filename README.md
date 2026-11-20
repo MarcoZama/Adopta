@@ -56,9 +56,13 @@ where the player could display diagnostic JSON instead of the interface.
 
 ## Installation
 
-Follow the [installation README](installation/README.md) for prerequisites,
-connections, import, security roles, configuration, agent publication,
-Teams distribution, and acceptance checks.
+Installation guides:
+
+- [English](installation/README.md)
+- [Italiano](installation/README.it.md)
+
+Both guides cover prerequisites, connections, import, security roles,
+configuration, agent publication, Teams distribution, and acceptance checks.
 
 You can install Italian, English, or both. Keep sending blocked until the
 selected edition has been configured and tested with a small recipient group.

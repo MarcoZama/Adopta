@@ -33,11 +33,29 @@ fabricate missing metadata. Incomplete pairs fail validation before packaging.
 - **Download:** Release assets, or the `adopta-solutions` Actions artifact
   retained for 30 days.
 
-The version is `major.minor.run_number.run_attempt`, taking major/minor from
-the matching IT/EN source versions. Source manifests are not modified by CI
-versioning. Each version component must stay within `0..65535`.
-A release remains a draft until its six assets have been uploaded.
-Use **Re-run all jobs** after a failed release to obtain a new revision.
+The version preserves `major.minor.build` from the matching IT/EN source
+manifests and increments only the fourth component, using existing GitHub tags
+in that series. For example, with source `1.0.0.20` and tag `v1.0.0.20`,
+the next release is `1.0.0.21`, followed by `1.0.0.22`. Tags are compared
+numerically, not alphabetically; other version series are ignored.
+
+The source revision is a minimum: with no matching tags the source version is
+used unchanged, and explicitly raising it advances the next release to at least
+that value. Source manifests are not modified. Every component must stay within
+`0..65535`; when the revision is exhausted, advance the version series in both
+manifests.
+
+The publication job reserves the Git tag before creating a draft and uploading
+its six assets. An existing tag is never overwritten. If publication fails,
+**Re-run all jobs**: the reserved tag causes allocation of the next revision,
+so failed releases can leave gaps. Rerunning only the publication job retains
+the old version and cannot reuse its reserved tag. A release becomes public
+only after all six assets have been uploaded.
+
+The original `v1.0.0.20` release and its native exports remain unchanged.
+Packages built with the former run-based scheme may have a higher Dataverse
+version, such as `1.0.2.1`. If already installed, do not attempt to force a
+downgrade to `1.0.0.x`; plan a higher series in both source manifests instead.
 
 GitHub Actions must be enabled. Only the publication job receives
 `contents: write`, using the built-in `GITHUB_TOKEN` to create the tag and Release.

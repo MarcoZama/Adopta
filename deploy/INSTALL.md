@@ -1,7 +1,7 @@
 # Installare Adopta IT / EN
 
-> Guida corrente in inglese per la 1.0.0.20:
-> [Installation README](../installation/README.md).
+> Guide correnti per la 1.0.0.20:
+> [Italiano](../installation/README.it.md) | [English](../installation/README.md).
 > Questo documento conserva anche le istruzioni storiche della baseline 1.0.0.17;
 > per una nuova installazione seguire la guida corrente.
 

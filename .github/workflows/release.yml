@@ -51,17 +51,21 @@ jobs:
           }
       - name: Compute release version
         id: version
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           [xml]$it = Get-Content -Raw .\src\Other\Solution.xml
           [xml]$en = Get-Content -Raw .\src-en\Other\Solution.xml
-          if ($it.ImportExportXml.SolutionManifest.Version -cne $en.ImportExportXml.SolutionManifest.Version) {
-            throw 'IT and EN source versions must match.'
-          }
-          $source = [version]$it.ImportExportXml.SolutionManifest.Version
-          foreach ($part in $source.Major, $source.Minor, [int]$env:GITHUB_RUN_NUMBER, [int]$env:GITHUB_RUN_ATTEMPT) {
-            if ($part -lt 0 -or $part -gt 65535) { throw 'Solution version component outside 0..65535.' }
-          }
-          "version=$($source.Major).$($source.Minor).$env:GITHUB_RUN_NUMBER.$env:GITHUB_RUN_ATTEMPT" >> $env:GITHUB_OUTPUT
+          $tags = @(gh api --paginate "repos/$env:GITHUB_REPOSITORY/tags?per_page=100" --jq '.[].name')
+          if ($LASTEXITCODE -ne 0) { throw 'Cannot read existing release tags; version allocation stopped.' }
+          $request = @{
+            it = [string]$it.ImportExportXml.SolutionManifest.Version
+            en = [string]$en.ImportExportXml.SolutionManifest.Version
+            tags = @($tags)
+          } | ConvertTo-Json
+          $version = $request | node .\deploy\release-version.mjs
+          if ($LASTEXITCODE -ne 0) { throw 'Release version allocation failed.' }
+          "version=$version" >> $env:GITHUB_OUTPUT
       - name: Run regression tests
         run: npm test
       - name: Build all apps and pack managed / unmanaged from source
@@ -126,10 +130,13 @@ jobs:
           $tag = "v$env:RELEASE_VERSION"
           $files = @(Get-ChildItem -LiteralPath .\release -File)
           if ($files.Count -ne 6) { throw 'Expected four ZIPs, SHA256SUMS.txt and release.json.' }
-          gh release create $tag @($files.FullName) --draft --target $env:GITHUB_SHA `
+          gh api --method POST "repos/$env:GH_REPO/git/refs" `
+            -f "ref=refs/tags/$tag" -f "sha=$env:GITHUB_SHA" --silent
+          if ($LASTEXITCODE -ne 0) { throw 'Cannot reserve release tag. Existing versions are never overwritten; re-run all jobs to allocate a new revision.' }
+          gh release create $tag @($files.FullName) --draft --verify-tag `
             --title "Adopta $env:RELEASE_VERSION" `
             --notes "IT/EN managed and unmanaged packages built offline with PAC CLI from commit $env:GITHUB_SHA using native Both source metadata. See README for installation and acceptance checks."
-          if ($LASTEXITCODE -ne 0) { throw 'Draft release creation or asset upload failed. Re-run all jobs to use a new version.' }
+          if ($LASTEXITCODE -ne 0) { throw 'Draft release creation or asset upload failed. Re-run all jobs to allocate a new revision.' }
           gh release edit $tag --draft=false --latest
           if ($LASTEXITCODE -ne 0) { throw 'Publishing the complete release failed.' }
           "### Download packages`nhttps://github.com/$env:GH_REPO/releases/tag/$tag" >> $env:GITHUB_STEP_SUMMARY
