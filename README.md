@@ -1,80 +1,86 @@
 # Adopta
 
-Adopta aiuta le organizzazioni a promuovere l'adozione di Microsoft 365 e Copilot
-attraverso comunicazioni in Teams e un assistente conversazionale.
-La soluzione usa Power Apps, Power Automate, Dataverse e Copilot Studio.
+Adopta helps organizations drive Microsoft 365 and Copilot adoption through
+targeted communications in Microsoft Teams and a conversational Adoption Coach.
+It brings together Power Apps, Power Automate, Dataverse, and Copilot Studio.
 
-## Cosa fa
+## What it does
 
-- **Adoption Coach**: risponde alle domande, chiarisce ruolo e obiettivo
-  dell'utente e propone indicazioni pratiche basate sulle fonti configurate.
-- **Agente principale**: gestisce l'ingresso alla conversazione, le richieste
-  sulle comunicazioni e la delega al Coach.
-- **Communications**: app per preparare bozze, selezionare i gruppi destinatari,
-  pianificare le comunicazioni e consultarne stato e risultati.
-- **Admin**: app per configurare nomi, logo, knowledge del Coach, gruppi e
-  abilitazione degli invii.
-- **Automazione**: i flow applicano le impostazioni, gestiscono la pianificazione
-  e consegnano le card in Teams, registrando gli esiti in Dataverse.
+- **Adoption Coach** answers questions, clarifies the user's role and goals,
+  and provides practical guidance grounded in the configured knowledge sources.
+- **Main agent** handles conversations, explains communications, and delegates
+  adoption-related requests to the Coach.
+- **Communications app** lets communication managers draft messages, select
+  recipient groups, schedule delivery, and review delivery history and results.
+- **Admin app** manages branding, agent display names, Coach knowledge,
+  recipient groups, and the sending switch.
+- **Delivery automation** applies settings, processes scheduled communications,
+  sends cards in Teams, and records delivery outcomes in Dataverse.
 
-Gli invii richiedono una configurazione esplicitamente abilitata. Installare
-la soluzione non equivale ad autorizzare l'invio di comunicazioni.
+Sending requires an explicitly enabled configuration. Installing the solution
+alone does not authorize communications to be sent.
 
-## Due edizioni indipendenti
+## Two independent editions
 
 | | Adopta IT | Adopta EN |
 |---|---|---|
-| Nome tecnico della soluzione | `Adopta` | `AdoptaEN` |
-| Agente principale e Coach | Solo italiano | Solo inglese |
-| Interfaccia delle app | Italiano / inglese | Italiano / inglese |
-| Tabelle, flow e impostazioni | Propri | Propri, separati da IT |
+| Solution unique name | `Adopta` | `AdoptaEN` |
+| Main agent and Coach | Italian only | English only |
+| App interface | Italian / English | Italian / English |
+| Tables, flows, and settings | Dedicated to IT | Dedicated to EN |
 
-Le due edizioni possono convivere nello stesso ambiente senza condividere
-configurazioni o dati applicativi. Il selettore della lingua nelle app cambia
-l'interfaccia, non la lingua degli agenti o delle nuove card.
-Ogni edizione comprende due agenti, due code app, cinque flow, sei tabelle
-e due ruoli applicativi.
+Both editions can coexist in the same environment with separate application
+data and configuration. Changing an app's interface language does not change
+the language of its agents or newly scheduled communication cards.
 
-## Scaricare e installare
+Each edition includes two agents, two code apps, five flows, six tables,
+and two application security roles.
 
-I pacchetti automatici sono pubblicati nelle
-[GitHub Releases](https://github.com/MarcoZama/Adopta/releases), dopo aver
-configurato la pipeline:
+## Download version 1.0.0.20
 
-- `Adopta_IT_<versione>_managed.zip`
-- `Adopta_IT_<versione>_unmanaged.zip`
-- `Adopta_EN_<versione>_managed.zip`
-- `Adopta_EN_<versione>_unmanaged.zip`
-- `SHA256SUMS.txt` e `release.json`, con hash e commit di provenienza.
+| Edition | Managed | Unmanaged |
+|---|---|---|
+| Italian | [Download managed](https://github.com/MarcoZama/Adopta/releases/download/v1.0.0.20/Adopta_IT_1_0_0_20_managed.zip) | [Download unmanaged](https://github.com/MarcoZama/Adopta/releases/download/v1.0.0.20/Adopta_IT_1_0_0_20_unmanaged.zip) |
+| English | [Download managed](https://github.com/MarcoZama/Adopta/releases/download/v1.0.0.20/Adopta_EN_1_0_0_20_managed.zip) | [Download unmanaged](https://github.com/MarcoZama/Adopta/releases/download/v1.0.0.20/Adopta_EN_1_0_0_20_unmanaged.zip) |
 
-Usare **managed** negli ambienti di destinazione e **unmanaged** per lo sviluppo.
-Non importare una managed sopra l'omonima unmanaged e non eliminare soluzioni
-contenenti dati per cambiarne il tipo.
+The [1.0.0.20 release](https://github.com/MarcoZama/Adopta/releases/tag/v1.0.0.20)
+also includes a `.sha256` checksum for each ZIP. These are native Power Platform
+exports, not unmanaged packages relabeled as managed.
 
-Servono un ambiente Dataverse con Copilot Studio e code app abilitate,
-licenze adeguate, connessioni ai connettori richiesti e i ruoli applicativi.
-La configurazione del tenant, la pubblicazione degli agenti e la distribuzione
-in Teams restano passi dell'installazione:
-[guida completa](deploy/INSTALL.md).
+Use **managed** packages in destination environments and **unmanaged** packages
+for development. Do not import a managed solution over an existing unmanaged
+solution with the same unique name, or delete application data to change types.
 
-## Struttura del repository
+Version 1.0.0.20 fixes the code app launch issue affecting versions 1.0.0.18/19,
+where the player could display diagnostic JSON instead of the interface.
 
-| Percorso | Contenuto |
+## Installation
+
+Follow the [installation README](installation/README.md) for prerequisites,
+connections, import, security roles, configuration, agent publication,
+Teams distribution, and acceptance checks.
+
+You can install Italian, English, or both. Keep sending blocked until the
+selected edition has been configured and tested with a small recipient group.
+
+## Repository layout
+
+| Path | Contents |
 |---|---|
-| [src](src/) | Soluzione e agenti italiani |
-| [src-en](src-en/) | Soluzione e agenti inglesi |
-| [admin-app](admin-app/) | Sorgenti React/TypeScript dell'app Admin |
-| [code-app](code-app/) | Sorgenti React/TypeScript dell'app Communications |
-| [shared](shared/) | Binding e adattatori comuni alle due edizioni |
-| [deploy](deploy/) | Build, validazione e istruzioni di installazione/rilascio |
-| [tests](tests/) | Test dei topic, dei flow e dell'isolamento tra edizioni |
-| [.github/workflows/release.yml](.github/workflows/release.yml) | Pipeline di verifica e rilascio |
+| [src](src/) | Italian solution and agents |
+| [src-en](src-en/) | English solution and agents |
+| [admin-app](admin-app/) | Admin app React/TypeScript source |
+| [code-app](code-app/) | Communications app React/TypeScript source |
+| [shared](shared/) | Shared edition-aware bindings and adapters |
+| [installation](installation/) | Installation and operational checks |
+| [deploy](deploy/) | Packaging, validation, and technical documentation |
+| [tests](tests/) | Agent, flow, packaging, and edition-isolation tests |
 
-## Sviluppo locale
+## Local development
 
-Prerequisiti: Node.js 24, PowerShell 7, .NET 10 e
+Prerequisites: Node.js 24, PowerShell 7, .NET 10, and
 [Power Platform CLI](https://learn.microsoft.com/power-platform/developer/cli/introduction)
-2.12.2, inclusi gli assembly di authoring usati dai test.
+2.12.2, including the authoring assemblies used by the tests.
 
 ```powershell
 npm ci
@@ -82,35 +88,13 @@ npm --prefix .\admin-app ci
 npm --prefix .\code-app ci
 npm test
 
-.\deploy\Build-Solution.ps1 -Edition it
-.\deploy\Build-Solution.ps1 -Edition en
+.\deploy\Build-Solution.ps1 -Edition it -PackageType Both
+.\deploy\Build-Solution.ps1 -Edition en -PackageType Both
 ```
 
-Le build locali producono unmanaged in `dist/local`. Non accedono a Dataverse
-e **non possono generare managed autentiche**: per queste serve l'export nativo
-eseguito dalla pipeline. Dipendenze, output e configurazioni locali non sono
-versionati; schemi SDK, binding e asset richiesti dai sorgenti rimangono in Git.
-
-## Pipeline dopo il merge
-
-1. Una PR verso `main` esegue test, build delle quattro app e packaging unmanaged,
-   senza accesso a Dataverse.
-2. Il merge genera un push su `main`: la pipeline importa i pacchetti in un
-   **ambiente CI dedicato**, quindi esporta nativamente managed e unmanaged.
-3. Solo dopo le verifiche di tutti e quattro i pacchetti pubblica una GitHub
-   Release scaricabile. Non distribuisce in produzione o in Teams.
-
-I push diretti su `main` attivano lo stesso rilascio; proteggere il branch
-richiedendo una PR. E' disponibile anche l'avvio manuale da Actions, su `main`.
-La versione CI e' `major.minor.numero_run.tentativo`, per esempio `1.0.12.1`;
-`major.minor` proviene dai manifest sorgente. Per riprovare un rilascio fallito,
-usare **Re-run all jobs**, cosi' viene assegnata una nuova revisione.
-
-**Configurazione iniziale obbligatoria**: ambiente Dataverse di build,
-identita' Entra federata, variabili e secret GitHub.
-Seguire [Configurare la pipeline](deploy/CI.md). Senza questi prerequisiti il
-rilascio fallisce esplicitamente: non vengono pubblicati managed simulati.
-
-La pipeline verifica il packaging e i sorgenti, non certifica conversazioni
-generative, primo import senza warning in un ambiente vuoto o consegna Teams.
-Per note sui rilasci precedenti e limiti noti: [documentazione tecnica](deploy/README.md).
+Local builds create managed and unmanaged packages in `dist/local` with PAC CLI,
+without connecting to Dataverse. The source includes the native `Both` metadata
+and managed form variants required for dual-format packaging.
+Installed dependencies, build output, exports, and local configuration files
+are excluded from Git; SDK schemas, bindings, and required solution assets
+remain versioned.

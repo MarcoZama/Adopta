@@ -3,7 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "node --test tests/communication-details.test.mjs tests/editions.test.mjs tests/release-pipeline.test.mjs",
+    "test": "node --test tests/communication-details.test.mjs tests/editions.test.mjs tests/dual-format-source.test.mjs",
     "validate": "node deploy/validate-solution.mjs"
   },
   "devDependencies": {

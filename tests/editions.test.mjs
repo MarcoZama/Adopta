@@ -2,7 +2,6 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import path from "node:path";
 import test from "node:test";
-import { spawnSync } from "node:child_process";
 import profiles from "../deploy/editions.json" with { type: "json" };
 import { bindQuery, bindRecord, canonicalRecord, getEdition, nativeName } from "../shared/edition.ts";
 import { bindSources, tableService } from "../shared/power-apps.ts";
@@ -32,7 +31,7 @@ test("code app HTML is always the launch asset and build diagnostics never enter
 });
 
 test("English syntax, XML, references and targeted Microsoft authoring semantics are valid", () => {
-  assert.deepEqual(validateSolution("en"), { yaml: 46, xml: 143 });
+  assert.deepEqual(validateSolution("en"), { yaml: 46, xml: 161 });
 });
 
 test("all four agent instruction blocks fit the documented 8000-character budget", () => {
@@ -200,15 +199,6 @@ test("both pipelines retain authenticated queries, type declarations, a single f
     const card = results[index + 1];
     assert.equal(card.success, true);
     assert.equal(card.value.actions[0].title, edition === "en" ? "Open the content" : "Apri il contenuto");
-  }
-});
-
-test("managed release fails explicitly before any environment access or fabricated managed package", () => {
-  for (const edition of ["it", "en"]) {
-    const result = spawnSync("pwsh", ["-NoLogo", "-NoProfile", "-File", path.join(root, "deploy", "Build-Solution.ps1"),
-      "-Edition", edition, "-PackageType", "Managed"], { encoding: "utf8" });
-    assert.notEqual(result.status, 0);
-    assert.match(result.stderr, /Managed .* release is blocked/);
   }
 });
 

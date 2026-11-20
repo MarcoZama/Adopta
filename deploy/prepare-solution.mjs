@@ -6,6 +6,22 @@ import editions from "./editions.json" with { type: "json" };
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 
+export function validateDualFormatSource(source) {
+  const manifest = fs.readFileSync(path.join(source, "Other", "Solution.xml"), "utf8");
+  assert.match(manifest, /<Managed>2<\/Managed>/, "Expected native Both source metadata, not an unmanaged-to-managed conversion.");
+  const entities = path.join(source, "Entities");
+  const forms = fs.readdirSync(entities, { recursive: true }).filter((name) =>
+    name.includes(`${path.sep}FormXml${path.sep}`) && name.endsWith(".xml"));
+  for (const name of forms) {
+    const counterpart = name.endsWith("_managed.xml")
+      ? name.replace(/_managed\.xml$/, ".xml") : name.replace(/\.xml$/, "_managed.xml");
+    assert.ok(fs.existsSync(path.join(entities, counterpart)), `Missing native form counterpart: ${counterpart}`);
+    const formId = (file) => fs.readFileSync(path.join(entities, file), "utf8").match(/<formid>([^<]+)<\/formid>/)?.[1];
+    assert.ok(formId(name), `Missing form ID: ${name}`);
+    assert.equal(formId(name), formId(counterpart), `Mismatched managed/unmanaged form IDs: ${name}`);
+  }
+}
+
 export function codeAppAssets(folder) {
   const entry = path.join(folder, "index.html");
   assert.ok(fs.existsSync(entry) && fs.statSync(entry).isFile(), `Missing code app entry point: ${entry}`);
@@ -23,6 +39,7 @@ export function prepareSolution(edition, destination, sourceOverride) {
   assert.ok(stage.startsWith(workRoot), "Stage must be a named subdirectory of .solution-build.");
   assert.ok(!fs.existsSync(stage), `Stage already exists: ${stage}`);
   fs.cpSync(sourceOverride ?? path.join(root, profile.source), stage, { recursive: true });
+  validateDualFormatSource(stage);
 
   for (const app of Object.values(profile.apps)) {
     const built = path.join(root, app.project, `dist-${edition}`);

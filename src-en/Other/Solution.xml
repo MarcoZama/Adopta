@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<ImportExportXml version="9.2.26101.177" SolutionPackageVersion="9.2" languagecode="1033" generatedBy="CrmLive" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" OrganizationVersion="9.2.26101.177" OrganizationSchemaType="Standard" CRMServerServiceabilityVersion="9.2.26101.00177">
+<ImportExportXml version="9.2.26102.136" SolutionPackageVersion="9.2" languagecode="1033" generatedBy="CrmLive" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" OrganizationVersion="9.2.26102.136" OrganizationSchemaType="Standard" CRMServerServiceabilityVersion="9.2.26102.00136">
   <SolutionManifest>
     <UniqueName>AdoptaEN</UniqueName>
     <LocalizedNames>
@@ -9,7 +9,7 @@
       <Description description="Scheduling console and delivery tracking for Adopta." languagecode="1033" />
     </Descriptions>
     <Version>1.0.0.20</Version>
-    <Managed>0</Managed>
+    <Managed>2</Managed>
     <Publisher>
       <UniqueName>vinm</UniqueName>
       <LocalizedNames>
@@ -89,10 +89,10 @@
       <RootComponent type="20" id="{0cf1fa3d-76e4-4780-85c2-0d5943b720df}" behavior="0" />
       <RootComponent type="20" id="{5bdae664-d1b1-4c9f-8fb4-4b4bebb4e0d1}" behavior="0" />
       <RootComponent type="29" id="{46412212-8e45-42ac-b0bc-33404426db44}" behavior="0" />
-      <RootComponent type="29" id="{f32fb76b-d3f0-4237-aa9d-1eb3dfdefcfc}" behavior="0" />
-      <RootComponent type="29" id="{c58c4dd6-c53e-4c5f-b9d2-e8bc0c84b7d1}" behavior="0" />
-      <RootComponent type="29" id="{c54dd143-e343-412b-bd9e-c791c263352b}" behavior="0" />
       <RootComponent type="29" id="{5e121266-6755-405e-b1e0-d11449aefe79}" behavior="0" />
+      <RootComponent type="29" id="{c54dd143-e343-412b-bd9e-c791c263352b}" behavior="0" />
+      <RootComponent type="29" id="{c58c4dd6-c53e-4c5f-b9d2-e8bc0c84b7d1}" behavior="0" />
+      <RootComponent type="29" id="{f32fb76b-d3f0-4237-aa9d-1eb3dfdefcfc}" behavior="0" />
       <RootComponent type="300" schemaName="vm_adoptaenadmincodeapp_daf99" behavior="0" />
       <RootComponent type="300" schemaName="vm_adoptaencommunicationscodeapp_d7690" behavior="0" />
       <RootComponent type="401" id="{18d7ca29-7460-4d39-90f8-7990800c497c}" behavior="0" />

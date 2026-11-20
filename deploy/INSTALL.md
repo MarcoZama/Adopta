@@ -1,5 +1,10 @@
 # Installare Adopta IT / EN
 
+> Guida corrente in inglese per la 1.0.0.20:
+> [Installation README](../installation/README.md).
+> Questo documento conserva anche le istruzioni storiche della baseline 1.0.0.17;
+> per una nuova installazione seguire la guida corrente.
+
 ## Aggiornamento nativo 1.0.0.20
 
 Importare i pacchetti **1.0.0.20** della rispettiva edizione, senza disinstallare
@@ -40,9 +45,8 @@ e regressione Teams.
 ## Installazione dei pacchetti nativi
 
 Usare gli [export nativi managed/unmanaged](README.md) della rispettiva edizione.
-I nuovi rilasci automatici sono scaricabili dalle
-[GitHub Releases](https://github.com/MarcoZama/Adopta/releases) dopo la
-[configurazione iniziale della pipeline](CI.md).
+I quattro pacchetti IT/EN managed e unmanaged 1.0.0.20 sono scaricabili dalla
+[release dedicata](https://github.com/MarcoZama/Adopta/releases/tag/v1.0.0.20).
 Pacchetti, hash e manifest in `dist` sono artefatti locali esclusi da Git:
 un clone del repository non li contiene. Procurarsi separatamente gli export
 nativi verificati; gli ZIP in `dist/local` sono invece bozze locali di authoring.

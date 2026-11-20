@@ -1,10 +1,18 @@
 # Adopta IT / EN: sorgenti ed export nativi 1.0.0.20
 
 Per la descrizione del prodotto: [README principale](../README.md).
-La pipeline GitHub crea nuovi export nativi IT/EN dopo il merge in `main`:
+La pipeline GitHub crea i quattro pacchetti IT/EN con PAC CLI offline dai sorgenti
+Both versionati, senza ambiente Dataverse o credenziali:
 [configurazione CI e download delle Release](CI.md).
 Le sezioni seguenti documentano anche le verifiche storiche, non l'esito
 delle future esecuzioni CI.
+
+Il builder attuale supporta `-PackageType Both`, `Managed` e `Unmanaged`.
+I manifest Both e le 18 varianti form managed per edizione provengono dagli
+export nativi 1.0.0.20: [provenienza](native-metadata.json).
+Sono metadati sorgente richiesti dalla compilazione, non cache o ZIP generati.
+Le indicazioni storiche sul blocco delle build managed non si applicano piu'
+al builder attuale con sorgenti Both completi.
 
 ## File versionati e artefatti locali
 
@@ -219,21 +227,21 @@ Le build ricompilano entrambe le app per l'edizione scelta, incorporano i nuovi
 bundle in una copia temporanea dei sorgenti, verificano payload e metadati,
 eseguono pack/unpack e validano anche il risultato estratto.
 
-Output di authoring, **unmanaged e non qualificati per installazione cliente**,
-separati dagli export nativi per impedirne la sovrascrittura:
+Output offline managed e unmanaged, separati dagli export nativi per impedirne
+la sovrascrittura e da collaudare nell'ambiente di destinazione:
 
-- `dist/local/Adopta_IT_1_0_0_19_unmanaged.zip` e relativo SHA-256;
-- `dist/local/Adopta_EN_1_0_0_19_unmanaged.zip` e relativo SHA-256;
+- `dist/local/Adopta_IT_<versione>_managed.zip` / `_unmanaged.zip` e relativi SHA-256;
+- `dist/local/Adopta_EN_<versione>_managed.zip` / `_unmanaged.zip` e relativi SHA-256;
 - settings IT in [deploymentSettings.json](deploymentSettings.json);
 - settings EN generati dallo ZIP tramite `pac solution create-settings`, senza
   connessioni o valori cliente precompilati.
 
 Gli script di build locale non eseguono login, import, export, creazione agenti
-o pubblicazione. `-PackageType Managed` continua a fallire esplicitamente:
-per i managed si usano gli export nativi, senza riciclare vecchie baseline
-o sovrascrivere l'export con contenuti locali non sincronizzati.
+o pubblicazione. PAC esegue pack/unpack Both sui sorgenti completi di metadati
+managed nativi. `-PackageType` seleziona gli output Both, Managed o Unmanaged.
+I valori dell'ambiente e le connessioni cliente vengono forniti all'installazione.
 
-La suite copre 92 payload YAML e 286 XML di authoring, isolamento degli schemi e dei GUID,
+La suite copre 92 payload YAML e 322 XML di authoring, isolamento degli schemi e dei GUID,
 binding SDK, query effettive Power Fx e card. La semantica dei topic principali
 e dei due Coach e' verificata con l'SDK locale. L'inizializzazione autenticata
 richiede schemi di runtime non disponibili nel BotEntity locale: i suoi contratti
@@ -306,10 +314,10 @@ npm test
 .\deploy\Build-Solution.ps1
 ```
 
-Lo script attuale costruisce la bozza unmanaged IT 1.0.0.18; aggiungere `-Edition en`
-per EN. La vecchia procedura a overlay managed e' stata rimossa perche' non
-copriva agenti, schema e bundle modificati da questa separazione. I pacchetti
-storici 1.0.0.16 e 1.0.0.17 restano intatti. Non viene convertito unmanaged in managed.
+Lo script attuale costruisce entrambi i formati per l'edizione IT; aggiungere
+`-Edition en` per EN. Usa i metadati Both nativi versionati e i sorgenti correnti,
+senza login o conversioni del flag di uno ZIP unmanaged.
+I pacchetti storici restano intatti e le nuove build scrivono in `dist/local`.
 
 ### Provenienza della baseline 1.0.0.15
 

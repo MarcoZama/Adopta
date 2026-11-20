@@ -1,6 +1,6 @@
 param(
     [ValidateSet('it', 'en')] [string] $Edition = 'it',
-    [ValidateSet('Unmanaged', 'Managed')] [string] $PackageType = 'Unmanaged',
+    [ValidateSet('Unmanaged', 'Managed', 'Both')] [string] $PackageType = 'Both',
     [ValidatePattern('^\d+\.\d+\.\d+\.\d+$')] [string] $ReleaseVersion,
     [switch] $SkipTests
 )
@@ -9,9 +9,6 @@ $ErrorActionPreference = 'Stop'
 $root = Split-Path $PSScriptRoot
 $profiles = Get-Content -Raw -LiteralPath (Join-Path $PSScriptRoot 'editions.json') | ConvertFrom-Json
 $profile = $profiles.$Edition
-if ($PackageType -eq 'Managed') {
-    throw "Managed $Edition release is blocked in this local authoring builder. Use the verified native exports in dist, or export the synchronized solution from an authorized development environment. Never synthesize managed from unmanaged XML. No package was created."
-}
 
 function Invoke-Checked {
     param([string] $Command, [string[]] $Arguments)
@@ -47,21 +44,24 @@ try {
     Invoke-Checked 'node' @('deploy\validate-solution.mjs', $Edition, $stage)
     $version = [string]$manifest.ImportExportXml.SolutionManifest.Version
     if ($manifest.ImportExportXml.SolutionManifest.UniqueName -cne $profile.solution -or
-        $manifest.ImportExportXml.SolutionManifest.Managed -ne '0' -or
+        $manifest.ImportExportXml.SolutionManifest.Managed -ne '2' -or
         $version -notmatch '^\d+\.\d+\.\d+\.\d+$') { throw 'Wrong solution identity, package type or version.' }
     $dist = Join-Path $root 'dist\local'
     $null = New-Item -ItemType Directory -Path $dist -Force
-    $stem = "Adopta_$($Edition.ToUpperInvariant())_$($version.Replace('.', '_'))_unmanaged"
+    $stem = "Adopta_$($Edition.ToUpperInvariant())_$($version.Replace('.', '_'))"
     $candidate = Join-Path $work "$stem.zip"
-    Invoke-Checked 'pac' @('solution', 'pack', '--folder', $stage, '--zipfile', $candidate, '--packagetype', 'Unmanaged', '--errorlevel', 'Warning')
+    Invoke-Checked 'pac' @('solution', 'pack', '--folder', $stage, '--zipfile', $candidate, '--packagetype', 'Both', '--errorlevel', 'Warning')
 
     Add-Type -AssemblyName System.IO.Compression.FileSystem
-    $archive = [IO.Compression.ZipFile]::OpenRead($candidate)
-    try {
+    foreach ($type in 'Unmanaged', 'Managed') {
+      $file = if ($type -eq 'Managed') { Join-Path $work "${stem}_managed.zip" } else { $candidate }
+      $expectedManaged = if ($type -eq 'Managed') { '1' } else { '0' }
+      $archive = [IO.Compression.ZipFile]::OpenRead($file)
+      try {
         [xml]$packed = Read-ZipEntry $archive 'solution.xml'
         if ($packed.ImportExportXml.SolutionManifest.UniqueName -cne $profile.solution -or
             $packed.ImportExportXml.SolutionManifest.Version -ne $version -or
-            $packed.ImportExportXml.SolutionManifest.Managed -ne '0') { throw 'Packed solution identity does not match the edition.' }
+            [string]$packed.ImportExportXml.SolutionManifest.Managed -cne $expectedManaged) { throw 'Packed solution identity does not match the edition or package type.' }
         foreach ($file in Get-ChildItem -LiteralPath $stage -Recurse -File |
             Where-Object { $_.Name -eq 'data' -or $_.Directory.Name -eq 'Workflows' -and $_.Extension -eq '.json' -or $_.FullName -match '_CodeAppPackages\\' }) {
             $name = [IO.Path]::GetRelativePath($stage, $file.FullName).Replace('\', '/')
@@ -70,21 +70,27 @@ try {
             if ($actual.Replace("`r`n", "`n").Trim() -cne $expected.Replace("`r`n", "`n").Trim()) { throw "Stale package payload: $name" }
         }
         if ($archive.Entries.FullName -match 'environmentvariablevalues\.json$') { throw 'Exported environment values must not be packaged.' }
-    } finally { $archive.Dispose() }
+      } finally { $archive.Dispose() }
+    }
 
     $roundtrip = Join-Path $work 'roundtrip'
-    Invoke-Checked 'pac' @('solution', 'unpack', '--zipfile', $candidate, '--folder', $roundtrip, '--packagetype', 'Unmanaged', '--errorlevel', 'Warning')
+    Invoke-Checked 'pac' @('solution', 'unpack', '--zipfile', $candidate, '--folder', $roundtrip, '--packagetype', 'Both', '--errorlevel', 'Warning')
     Invoke-Checked 'node' @('deploy\validate-solution.mjs', $Edition, $roundtrip)
-    $output = Join-Path $dist "$stem.zip"
-    Copy-Item -LiteralPath $candidate -Destination $output
     $settings = Join-Path $PSScriptRoot $(if ($Edition -eq 'it') { 'deploymentSettings.json' } else { 'deploymentSettings.en.json' })
     if (-not (Test-Path -LiteralPath $settings)) {
-        Invoke-Checked 'pac' @('solution', 'create-settings', '--solution-zip', $output, '--settings-file', $settings)
+        Invoke-Checked 'pac' @('solution', 'create-settings', '--solution-zip', $candidate, '--settings-file', $settings)
     }
-    $hash = (Get-FileHash -LiteralPath $output -Algorithm SHA256).Hash.ToLowerInvariant()
-    "$hash  $stem.zip" | Set-Content -LiteralPath (Join-Path $dist "$stem.sha256")
-    Write-Host "Local unmanaged authoring package: $output"
-    Write-Warning 'No environment was changed. Import, agent creation, app registration, publication and Teams behavior remain unverified. This is not a managed customer release.'
+    foreach ($type in 'Unmanaged', 'Managed') {
+        if ($PackageType -ne 'Both' -and $PackageType -ne $type) { continue }
+        $file = if ($type -eq 'Managed') { Join-Path $work "${stem}_managed.zip" } else { $candidate }
+        $name = "${stem}_$($type.ToLowerInvariant())"
+        $output = Join-Path $dist "$name.zip"
+        Copy-Item -LiteralPath $file -Destination $output
+        $hash = (Get-FileHash -LiteralPath $output -Algorithm SHA256).Hash.ToLowerInvariant()
+        "$hash  $name.zip" | Set-Content -LiteralPath (Join-Path $dist "$name.sha256")
+        Write-Host "Offline PAC $type package: $output"
+    }
+    Write-Warning 'Packed offline from native Both metadata. No environment was changed. Validate import, agent publication and Teams behavior in the destination before production use.'
 } finally {
     Pop-Location
     if ($work -and (Test-Path -LiteralPath $work)) {

@@ -5,6 +5,7 @@ import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import YAML from "yaml";
 import editions from "./editions.json" with { type: "json" };
+import { validateDualFormatSource } from "./prepare-solution.mjs";
 
 export const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 export const componentRoot = path.join(root, "src", "botcomponents");
@@ -52,6 +53,7 @@ export function validateSolution(edition = "it", sourceOverride) {
   const files = filesUnder(source);
   const dataFiles = files.filter((name) => path.basename(name) === "data");
   const manifest = fs.readFileSync(path.join(source, "Other", "Solution.xml"), "utf8");
+  if (/<Managed>2<\/Managed>/.test(manifest)) validateDualFormatSource(source);
   assert.ok(manifest.includes(`<UniqueName>${profile.solution}</UniqueName>`), "Wrong solution edition");
   for (const bot of [profile.agent, profile.coach]) {
     const metadata = fs.readFileSync(path.join(source, "bots", bot, "bot.xml"), "utf8");
