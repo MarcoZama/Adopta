@@ -1,4 +1,87 @@
-# Installare Adopta 1.0.0.17: guida passo passo
+# Installare Adopta IT / EN
+
+## Aggiornamento nativo 1.0.0.20
+
+Importare i pacchetti **1.0.0.20** della rispettiva edizione, senza disinstallare
+la soluzione o cancellare dati. Le 1.0.0.18/19 hanno un errore di packaging:
+il player puo' mostrare `edition.json` anziche' l'app. La 1.0.0.20 ripristina
+`index.html` come primo asset ed esclude quel diagnostico dal pacchetto.
+Chiudere e riaprire il player dopo l'aggiornamento.
+
+Le due managed sono installate in Adopta-V3; avvio e lettura iniziale delle
+quattro app sono verificati. Le Admin non hanno configurazione e gli invii
+rimangono bloccati. Non sono stati collaudati salvataggi o consegne Teams.
+Il figlio e il dispatcher IT che avevano causato il warning sono stati attivati
+con successo dall'elenco nativo, nell'ordine figlio-parent, senza salvare
+definizioni e senza creare livelli unmanaged.
+
+### Modifiche agli agenti introdotte nella 1.0.0.19
+
+La modifica dell'attesa e dei chiarimenti del Coach e' disponibile nei sorgenti,
+nelle build locali e negli export nativi managed/unmanaged 1.0.0.20.
+E' stata importata in sviluppo e le personalizzazioni Dataverse sono pubblicate.
+La CLI non ha confermato la pubblicazione di tutti gli agenti: controllarla
+in Copilot Studio, nell'ordine Coach-principale per entrambe le edizioni.
+
+Dopo l'import di sviluppo e la pubblicazione Coach-principale verificare:
+
+- richiesta di caso d'uso con ruolo mancante: una sola domanda del Coach,
+  nessun avviso di attesa e nessuna copia della domanda dal principale;
+- risposta al chiarimento: ripresa della richiesta originale con il ruolo fornito;
+- contesto completo e ricerca: al massimo un avviso del Coach per messaggio;
+- saluti o risposte immediate: nessun avviso;
+- card comunicazioni: attesa e pipeline esistenti invariate;
+- stesse verifiche in inglese e controllo dei messaggi nell'activity map.
+
+Il topic di attesa del principale e' ritirato ma mantiene la propria identita'
+per gli aggiornamenti. Restano da verificare pubblicazione live completa
+e regressione Teams.
+
+## Installazione dei pacchetti nativi
+
+Usare gli [export nativi managed/unmanaged](README.md) della rispettiva edizione.
+Pacchetti, hash e manifest in `dist` sono artefatti locali esclusi da Git:
+un clone del repository non li contiene. Procurarsi separatamente gli export
+nativi verificati; gli ZIP in `dist/local` sono invece bozze locali di authoring.
+
+1. Preparare un ambiente di destinazione con Dataverse, Copilot Studio,
+   connessioni e code app abilitate, con i prerequisiti descritti sotto.
+2. Importare il managed IT, EN o entrambi, selezionando le cinque connessioni
+   della relativa soluzione. **Non importare managed sopra l'omonima unmanaged
+   usata in sviluppo.** Non eliminare soluzioni contenenti dati per cambiare tipo.
+3. Verificare le sei tabelle di ciascuna edizione e pubblicare le personalizzazioni.
+   Se un flow fallisce sui metadati, controllare che le tabelle esistano prima
+   di modificare i componenti o sostituire ID. Un GUID citato da
+   `GetMetadataForGetEntity` puo' essere l'ID metadata generato nel target,
+   non un riferimento da sostituire nello ZIP. Se presente ma non ancora risolto
+   dal connettore, pubblicare e reimportare lo stesso managed con le connessioni
+   corrette, mantenendo gli invii bloccati.
+4. Per ogni edizione verificare nell'ordine DeliverCommunication, ApplySettings,
+   ManageCommunication e ScheduleCommunication. Usare **Attiva / Turn on**
+   nell'elenco della soluzione e verificare il successo effettivo, non soltanto
+   l'esito dell'import. Il figlio DeliverCommunication deve essere attivo prima
+   del parent DispatchScheduled, altrimenti si ottiene `ChildFlowNeverPublished`.
+   **Non salvare la definizione di un flow managed nell'editor:** creerebbe un
+   livello unmanaged. Se l'attivazione continua a fallire, conservare il log e
+   interrompere il collaudo; non dichiarare l'installazione pronta. Verificare
+   anche `Personalizzato / Customized: No`. Lasciare DispatchScheduled spento
+   fino al collaudo.
+5. Configurare separatamente impostazioni, knowledge e gruppi nelle due app Admin,
+   mantenendo il flag Invii bloccato. Pubblicare prima il Coach e poi il principale
+   di ciascuna edizione, e distribuire le due app Teams corrette.
+6. Collaudare app, autorizzazioni, card, selezione delle comunicazioni e conversazioni.
+   Il selettore IT/EN riguarda solo l'interfaccia: agenti e nuove card rimangono
+   nella lingua fissa dell'edizione. Le vecchie card conservano il payload,
+   ma la risposta segue sempre la lingua fissa dell'agente.
+7. Abilitare dispatcher e flag Invii solo quando si vuole avviare la consegna.
+   Le run gia' avviate non vengono richiamate disabilitando il flag.
+
+L'aggiornamento managed e l'avvio delle quattro app sono verificati in Adopta-V3.
+Questo non dimostra l'assenza dei warning su una nuova installazione pulita:
+verificare sempre metadati, connessioni e attivazione figlio-parent.
+Le prove end-to-end in Teams restano da collaudare.
+
+## Guida storica della baseline 1.0.0.17
 
 Questa guida installa la soluzione **managed** *Adopta Agents and App* in un ambiente Power Platform, dalla preparazione fino al primo invio di prova. Si fa tutto dai portali web (Power Platform admin center, Power Apps, Power Automate, Copilot Studio, Teams admin center), senza strumenti da riga di comando.
 

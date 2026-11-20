@@ -58,7 +58,7 @@ function cardCase(name, text, expected) {
       check: (value) => {
         const versioned = text.startsWith("Adopta.Communication.v2|");
         assert.equal(value.Mode, versioned ? "id" : "title");
-        assert.equal(value.English, text.includes("|en|") || text.startsWith("Tell me more"));
+        assert.equal(Object.hasOwn(value, "English"), false);
         assert.equal(value.MatchLink, !versioned);
         assert.equal(value.ConfirmLatest, false);
         if (versioned) assert.equal(value.CommunicationId, text.split("|")[2]);
@@ -97,7 +97,7 @@ test("new scheduled cards carry stable references and preserve localized labels 
     }
     const card = context.outputs.Build_card;
     const buttons = card.body.find((item) => item.type === "ActionSet").actions;
-    const english = language?.trim().toLowerCase() === "en";
+    const english = false;
     assert.equal(card.body[0].text, record.vm_title);
     assert.equal(card.body[1].text, record.vm_body);
     assert.equal(card.body.at(-1).text, record.vm_cardmessage);
@@ -181,7 +181,6 @@ test("final explanation card type-checks against declared communication field ty
         Global: {
           kind: "Record",
           properties: {
-            CommunicationEnglish: resolver.inputType.properties.English,
             CommunicationSelectedTitle: columns.communicationtitle,
             CommunicationSelectedBody: columns.communicationbody,
             CommunicationSelectedLink: columns.communicationlink,
@@ -358,7 +357,7 @@ evaluate("insufficient evidence is explicit", action(explanation, "answerText").
   Topic: { HasAnswer: false, Answer: { Text: { Content: "Unsupported content" } } },
   Global: { CommunicationEnglish: true },
 }, (value) => {
-  assert.ok(value.includes("could not find sufficient"));
+  assert.ok(value.includes("Non ho trovato documentazione Microsoft sufficiente"));
   assert.ok(!value.includes("Unsupported content"));
 });
 

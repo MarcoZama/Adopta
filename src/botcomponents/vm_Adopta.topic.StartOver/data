@@ -13,16 +13,13 @@ beginDialog:
       - start over
       - let's start again
       - restart
-
   actions:
     - kind: Question
       id: question_zguoVV
       alwaysPrompt: false
       variable: init:Topic.Confirm
-      prompt: |-
-        {If(Text(Global.UserLanguage) = "en", "Do you want to start over?", "Riavviare la conversazione?")}
+      prompt: Riavviare la conversazione?
       entity: BooleanPrebuiltEntity
-
     - kind: ConditionGroup
       id: conditionGroup_lvx2zV
       conditions:
@@ -32,9 +29,7 @@ beginDialog:
             - kind: BeginDialog
               id: 0YKYsy
               dialog: vm_Adopta.topic.ResetConversation
-
       elseActions:
         - kind: SendActivity
           id: sendMessage_lk2CyQ
-          activity: |-
-            {If(Text(Global.UserLanguage) = "en", "OK. Let's carry on.", "Ok. Andiamo avanti.")}
+          activity: Ok. Andiamo avanti.

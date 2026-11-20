@@ -1,0 +1,77 @@
+{
+  "EnvironmentVariables": [
+    {
+      "SchemaName": "vm_AdoptaENCoachKnowledgeUrl",
+      "Value": "",
+      "Name": {
+        "Default": "Adopta - Coach SharePoint knowledge URL",
+        "ByLcid": {
+          "1033": "Adopta - Coach SharePoint knowledge URL"
+        }
+      },
+      "TypeId": 100000000,
+      "Description": {
+        "Default": "SharePoint folder or library that Adopta - Adoption Coach uses as knowledge. Do not set it by hand: the admin enters it in Adopta Admin (Settings, Coach knowledge URL) and the flow AdoptaENApplySettings copies it here. Republish the agents after a change.",
+        "ByLcid": {
+          "1033": "SharePoint folder or library that Adopta - Adoption Coach uses as knowledge. Do not set it by hand: the admin enters it in Adopta Admin (Settings, Coach knowledge URL) and the flow AdoptaENApplySettings copies it here. Republish the agents after a change."
+        }
+      },
+      "IsRequired": false
+    },
+    {
+      "SchemaName": "vm_AdoptaENDataverseUrl",
+      "Value": "",
+      "Name": {
+        "Default": "Adopta - Dataverse environment URL",
+        "ByLcid": {
+          "1033": "Adopta - Dataverse environment URL"
+        }
+      },
+      "TypeId": 100000000,
+      "Description": {
+        "Default": "Base URL of the Dataverse environment, without trailing slash. The flow AdoptaENApplySettings writes it when the settings are saved in Adopta Admin; it can also be set at import in deploymentSettings.json, so the agents work from their first publish. The Adopta agent uses it to read settings and communications.",
+        "ByLcid": {
+          "1033": "Base URL of the Dataverse environment, without trailing slash. The flow AdoptaENApplySettings writes it when the settings are saved in Adopta Admin; it can also be set at import in deploymentSettings.json, so the agents work from their first publish. The Adopta agent uses it to read settings and communications."
+        }
+      },
+      "IsRequired": false
+    }
+  ],
+  "ConnectionReferences": [
+    {
+      "LogicalName": "vm_AdoptaEN.shared_commondataserviceforapps.shared-commondataser-6e49f493-498a-4491-a695-495acadecad3",
+      "ConnectionId": "",
+      "ConnectorId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps"
+    },
+    {
+      "LogicalName": "vm_AdoptaEN.shared_office365users.shared-office365user-8dfd2f1e-f214-4d98-99eb-7efc58c1608f",
+      "ConnectionId": "",
+      "ConnectorId": "/providers/Microsoft.PowerApps/apis/shared_office365users"
+    },
+    {
+      "LogicalName": "vm_adoptaendataverse",
+      "ConnectionId": "",
+      "ConnectorId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps"
+    },
+    {
+      "LogicalName": "vm_adoptaenoffice365groups",
+      "ConnectionId": "",
+      "ConnectorId": "/providers/Microsoft.PowerApps/apis/shared_office365groups"
+    },
+    {
+      "LogicalName": "vm_adoptaenteams",
+      "ConnectionId": "",
+      "ConnectorId": "/providers/Microsoft.PowerApps/apis/shared_teams"
+    }
+  ],
+  "CopilotAgents": [
+    {
+      "AadGroupId": "00000000-0000-0000-0000-000000000000",
+      "Name": "vm_AdoptaEN"
+    },
+    {
+      "AadGroupId": "00000000-0000-0000-0000-000000000000",
+      "Name": "vm_AdoptaENAdoptionCoach"
+    }
+  ]
+}

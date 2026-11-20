@@ -19,9 +19,13 @@ foreach ($name in 'Microsoft.Agents.ObjectModel.dll', 'Microsoft.PowerFx.Core.dl
 $request = [Console]::In.ReadToEnd() | ConvertFrom-Json
 $validated = 0
 foreach ($path in $request.validatePaths) {
-    $null = [Microsoft.Agents.ObjectModel.Yaml.YamlSerializer]::Deserialize[Microsoft.Agents.ObjectModel.BotElement](
-        (Get-Content -Raw -LiteralPath $path)
-    )
+    try {
+        $null = [Microsoft.Agents.ObjectModel.Yaml.YamlSerializer]::Deserialize[Microsoft.Agents.ObjectModel.BotElement](
+            (Get-Content -Raw -LiteralPath $path)
+        )
+    } catch {
+        throw "Invalid authoring YAML in ${path}: $($_.Exception.Message)"
+    }
     $validated++
 }
 foreach ($path in $request.xmlPaths) {
@@ -95,7 +99,8 @@ public sealed class AdoptaLocalAuthoringFeatures : Microsoft.Agents.ObjectModel.
     $features = [AdoptaLocalAuthoringFeatures]::new()
     $checker = [Microsoft.Agents.ObjectModel.PowerFx.PowerFxExpressionChecker]::new($features)
     $components = [Collections.Generic.List[Microsoft.Agents.ObjectModel.BotComponentBase]]::new()
-    foreach ($folder in Get-ChildItem -LiteralPath $request.semanticRoot -Directory -Filter 'vm_Adopta.*') {
+    $botSchema = if ($request.semanticBotSchema) { [string]$request.semanticBotSchema } else { 'vm_Adopta' }
+    foreach ($folder in Get-ChildItem -LiteralPath $request.semanticRoot -Directory -Filter "$botSchema.*") {
         $override = $request.semanticOverrides.PSObject.Properties | Where-Object Name -eq $folder.Name
         $raw = if ($override) { [string]$override.Value } else { Get-Content -Raw -LiteralPath (Join-Path $folder.FullName 'data') }
         if ($raw -notmatch '^kind: (AdaptiveDialog|TaskDialog)') { continue }
@@ -104,7 +109,7 @@ public sealed class AdoptaLocalAuthoringFeatures : Microsoft.Agents.ObjectModel.
         $components.Add([Microsoft.Agents.ObjectModel.Yaml.YamlSerializer]::Deserialize[Microsoft.Agents.ObjectModel.BotComponentBase]($wrapped))
     }
     $entity = [Microsoft.Agents.ObjectModel.Yaml.YamlSerializer]::Deserialize[Microsoft.Agents.ObjectModel.BotEntity](
-        "kind: BotEntity`nschemaName: vm_Adopta"
+        "kind: BotEntity`nschemaName: $botSchema"
     )
     $definition = [Microsoft.Agents.ObjectModel.BotDefinition]::Empty.WithComponents($components).WithEntity($entity)
     $validatedDefinition = [Microsoft.Agents.ObjectModel.ValidationExtensions]::Validate[Microsoft.Agents.ObjectModel.BotDefinition](

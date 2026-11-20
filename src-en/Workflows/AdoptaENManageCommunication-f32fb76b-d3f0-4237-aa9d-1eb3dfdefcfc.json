@@ -1,0 +1,839 @@
+{
+  "properties": {
+    "connectionReferences": {
+      "shared_commondataserviceforapps": {
+        "impersonation": {
+          "source": "invoker"
+        },
+        "runtimeSource": "embedded",
+        "connection": {
+          "connectionReferenceLogicalName": "vm_adoptaendataverse"
+        },
+        "api": {
+          "name": "shared_commondataserviceforapps"
+        }
+      }
+    },
+    "definition": {
+      "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+      "contentVersion": "1.0.0.0",
+      "parameters": {
+        "$authentication": {
+          "defaultValue": {},
+          "type": "SecureObject"
+        },
+        "$connections": {
+          "defaultValue": {},
+          "type": "Object"
+        }
+      },
+      "triggers": {
+        "manual": {
+          "type": "Request",
+          "kind": "PowerAppV2",
+          "inputs": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "text": {
+                  "type": "string",
+                  "title": "CommunicationId",
+                  "description": "Identifier of the saved communication.",
+                  "x-ms-content-hint": "TEXT",
+                  "x-ms-dynamically-added": true
+                },
+                "text_1": {
+                  "type": "string",
+                  "title": "Operation",
+                  "x-ms-content-hint": "TEXT",
+                  "x-ms-dynamically-added": true
+                }
+              },
+              "required": [
+                "text",
+                "text_1"
+              ]
+            }
+          }
+        }
+      },
+      "actions": {
+        "Initialize": {
+          "type": "InitializeVariable",
+          "runAfter": {},
+          "inputs": {
+            "variables": [
+              {
+                "name": "success",
+                "type": "boolean",
+                "value": false
+              },
+              {
+                "name": "message",
+                "type": "string",
+                "value": "Operazione non valida."
+              },
+              {
+                "name": "sendingEnabled",
+                "type": "boolean",
+                "value": false
+              },
+              {
+                "name": "settingKnown",
+                "type": "boolean",
+                "value": false
+              },
+              {
+                "name": "managementClaimOwned",
+                "type": "boolean",
+                "value": false
+              }
+            ]
+          }
+        },
+        "Try_manage": {
+          "type": "Scope",
+          "actions": {
+            "Known_operation": {
+              "type": "If",
+              "expression": "@contains(createArray('status','enable','disable','delete','cancel'),triggerBody()?['text_1'])",
+              "actions": {
+                "Settings_or_communication": {
+                  "type": "If",
+                  "expression": "@contains(createArray('status','enable','disable'),triggerBody()?['text_1'])",
+                  "actions": {
+                    "Read_sending_configuration": {
+                      "type": "Scope",
+                      "actions": {
+                        "Get_sending_setting": {
+                          "runAfter": {},
+                          "type": "OpenApiConnection",
+                          "inputs": {
+                            "host": {
+                              "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                              "operationId": "ListRecords",
+                              "connectionName": "shared_commondataserviceforapps"
+                            },
+                            "parameters": {
+                              "entityName": "vm_adoptaensettings",
+                              "$select": "vm_adoptaensettingid,vm_sendingenabled",
+                              "$filter": "statecode eq 0",
+                              "$orderby": "createdon asc",
+                              "$top": 1
+                            }
+                          }
+                        },
+                        "Sending_setting_exists": {
+                          "runAfter": {
+                            "Get_sending_setting": [
+                              "Succeeded"
+                            ]
+                          },
+                          "type": "If",
+                          "expression": "@equals(length(body('Get_sending_setting')?['value']),1)",
+                          "actions": {
+                            "Apply_sending_value": {
+                              "runAfter": {},
+                              "type": "SetVariable",
+                              "inputs": {
+                                "name": "sendingEnabled",
+                                "value": "@equals(first(body('Get_sending_setting')?['value'])?['vm_sendingenabled'],true)"
+                              }
+                            },
+                            "Setting_known": {
+                              "runAfter": {
+                                "Apply_sending_value": [
+                                  "Succeeded"
+                                ]
+                              },
+                              "type": "SetVariable",
+                              "inputs": {
+                                "name": "settingKnown",
+                                "value": true
+                              }
+                            }
+                          },
+                          "else": {
+                            "actions": {
+                              "Missing_sending_setting": {
+                                "runAfter": {},
+                                "type": "SetVariable",
+                                "inputs": {
+                                  "name": "message",
+                                  "value": "Configurazione assente: un amministratore deve creare il record in Adopta Admin > Impostazioni."
+                                }
+                              }
+                            }
+                          }
+                        }
+                      },
+                      "runAfter": {}
+                    },
+                    "Setting_valid": {
+                      "type": "If",
+                      "expression": "@equals(variables('settingKnown'),true)",
+                      "actions": {
+                        "Read_or_change": {
+                          "type": "If",
+                          "expression": "@equals(triggerBody()?['text_1'],'status')",
+                          "actions": {
+                            "Read_success": {
+                              "type": "SetVariable",
+                              "inputs": {
+                                "name": "success",
+                                "value": true
+                              },
+                              "runAfter": {}
+                            },
+                            "Read_message": {
+                              "type": "SetVariable",
+                              "inputs": {
+                                "name": "message",
+                                "value": "Stato invii aggiornato."
+                              },
+                              "runAfter": {
+                                "Read_success": [
+                                  "Succeeded"
+                                ]
+                              }
+                            }
+                          },
+                          "else": {
+                            "actions": {
+                              "Update_sending_value": {
+                                "runAfter": {},
+                                "type": "OpenApiConnection",
+                                "inputs": {
+                                  "host": {
+                                    "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                                    "operationId": "UpdateOnlyRecord",
+                                    "connectionName": "shared_commondataserviceforapps"
+                                  },
+                                  "parameters": {
+                                    "entityName": "vm_adoptaensettings",
+                                    "recordId": "@first(body('Get_sending_setting')?['value'])?['vm_adoptaensettingid']",
+                                    "item/vm_sendingenabled": "@equals(triggerBody()?['text_1'],'enable')"
+                                  }
+                                }
+                              },
+                              "Updated_setting": {
+                                "type": "SetVariable",
+                                "inputs": {
+                                  "name": "sendingEnabled",
+                                  "value": "@equals(triggerBody()?['text_1'],'enable')"
+                                },
+                                "runAfter": {
+                                  "Update_sending_value": [
+                                    "Succeeded"
+                                  ]
+                                }
+                              },
+                              "Update_success": {
+                                "type": "SetVariable",
+                                "inputs": {
+                                  "name": "success",
+                                  "value": true
+                                },
+                                "runAfter": {
+                                  "Updated_setting": [
+                                    "Succeeded"
+                                  ]
+                                }
+                              },
+                              "Update_message": {
+                                "type": "SetVariable",
+                                "inputs": {
+                                  "name": "message",
+                                  "value": "@if(variables('sendingEnabled'),'Invii abilitati. Il dispatcher deve essere operativo; le run gia avviate non cambiano.','Nuovi invii bloccati. Le run che hanno gia letto Si non vengono interrotte.')"
+                                },
+                                "runAfter": {
+                                  "Update_success": [
+                                    "Succeeded"
+                                  ]
+                                }
+                              }
+                            }
+                          },
+                          "runAfter": {}
+                        }
+                      },
+                      "else": {
+                        "actions": {}
+                      },
+                      "runAfter": {
+                        "Read_sending_configuration": [
+                          "Succeeded"
+                        ]
+                      }
+                    }
+                  },
+                  "else": {
+                    "actions": {
+                      "Get_target": {
+                        "type": "OpenApiConnection",
+                        "inputs": {
+                          "host": {
+                            "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                            "operationId": "GetItem",
+                            "connectionName": "shared_commondataserviceforapps"
+                          },
+                          "parameters": {
+                            "entityName": "vm_adoptaencommunications",
+                            "recordId": "@triggerBody()?['text']"
+                          }
+                        },
+                        "runAfter": {}
+                      },
+                      "Target_eligible": {
+                        "type": "If",
+                        "expression": "@or(or(and(equals(triggerBody()?['text_1'],'delete'),equals(body('Get_target')?['vm_communicationstatus'],100000000)),and(equals(triggerBody()?['text_1'],'cancel'),equals(body('Get_target')?['vm_communicationstatus'],100000001))),and(equals(triggerBody()?['text_1'],'delete'),equals(body('Get_target')?['vm_communicationstatus'],100000006)))",
+                        "actions": {
+                          "Delete_cancelled_or_manage": {
+                            "type": "If",
+                            "expression": "@and(equals(triggerBody()?['text_1'],'delete'),equals(body('Get_target')?['vm_communicationstatus'],100000006))",
+                            "actions": {
+                              "Find_cancellation_claim": {
+                                "type": "OpenApiConnection",
+                                "inputs": {
+                                  "host": {
+                                    "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                                    "operationId": "ListRecords",
+                                    "connectionName": "shared_commondataserviceforapps"
+                                  },
+                                  "parameters": {
+                                    "entityName": "vm_adoptaendispatchclaims",
+                                    "$filter": "vm_adoptaendispatchclaimid eq @{triggerBody()?['text']} and vm_name eq 'Management via app'",
+                                    "$select": "vm_adoptaendispatchclaimid",
+                                    "$top": 1
+                                  }
+                                },
+                                "runAfter": {}
+                              },
+                              "Cancellation_claim_valid": {
+                                "type": "If",
+                                "expression": "@equals(length(body('Find_cancellation_claim')?['value']),1)",
+                                "actions": {
+                                  "Get_cancelled_target": {
+                                    "type": "OpenApiConnection",
+                                    "inputs": {
+                                      "host": {
+                                        "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                                        "operationId": "GetItem",
+                                        "connectionName": "shared_commondataserviceforapps"
+                                      },
+                                      "parameters": {
+                                        "entityName": "vm_adoptaencommunications",
+                                        "recordId": "@triggerBody()?['text']"
+                                      }
+                                    },
+                                    "runAfter": {}
+                                  },
+                                  "Cancelled_deliveries": {
+                                    "type": "OpenApiConnection",
+                                    "inputs": {
+                                      "host": {
+                                        "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                                        "operationId": "ListRecords",
+                                        "connectionName": "shared_commondataserviceforapps"
+                                      },
+                                      "parameters": {
+                                        "entityName": "vm_adoptaendeliveries",
+                                        "$filter": "_vm_communication_value eq @{triggerBody()?['text']}",
+                                        "$select": "vm_adoptaendeliveryid",
+                                        "$top": 1
+                                      }
+                                    },
+                                    "runAfter": {
+                                      "Get_cancelled_target": [
+                                        "Succeeded"
+                                      ]
+                                    }
+                                  },
+                                  "Cancelled_delete_safe": {
+                                    "type": "If",
+                                    "expression": "@and(equals(body('Get_cancelled_target')?['vm_communicationstatus'],100000006),empty(body('Get_cancelled_target')?['vm_startedat']),equals(coalesce(body('Get_cancelled_target')?['vm_recipientcount'],0),0),equals(coalesce(body('Get_cancelled_target')?['vm_sentcount'],0),0),equals(coalesce(body('Get_cancelled_target')?['vm_failedcount'],0),0),equals(body('Get_cancelled_target')?['vm_lasterror'],'Pianificazione annullata dall''app.'),empty(body('Cancelled_deliveries')?['value']))",
+                                    "actions": {
+                                      "Adopt_cancellation_claim": {
+                                        "type": "SetVariable",
+                                        "inputs": {
+                                          "name": "managementClaimOwned",
+                                          "value": true
+                                        },
+                                        "runAfter": {}
+                                      },
+                                      "Delete_cancelled_communication": {
+                                        "type": "OpenApiConnection",
+                                        "inputs": {
+                                          "host": {
+                                            "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                                            "operationId": "DeleteRecord",
+                                            "connectionName": "shared_commondataserviceforapps"
+                                          },
+                                          "parameters": {
+                                            "entityName": "vm_adoptaencommunications",
+                                            "recordId": "@triggerBody()?['text']"
+                                          },
+                                          "retryPolicy": {
+                                            "type": "none"
+                                          }
+                                        },
+                                        "runAfter": {
+                                          "Adopt_cancellation_claim": [
+                                            "Succeeded"
+                                          ]
+                                        }
+                                      },
+                                      "Release_cancellation_claim": {
+                                        "type": "OpenApiConnection",
+                                        "inputs": {
+                                          "host": {
+                                            "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                                            "operationId": "DeleteRecord",
+                                            "connectionName": "shared_commondataserviceforapps"
+                                          },
+                                          "parameters": {
+                                            "entityName": "vm_adoptaendispatchclaims",
+                                            "recordId": "@triggerBody()?['text']"
+                                          },
+                                          "retryPolicy": {
+                                            "type": "none"
+                                          }
+                                        },
+                                        "runAfter": {
+                                          "Delete_cancelled_communication": [
+                                            "Succeeded"
+                                          ]
+                                        }
+                                      },
+                                      "Deleted_cancelled_success": {
+                                        "type": "SetVariable",
+                                        "inputs": {
+                                          "name": "success",
+                                          "value": true
+                                        },
+                                        "runAfter": {
+                                          "Release_cancellation_claim": [
+                                            "Succeeded"
+                                          ]
+                                        }
+                                      },
+                                      "Deleted_cancelled_message": {
+                                        "type": "SetVariable",
+                                        "inputs": {
+                                          "name": "message",
+                                          "value": "Comunicazione annullata eliminata definitivamente con i collegamenti ai gruppi."
+                                        },
+                                        "runAfter": {
+                                          "Deleted_cancelled_success": [
+                                            "Succeeded"
+                                          ]
+                                        }
+                                      }
+                                    },
+                                    "else": {
+                                      "actions": {
+                                        "Unsafe_cancelled_delete": {
+                                          "type": "SetVariable",
+                                          "inputs": {
+                                            "name": "message",
+                                            "value": "Eliminazione rifiutata: stato cambiato, elaborazione gia iniziata, contatori/log presenti o annullamento non riconosciuto. Comunicazione e claim conservati."
+                                          },
+                                          "runAfter": {}
+                                        }
+                                      }
+                                    },
+                                    "runAfter": {
+                                      "Cancelled_deliveries": [
+                                        "Succeeded"
+                                      ]
+                                    }
+                                  }
+                                },
+                                "else": {
+                                  "actions": {
+                                    "Unrecognized_cancellation_claim": {
+                                      "type": "SetVariable",
+                                      "inputs": {
+                                        "name": "message",
+                                        "value": "Eliminazione rifiutata: prenotazione di annullamento assente o non riconosciuta. Non rimuovere manualmente i claim; richiedere una verifica amministrativa."
+                                      },
+                                      "runAfter": {}
+                                    }
+                                  }
+                                },
+                                "runAfter": {
+                                  "Find_cancellation_claim": [
+                                    "Succeeded"
+                                  ]
+                                }
+                              }
+                            },
+                            "else": {
+                              "actions": {
+                                "Reserve_management": {
+                                  "type": "OpenApiConnection",
+                                  "inputs": {
+                                    "host": {
+                                      "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                                      "operationId": "CreateRecord",
+                                      "connectionName": "shared_commondataserviceforapps"
+                                    },
+                                    "parameters": {
+                                      "entityName": "vm_adoptaendispatchclaims",
+                                      "item/vm_adoptaendispatchclaimid": "@triggerBody()?['text']",
+                                      "item/vm_name": "Management via app"
+                                    },
+                                    "retryPolicy": {
+                                      "type": "none"
+                                    }
+                                  },
+                                  "runAfter": {}
+                                },
+                                "Management_claim_owned": {
+                                  "type": "SetVariable",
+                                  "inputs": {
+                                    "name": "managementClaimOwned",
+                                    "value": true
+                                  },
+                                  "runAfter": {
+                                    "Reserve_management": [
+                                      "Succeeded"
+                                    ]
+                                  }
+                                },
+                                "Get_locked_target": {
+                                  "type": "OpenApiConnection",
+                                  "inputs": {
+                                    "host": {
+                                      "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                                      "operationId": "GetItem",
+                                      "connectionName": "shared_commondataserviceforapps"
+                                    },
+                                    "parameters": {
+                                      "entityName": "vm_adoptaencommunications",
+                                      "recordId": "@triggerBody()?['text']"
+                                    }
+                                  },
+                                  "runAfter": {
+                                    "Management_claim_owned": [
+                                      "Succeeded"
+                                    ]
+                                  }
+                                },
+                                "Existing_deliveries": {
+                                  "type": "OpenApiConnection",
+                                  "inputs": {
+                                    "host": {
+                                      "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                                      "operationId": "ListRecords",
+                                      "connectionName": "shared_commondataserviceforapps"
+                                    },
+                                    "parameters": {
+                                      "entityName": "vm_adoptaendeliveries",
+                                      "$filter": "_vm_communication_value eq @{triggerBody()?['text']}",
+                                      "$top": 1,
+                                      "$select": "vm_adoptaendeliveryid"
+                                    }
+                                  },
+                                  "runAfter": {
+                                    "Get_locked_target": [
+                                      "Succeeded"
+                                    ]
+                                  }
+                                },
+                                "Locked_target_eligible": {
+                                  "type": "If",
+                                  "expression": "@and(or(and(equals(triggerBody()?['text_1'],'delete'),equals(body('Get_locked_target')?['vm_communicationstatus'],100000000)),and(equals(triggerBody()?['text_1'],'cancel'),equals(body('Get_locked_target')?['vm_communicationstatus'],100000001))),empty(body('Existing_deliveries')?['value']))",
+                                  "actions": {
+                                    "Delete_or_cancel": {
+                                      "type": "If",
+                                      "expression": "@equals(triggerBody()?['text_1'],'delete')",
+                                      "actions": {
+                                        "Delete_draft": {
+                                          "type": "OpenApiConnection",
+                                          "inputs": {
+                                            "host": {
+                                              "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                                              "operationId": "DeleteRecord",
+                                              "connectionName": "shared_commondataserviceforapps"
+                                            },
+                                            "parameters": {
+                                              "entityName": "vm_adoptaencommunications",
+                                              "recordId": "@triggerBody()?['text']"
+                                            },
+                                            "retryPolicy": {
+                                              "type": "none"
+                                            }
+                                          },
+                                          "runAfter": {}
+                                        },
+                                        "Release_deleted_claim": {
+                                          "type": "OpenApiConnection",
+                                          "inputs": {
+                                            "host": {
+                                              "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                                              "operationId": "DeleteRecord",
+                                              "connectionName": "shared_commondataserviceforapps"
+                                            },
+                                            "parameters": {
+                                              "entityName": "vm_adoptaendispatchclaims",
+                                              "recordId": "@triggerBody()?['text']"
+                                            },
+                                            "retryPolicy": {
+                                              "type": "none"
+                                            }
+                                          },
+                                          "runAfter": {
+                                            "Delete_draft": [
+                                              "Succeeded"
+                                            ]
+                                          }
+                                        },
+                                        "Deleted_success": {
+                                          "type": "SetVariable",
+                                          "inputs": {
+                                            "name": "success",
+                                            "value": true
+                                          },
+                                          "runAfter": {
+                                            "Release_deleted_claim": [
+                                              "Succeeded"
+                                            ]
+                                          }
+                                        },
+                                        "Deleted_message": {
+                                          "type": "SetVariable",
+                                          "inputs": {
+                                            "name": "message",
+                                            "value": "Bozza eliminata con i relativi collegamenti ai gruppi."
+                                          },
+                                          "runAfter": {
+                                            "Deleted_success": [
+                                              "Succeeded"
+                                            ]
+                                          }
+                                        }
+                                      },
+                                      "else": {
+                                        "actions": {
+                                          "Cancel_scheduled": {
+                                            "type": "OpenApiConnection",
+                                            "inputs": {
+                                              "host": {
+                                                "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                                                "operationId": "UpdateOnlyRecord",
+                                                "connectionName": "shared_commondataserviceforapps"
+                                              },
+                                              "parameters": {
+                                                "entityName": "vm_adoptaencommunications",
+                                                "recordId": "@triggerBody()?['text']",
+                                                "item/vm_communicationstatus": 100000006,
+                                                "item/vm_completedat": "@utcNow()",
+                                                "item/vm_lasterror": "Pianificazione annullata dall'app."
+                                              }
+                                            },
+                                            "runAfter": {}
+                                          },
+                                          "Cancelled_success": {
+                                            "type": "SetVariable",
+                                            "inputs": {
+                                              "name": "success",
+                                              "value": true
+                                            },
+                                            "runAfter": {
+                                              "Cancel_scheduled": [
+                                                "Succeeded"
+                                              ]
+                                            }
+                                          },
+                                          "Cancelled_message": {
+                                            "type": "SetVariable",
+                                            "inputs": {
+                                              "name": "message",
+                                              "value": "Pianificazione annullata. Comunicazione e storico conservati."
+                                            },
+                                            "runAfter": {
+                                              "Cancelled_success": [
+                                                "Succeeded"
+                                              ]
+                                            }
+                                          }
+                                        }
+                                      },
+                                      "runAfter": {}
+                                    }
+                                  },
+                                  "else": {
+                                    "actions": {
+                                      "Release_unchanged_claim": {
+                                        "type": "OpenApiConnection",
+                                        "inputs": {
+                                          "host": {
+                                            "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                                            "operationId": "DeleteRecord",
+                                            "connectionName": "shared_commondataserviceforapps"
+                                          },
+                                          "parameters": {
+                                            "entityName": "vm_adoptaendispatchclaims",
+                                            "recordId": "@triggerBody()?['text']"
+                                          },
+                                          "retryPolicy": {
+                                            "type": "none"
+                                          }
+                                        },
+                                        "runAfter": {}
+                                      },
+                                      "State_changed": {
+                                        "type": "SetVariable",
+                                        "inputs": {
+                                          "name": "message",
+                                          "value": "Stato modificato o storico presente: operazione non consentita. Aggiorna la lista."
+                                        },
+                                        "runAfter": {
+                                          "Release_unchanged_claim": [
+                                            "Succeeded"
+                                          ]
+                                        }
+                                      }
+                                    }
+                                  },
+                                  "runAfter": {
+                                    "Existing_deliveries": [
+                                      "Succeeded"
+                                    ]
+                                  }
+                                }
+                              }
+                            },
+                            "runAfter": {}
+                          }
+                        },
+                        "else": {
+                          "actions": {
+                            "Invalid_target": {
+                              "type": "SetVariable",
+                              "inputs": {
+                                "name": "message",
+                                "value": "Puoi eliminare bozze o comunicazioni annullate mai elaborate e senza log, oppure annullare Scheduled. Storico e invii in corso sono protetti."
+                              },
+                              "runAfter": {}
+                            }
+                          }
+                        },
+                        "runAfter": {
+                          "Get_target": [
+                            "Succeeded"
+                          ]
+                        }
+                      }
+                    }
+                  },
+                  "runAfter": {}
+                }
+              },
+              "else": {
+                "actions": {}
+              },
+              "runAfter": {}
+            }
+          },
+          "runAfter": {
+            "Initialize": [
+              "Succeeded"
+            ]
+          }
+        },
+        "Management_error": {
+          "type": "Scope",
+          "actions": {
+            "Unknown_setting": {
+              "type": "SetVariable",
+              "inputs": {
+                "name": "settingKnown",
+                "value": false
+              },
+              "runAfter": {}
+            },
+            "Unsuccessful_operation": {
+              "type": "SetVariable",
+              "inputs": {
+                "name": "success",
+                "value": false
+              },
+              "runAfter": {
+                "Unknown_setting": [
+                  "Succeeded"
+                ]
+              }
+            },
+            "Return_management_error": {
+              "type": "SetVariable",
+              "inputs": {
+                "name": "message",
+                "value": "@if(contains(createArray('enable','disable'),triggerBody()?['text_1']),'Stato invii non modificato: serve il ruolo Adopta EN Administrator, che può modificare Adopta Setting. Controllare anche connessione e cronologia del flow.',if(variables('managementClaimOwned'),'Operazione non confermata. Prenotazione acquisita: non riprovare automaticamente; controllare stato, cronologia e claim con un amministratore.','Operazione non confermata: controllare permessi Dataverse, connessione e cronologia. Una prenotazione gia presente impedisce modifiche a invii avviati o gestiti da un altro processo.'))"
+              },
+              "runAfter": {
+                "Unsuccessful_operation": [
+                  "Succeeded"
+                ]
+              }
+            }
+          },
+          "runAfter": {
+            "Try_manage": [
+              "Failed",
+              "TimedOut"
+            ]
+          }
+        },
+        "Respond": {
+          "type": "Response",
+          "kind": "PowerApp",
+          "inputs": {
+            "statusCode": 200,
+            "body": {
+              "success": "@variables('success')",
+              "message": "@variables('message')",
+              "sendingenabled": "@variables('sendingEnabled')",
+              "settingknown": "@variables('settingKnown')"
+            },
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "type": "boolean",
+                  "title": "success",
+                  "x-ms-content-hint": "BOOLEAN"
+                },
+                "message": {
+                  "type": "string",
+                  "title": "message",
+                  "x-ms-content-hint": "TEXT"
+                },
+                "sendingenabled": {
+                  "type": "boolean",
+                  "title": "sendingenabled",
+                  "x-ms-content-hint": "BOOLEAN"
+                },
+                "settingknown": {
+                  "type": "boolean",
+                  "title": "settingknown",
+                  "x-ms-content-hint": "BOOLEAN"
+                }
+              }
+            }
+          },
+          "runAfter": {
+            "Management_error": [
+              "Succeeded",
+              "Skipped"
+            ]
+          }
+        }
+      },
+      "outputs": {}
+    },
+    "templateName": null
+  },
+  "schemaVersion": "1.0.0.0"
+}

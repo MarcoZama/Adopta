@@ -1,6 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import { setDateLocale } from "../lib/format";
 import { MESSAGES, type Messages } from "./messages";
+import { edition } from "../../../shared/edition";
 
 export type Language = keyof typeof MESSAGES;
 
@@ -30,7 +31,7 @@ function browserLanguage(): Language | undefined {
 }
 
 // Code outside React (data layer) reads the texts of the language the provider last rendered.
-let current: Language = storedLanguage() ?? browserLanguage() ?? "it";
+let current: Language = storedLanguage() ?? browserLanguage() ?? edition().language;
 
 export function text(): Messages {
   return MESSAGES[current];
@@ -50,11 +51,11 @@ const I18nContext = createContext<I18n | undefined>(undefined);
 
 /**
  * Language of the app: the one the user picked (kept in this browser), otherwise the browser's if it
- * is Italian or English, otherwise `fallback` (the default language in Adopta Setting), otherwise Italian.
+ * is Italian or English, otherwise `fallback` (Adopta Setting), otherwise the fixed edition.
  */
 export function I18nProvider({ fallback, children }: { fallback?: Language; children: ReactNode }) {
   const [chosen, setChosen] = useState<Language | undefined>(storedLanguage);
-  const language = chosen ?? browserLanguage() ?? fallback ?? "it";
+  const language = chosen ?? browserLanguage() ?? fallback ?? edition().language;
   current = language;
   setDateLocale(language);
 

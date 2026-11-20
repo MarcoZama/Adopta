@@ -11,9 +11,7 @@ beginDialog:
           actions:
             - kind: SendActivity
               id: sendMessage_QZreqo
-              activity: |-
-                {If(Text(Global.UserLanguage) = "en", "Sorry, I'm not sure how to help with that. Can you try rephrasing your request?", "Mi dispiace, non so come posso aiutarti. Puoi provare a riformulare la richiesta?")}
-
+              activity: Mi dispiace, non so come posso aiutarti. Puoi provare a riformulare la richiesta?
       elseActions:
         - kind: BeginDialog
           id: 5aXj5M

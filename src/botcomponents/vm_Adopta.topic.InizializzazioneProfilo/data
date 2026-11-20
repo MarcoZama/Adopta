@@ -9,7 +9,6 @@ beginDialog:
       id: setVariable_Pf7kQ2
       variable: Global.ProfileInitialized
       value: =true
-
     - kind: BeginDialog
       id: oOj33p
       input: {}
@@ -37,7 +36,6 @@ beginDialog:
           officeLocation: Topic.officeLocation
           pastProjects: Topic.pastProjects
           postalCode: Topic.postalCode
-          preferredLanguage: Topic.preferredLanguage
           preferredName: Topic.preferredName
           responsibilities: Topic.responsibilities
           schools: Topic.schools
@@ -47,7 +45,6 @@ beginDialog:
           surname: Topic.surname
           userPrincipalName: Topic.userPrincipalName
           userType: Topic.userType
-
     - kind: ConditionGroup
       id: hxvqhM
       conditions:
@@ -59,22 +56,14 @@ beginDialog:
               input:
                 binding:
                   department: =Trim(Topic.department)
-
               output:
                 binding:
                   predictionOutput: Topic.ClassifyDepOutput
-
               aIModelId: db8bd9db-dcbf-4f99-93f1-d3424e0f46da
-
             - kind: SetVariable
               id: EW7BxL
               variable: Global.UserRole
               value: =Topic.ClassifyDepOutput.text
-
-            - kind: SendActivity
-              id: tTj8Gc
-              activity: "[debug: Role: {Global.UserRole}]"
-
     - kind: BeginDialog
       id: PNaioN
       input: {}
@@ -82,16 +71,9 @@ beginDialog:
       output:
         binding:
           value: Topic.BrandingRows
-
     - kind: SetVariable
       id: fnSZWG
       variable: Global.AgentName
       value: =Coalesce(Trim(First(Topic.BrandingRows).vm_agentname), System.Bot.Name)
-
-    - kind: SetVariable
-      id: setVariable_Lg12a1
-      variable: Global.UserLanguage
-      value: =If(StartsWith(Lower(Trim(Topic.preferredLanguage)), "en"), "en", StartsWith(Lower(Trim(Topic.preferredLanguage)), "it"), "it", Lower(Trim(First(Topic.BrandingRows).vm_defaultlanguage)) = "en", "en", "it")
-
 inputType: {}
 outputType: {}

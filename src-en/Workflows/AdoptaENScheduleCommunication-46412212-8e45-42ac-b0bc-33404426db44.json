@@ -1,0 +1,574 @@
+{
+  "properties": {
+    "connectionReferences": {
+      "shared_commondataserviceforapps": {
+        "api": {
+          "name": "shared_commondataserviceforapps"
+        },
+        "connection": {
+          "connectionReferenceLogicalName": "vm_adoptaendataverse"
+        },
+        "runtimeSource": "embedded",
+        "impersonation": {
+          "source": "invoker"
+        }
+      }
+    },
+    "definition": {
+      "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+      "contentVersion": "1.0.0.0",
+      "parameters": {
+        "$authentication": {
+          "defaultValue": {},
+          "type": "SecureObject"
+        },
+        "$connections": {
+          "defaultValue": {},
+          "type": "Object"
+        }
+      },
+      "triggers": {
+        "manual": {
+          "type": "Request",
+          "kind": "PowerAppV2",
+          "inputs": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "text": {
+                  "type": "string",
+                  "title": "CommunicationId",
+                  "description": "Identifier of the saved communication.",
+                  "x-ms-content-hint": "TEXT",
+                  "x-ms-dynamically-added": true
+                }
+              },
+              "required": [
+                "text"
+              ]
+            }
+          }
+        }
+      },
+      "actions": {
+        "Initialize": {
+          "type": "InitializeVariable",
+          "inputs": {
+            "variables": [
+              {
+                "name": "success",
+                "type": "boolean",
+                "value": false
+              }
+            ]
+          },
+          "runAfter": {}
+        },
+        "Try_schedule": {
+          "type": "Scope",
+          "actions": {
+            "Get_creator": {
+              "type": "OpenApiConnection",
+              "inputs": {
+                "parameters": {
+                  "entityName": "systemusers",
+                  "recordId": "@body('Get_communication_for_caller')?['_createdby_value']"
+                },
+                "host": {
+                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                  "operationId": "GetItem",
+                  "connectionName": "shared_commondataserviceforapps"
+                }
+              },
+              "runAfter": {
+                "Get_communication_for_caller": [
+                  "Succeeded"
+                ]
+              }
+            },
+            "Check_caller": {
+              "type": "If",
+              "expression": "@and(not(empty(triggerOutputs()?['headers']?['x-ms-user-id'])),equals(toLower(coalesce(triggerOutputs()?['headers']?['x-ms-user-id'],'')),toLower(coalesce(body('Get_creator')?['azureactivedirectoryobjectid'],''))))",
+              "actions": {
+                "Claim_schedule": {
+                  "type": "OpenApiConnection",
+                  "inputs": {
+                    "parameters": {
+                      "entityName": "vm_adoptaendispatchclaims",
+                      "item/vm_adoptaendispatchclaimid": "@triggerBody()?['text']",
+                      "item/vm_name": "Scheduling via app"
+                    },
+                    "host": {
+                      "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                      "operationId": "CreateRecord",
+                      "connectionName": "shared_commondataserviceforapps"
+                    },
+                    "retryPolicy": {
+                      "type": "none"
+                    }
+                  }
+                },
+                "Schedule_claim_owned": {
+                  "type": "SetVariable",
+                  "inputs": {
+                    "name": "scheduleClaimOwned",
+                    "value": true
+                  },
+                  "runAfter": {
+                    "Claim_schedule": [
+                      "Succeeded"
+                    ]
+                  }
+                },
+                "Get_communication": {
+                  "type": "OpenApiConnection",
+                  "inputs": {
+                    "parameters": {
+                      "entityName": "vm_adoptaencommunications",
+                      "recordId": "@triggerBody()?['text']"
+                    },
+                    "host": {
+                      "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                      "operationId": "GetItem",
+                      "connectionName": "shared_commondataserviceforapps"
+                    }
+                  },
+                  "runAfter": {
+                    "Schedule_claim_owned": [
+                      "Succeeded"
+                    ]
+                  }
+                },
+                "List_audiences": {
+                  "type": "OpenApiConnection",
+                  "inputs": {
+                    "parameters": {
+                      "entityName": "vm_adoptaencommunicationgroups",
+                      "$filter": "_vm_communication_value eq @{triggerBody()?['text']}"
+                    },
+                    "host": {
+                      "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                      "operationId": "ListRecords",
+                      "connectionName": "shared_commondataserviceforapps"
+                    }
+                  },
+                  "runAfter": {
+                    "Get_communication": [
+                      "Succeeded"
+                    ]
+                  },
+                  "runtimeConfiguration": {
+                    "paginationPolicy": {
+                      "minimumItemCount": 5000
+                    }
+                  }
+                },
+                "Validate_draft": {
+                  "type": "If",
+                  "expression": "@and(equals(body('Get_communication')?['vm_communicationstatus'],100000000),not(empty(trim(coalesce(body('Get_communication')?['vm_title'],'')))),not(empty(trim(coalesce(body('Get_communication')?['vm_body'],'')))),or(empty(body('Get_communication')?['vm_link']),startsWith(toLower(coalesce(body('Get_communication')?['vm_link'],'')),'https://')),greater(ticks(coalesce(body('Get_communication')?['vm_scheduledat'],'1900-01-01T00:00:00Z')),ticks(utcNow())),greater(length(body('List_audiences')?['value']),0),less(length(body('List_audiences')?['value']),5000))",
+                  "actions": {
+                    "Check_each_audience": {
+                      "type": "Foreach",
+                      "foreach": "@body('List_audiences')?['value']",
+                      "actions": {
+                        "Get_audience": {
+                          "type": "OpenApiConnection",
+                          "inputs": {
+                            "parameters": {
+                              "entityName": "vm_adoptaenaudiencegroups",
+                              "recordId": "@items('Check_each_audience')?['_vm_audiencegroup_value']"
+                            },
+                            "host": {
+                              "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                              "operationId": "GetItem",
+                              "connectionName": "shared_commondataserviceforapps"
+                            }
+                          }
+                        },
+                        "Audience_disabled": {
+                          "type": "If",
+                          "expression": "@or(not(equals(body('Get_audience')?['vm_enabled'],true)),empty(body('Get_audience')?['vm_entraobject']))",
+                          "actions": {
+                            "Reject_audience": {
+                              "type": "SetVariable",
+                              "inputs": {
+                                "name": "audiencesValid",
+                                "value": false
+                              }
+                            }
+                          },
+                          "else": {
+                            "actions": {}
+                          },
+                          "runAfter": {
+                            "Get_audience": [
+                              "Succeeded"
+                            ]
+                          }
+                        }
+                      },
+                      "runtimeConfiguration": {
+                        "concurrency": {
+                          "repetitions": 1
+                        }
+                      }
+                    },
+                    "All_audiences_valid": {
+                      "type": "If",
+                      "expression": "@equals(variables('audiencesValid'),true)",
+                      "actions": {
+                        "Card_texts": {
+                          "type": "Compose",
+                          "description": "Fixed labels for this edition, independent of the app language.",
+                          "inputs": {
+                            "more": "Tell me more",
+                            "moreText": "Tell me more about the communication «",
+                            "ignore": "Ignore",
+                            "ignoreText": "Ignore the communication «"
+                          }
+                        },
+                        "Card_reference": {
+                          "type": "Compose",
+                          "description": "Stable, versioned reference carried by the existing messageBack text; displayText remains the localized button label. The agent verifies the recipient in Dataverse.",
+                          "inputs": "@concat('Adopta.Communication.v2|en|',body('Get_communication')?['vm_adoptaencommunicationid'])",
+                          "runAfter": {
+                            "Card_texts": [
+                              "Succeeded"
+                            ]
+                          }
+                        },
+                        "Build_card": {
+                          "type": "Compose",
+                          "inputs": "@setProperty(json('{\"$schema\":\"http://adaptivecards.io/schemas/adaptive-card.json\",\"type\":\"AdaptiveCard\",\"version\":\"1.4\"}'),'body',union(createArray(addProperty(json('{\"type\":\"TextBlock\",\"size\":\"Large\",\"weight\":\"Bolder\",\"wrap\":true}'),'text',body('Get_communication')?['vm_title']),addProperty(json('{\"type\":\"TextBlock\",\"wrap\":true}'),'text',body('Get_communication')?['vm_body']),addProperty(json('{\"type\":\"ActionSet\"}'),'actions',union(createArray(addProperty(addProperty(json('{\"type\":\"Action.Submit\"}'),'title',outputs('Card_texts')?['more']),'data',addProperty(json('{}'),'msteams',addProperty(addProperty(json('{\"type\":\"messageBack\"}'),'displayText',outputs('Card_texts')?['more']),'text',outputs('Card_reference'))))),createArray(addProperty(addProperty(json('{\"type\":\"Action.Submit\"}'),'title',outputs('Card_texts')?['ignore']),'data',addProperty(json('{}'),'msteams',addProperty(addProperty(json('{\"type\":\"messageBack\"}'),'displayText',outputs('Card_texts')?['ignore']),'text',concat(outputs('Card_texts')?['ignoreText'],trim(coalesce(body('Get_communication')?['vm_title'],'')),'»')))))))),if(empty(trim(coalesce(body('Get_communication')?['vm_cardmessage'],''))),json('[]'),createArray(addProperty(json('{\"type\":\"TextBlock\",\"wrap\":true,\"spacing\":\"Medium\",\"separator\":true}'),'text',body('Get_communication')?['vm_cardmessage'])))))",
+                          "runAfter": {
+                            "Card_reference": [
+                              "Succeeded"
+                            ]
+                          }
+                        },
+                        "Check_card_size": {
+                          "type": "If",
+                          "expression": "@lessOrEquals(length(base64(string(outputs('Build_card')))),32000)",
+                          "actions": {
+                            "Mark_scheduled": {
+                              "type": "OpenApiConnection",
+                              "inputs": {
+                                "parameters": {
+                                  "entityName": "vm_adoptaencommunications",
+                                  "recordId": "@triggerBody()?['text']",
+                                  "item/vm_cardjson": "@string(outputs('Build_card'))",
+                                  "item/vm_language": "en",
+                                  "item/vm_communicationstatus": 100000001,
+                                  "item/vm_failedcount": 0,
+                                  "item/vm_lasterror": "",
+                                  "item/vm_recipientcount": 0,
+                                  "item/vm_sentcount": 0,
+                                  "item/vm_notinstalledcount": 0
+                                },
+                                "host": {
+                                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                                  "operationId": "UpdateOnlyRecord",
+                                  "connectionName": "shared_commondataserviceforapps"
+                                }
+                              }
+                            },
+                            "Success": {
+                              "type": "SetVariable",
+                              "inputs": {
+                                "name": "success",
+                                "value": true
+                              },
+                              "runAfter": {
+                                "Mark_scheduled": [
+                                  "Succeeded"
+                                ]
+                              }
+                            },
+                            "Queued_message": {
+                              "type": "SetVariable",
+                              "inputs": {
+                                "name": "message",
+                                "value": "Pianificazione registrata. La consegna richiede dispatcher operativo e invii abilitati."
+                              },
+                              "runAfter": {
+                                "Success": [
+                                  "Succeeded"
+                                ]
+                              }
+                            }
+                          },
+                          "else": {
+                            "actions": {
+                              "Card_too_large": {
+                                "type": "SetVariable",
+                                "inputs": {
+                                  "name": "message",
+                                  "value": "Messaggio troppo grande per Teams: riduci il testo."
+                                }
+                              }
+                            }
+                          },
+                          "runAfter": {
+                            "Build_card": [
+                              "Succeeded"
+                            ]
+                          }
+                        }
+                      },
+                      "else": {
+                        "actions": {
+                          "Invalid_audience": {
+                            "type": "SetVariable",
+                            "inputs": {
+                              "name": "message",
+                              "value": "Un gruppo selezionato non e autorizzato o e disabilitato."
+                            }
+                          }
+                        }
+                      },
+                      "runAfter": {
+                        "Check_each_audience": [
+                          "Succeeded"
+                        ]
+                      }
+                    }
+                  },
+                  "else": {
+                    "actions": {
+                      "Invalid_draft": {
+                        "type": "SetVariable",
+                        "inputs": {
+                          "name": "message",
+                          "value": "Servono una bozza salvata, titolo, testo, link HTTPS valido, data futura e almeno un gruppo autorizzato."
+                        }
+                      }
+                    }
+                  },
+                  "runAfter": {
+                    "List_audiences": [
+                      "Succeeded"
+                    ]
+                  }
+                }
+              },
+              "else": {
+                "actions": {
+                  "Not_authorized": {
+                    "type": "SetVariable",
+                    "inputs": {
+                      "name": "message",
+                      "value": "Puoi pianificare solo comunicazioni create da te."
+                    }
+                  }
+                }
+              },
+              "runAfter": {
+                "Get_creator": [
+                  "Succeeded"
+                ]
+              }
+            },
+            "Get_communication_for_caller": {
+              "type": "OpenApiConnection",
+              "inputs": {
+                "parameters": {
+                  "entityName": "vm_adoptaencommunications",
+                  "recordId": "@triggerBody()?['text']"
+                },
+                "host": {
+                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                  "operationId": "GetItem",
+                  "connectionName": "shared_commondataserviceforapps"
+                }
+              }
+            }
+          },
+          "runAfter": {
+            "Initialize_schedule_claim": [
+              "SUCCEEDED"
+            ]
+          }
+        },
+        "Scheduling_error": {
+          "type": "Scope",
+          "actions": {
+            "Failed_steps": {
+              "type": "Query",
+              "inputs": {
+                "from": "@result('Try_schedule')",
+                "where": "@or(equals(item()?['status'],'Failed'),equals(item()?['status'],'TimedOut'))"
+              }
+            },
+            "Return_error": {
+              "type": "SetVariable",
+              "inputs": {
+                "name": "message",
+                "value": "@concat('Pianificazione non confermata. Controlla lo stato prima di riprovare. ',string(first(body('Failed_steps'))?['name']),': ',coalesce(first(body('Failed_steps'))?['error']?['message'],string(first(body('Failed_steps'))?['outputs']?['statusCode'])))"
+              },
+              "runAfter": {
+                "Failed_steps": [
+                  "Succeeded"
+                ]
+              }
+            }
+          },
+          "runAfter": {
+            "Try_schedule": [
+              "Failed",
+              "TimedOut"
+            ]
+          }
+        },
+        "Respond": {
+          "type": "Response",
+          "kind": "PowerApp",
+          "inputs": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "type": "boolean",
+                  "title": "success",
+                  "x-ms-content-hint": "BOOLEAN"
+                },
+                "message": {
+                  "type": "string",
+                  "title": "message",
+                  "x-ms-content-hint": "TEXT"
+                }
+              },
+              "additionalProperties": {}
+            },
+            "statusCode": 200,
+            "body": {
+              "success": "@variables('success')",
+              "message": "@variables('message')"
+            }
+          },
+          "runAfter": {
+            "Schedule_cleanup_error": [
+              "Succeeded",
+              "Skipped"
+            ]
+          }
+        },
+        "Release_schedule_claim": {
+          "type": "If",
+          "expression": "@equals(variables('scheduleClaimOwned'),true)",
+          "actions": {
+            "Delete_schedule_claim": {
+              "type": "OpenApiConnection",
+              "inputs": {
+                "parameters": {
+                  "entityName": "vm_adoptaendispatchclaims",
+                  "recordId": "@triggerBody()?['text']"
+                },
+                "host": {
+                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                  "operationId": "DeleteRecord",
+                  "connectionName": "shared_commondataserviceforapps"
+                },
+                "retryPolicy": {
+                  "type": "none"
+                }
+              }
+            }
+          },
+          "else": {
+            "actions": {}
+          },
+          "runAfter": {
+            "Scheduling_error": [
+              "Succeeded",
+              "Skipped"
+            ]
+          }
+        },
+        "Schedule_cleanup_error": {
+          "type": "Scope",
+          "actions": {
+            "Cleanup_unsuccessful": {
+              "type": "SetVariable",
+              "inputs": {
+                "name": "success",
+                "value": false
+              }
+            },
+            "Cleanup_message": {
+              "type": "SetVariable",
+              "inputs": {
+                "name": "message",
+                "value": "Pianificazione non confermata: impossibile rilasciare la prenotazione tecnica. Aggiorna lo stato e contatta un amministratore prima di riprovare."
+              },
+              "runAfter": {
+                "Cleanup_unsuccessful": [
+                  "Succeeded"
+                ]
+              }
+            }
+          },
+          "runAfter": {
+            "Release_schedule_claim": [
+              "Failed",
+              "TimedOut"
+            ]
+          }
+        },
+        "Initialize_message": {
+          "type": "InitializeVariable",
+          "inputs": {
+            "variables": [
+              {
+                "name": "message",
+                "type": "string"
+              }
+            ]
+          },
+          "runAfter": {
+            "Initialize": [
+              "Succeeded"
+            ]
+          }
+        },
+        "Initialize_audiences_valid": {
+          "type": "InitializeVariable",
+          "inputs": {
+            "variables": [
+              {
+                "name": "audiencesValid",
+                "type": "boolean",
+                "value": true
+              }
+            ]
+          },
+          "runAfter": {
+            "Initialize_message": [
+              "SUCCEEDED"
+            ]
+          }
+        },
+        "Initialize_schedule_claim": {
+          "type": "InitializeVariable",
+          "inputs": {
+            "variables": [
+              {
+                "name": "scheduleClaimOwned",
+                "type": "boolean",
+                "value": false
+              }
+            ]
+          },
+          "runAfter": {
+            "Initialize_audiences_valid": [
+              "SUCCEEDED"
+            ]
+          }
+        }
+      },
+      "outputs": {},
+      "description": "Adopta Communications. Development only. Scheduler OFF; sending blocked until explicit commissioning."
+    },
+    "templateName": null
+  },
+  "schemaVersion": "1.0.0.0"
+}

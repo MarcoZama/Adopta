@@ -1,0 +1,11 @@
+<botcomponent schemaname="vm_AdoptaEN.action.MicrosoftDataverse-GetBranding">
+  <componenttype>9</componenttype>
+  <description>Internal initialization only. Reads the customer-configured agent display name. Never use to answer a user.</description>
+  <iscustomizable>0</iscustomizable>
+  <name>Get branding</name>
+  <parentbotid>
+    <schemaname>vm_AdoptaEN</schemaname>
+  </parentbotid>
+  <statecode>0</statecode>
+  <statuscode>1</statuscode>
+</botcomponent>

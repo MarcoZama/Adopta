@@ -83,16 +83,11 @@ beginDialog:
       - Voglio parlare con un tecnico
       - Parla con un membro del supporto tecnico
       - Parlare con un membro del supporto tecnico
-      - Talk to a person
-      - Talk to an agent
-      - Speak to a human
-      - I need customer support
-
   actions:
     - kind: SendActivity
       id: sendMessage_s39DCt
       conversationOutcome: Escalated
       activity: |-
-        {If(Text(Global.UserLanguage) = "en", "Escalation to a representative isn't set up for this agent yet, but here the agent can tell you how to get in touch with someone in another way.", "L'escalation a un rappresentante non è attualmente configurata per questo copilota, tuttavia qui l'agente può fornire informazioni su come entrare in contatto con qualcuno in un altro modo.")}
+        L'escalation a un rappresentante non è attualmente configurata per questo copilota, tuttavia qui l'agente può fornire informazioni su come entrare in contatto con qualcuno in un altro modo.
 
-        {If(Text(Global.UserLanguage) = "en", "Is there anything else I can do for you?", "C'è altro che posso fare per te?")}
+        C'è altro che posso fare per te?

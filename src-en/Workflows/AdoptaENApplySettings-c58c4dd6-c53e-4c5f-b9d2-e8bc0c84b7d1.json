@@ -1,0 +1,476 @@
+{
+  "properties": {
+    "connectionReferences": {
+      "shared_commondataserviceforapps": {
+        "runtimeSource": "embedded",
+        "connection": {
+          "connectionReferenceLogicalName": "vm_adoptaendataverse"
+        },
+        "api": {
+          "name": "shared_commondataserviceforapps"
+        }
+      }
+    },
+    "definition": {
+      "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+      "contentVersion": "1.0.0.0",
+      "parameters": {
+        "$connections": {
+          "defaultValue": {},
+          "type": "Object"
+        },
+        "$authentication": {
+          "defaultValue": {},
+          "type": "SecureObject"
+        }
+      },
+      "triggers": {
+        "When_settings_are_saved": {
+          "metadata": {
+            "operationMetadataId": "52249d53-3adc-4d8d-bee8-d9f1adf7bf81"
+          },
+          "type": "OpenApiConnectionWebhook",
+          "inputs": {
+            "host": {
+              "connectionName": "shared_commondataserviceforapps",
+              "operationId": "SubscribeWebhookTrigger",
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps"
+            },
+            "parameters": {
+              "subscriptionRequest/message": 4,
+              "subscriptionRequest/entityname": "vm_adoptaensetting",
+              "subscriptionRequest/scope": 4,
+              "subscriptionRequest/filteringattributes": "vm_name,vm_apptitle,vm_agentname,vm_coachknowledgeurl,statecode"
+            },
+            "authentication": "@parameters('$authentication')"
+          }
+        }
+      },
+      "actions": {
+        "Initialize_status": {
+          "runAfter": {},
+          "metadata": {
+            "operationMetadataId": "36dc7b3d-1091-4bed-b933-de8692f49305"
+          },
+          "type": "InitializeVariable",
+          "inputs": {
+            "variables": [
+              {
+                "name": "status",
+                "type": "string",
+                "value": ""
+              }
+            ]
+          }
+        },
+        "Initialize_changed": {
+          "runAfter": {
+            "Initialize_status": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "45a0c89e-d006-44ff-9097-64df78e53bc6"
+          },
+          "type": "InitializeVariable",
+          "inputs": {
+            "variables": [
+              {
+                "name": "changed",
+                "type": "array",
+                "value": []
+              }
+            ]
+          }
+        },
+        "Initialize_missing": {
+          "runAfter": {
+            "Initialize_changed": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "46d80ba7-07ba-493d-b021-7a9256403b07"
+          },
+          "type": "InitializeVariable",
+          "inputs": {
+            "variables": [
+              {
+                "name": "missing",
+                "type": "array",
+                "value": []
+              }
+            ]
+          }
+        },
+        "Try_apply": {
+          "actions": {
+            "Get_active_setting": {
+              "runAfter": {},
+              "metadata": {
+                "operationMetadataId": "bb1cf6c8-450d-41d7-9e5c-e12884972aeb"
+              },
+              "type": "OpenApiConnection",
+              "inputs": {
+                "host": {
+                  "connectionName": "shared_commondataserviceforapps",
+                  "operationId": "ListRecords",
+                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps"
+                },
+                "parameters": {
+                  "entityName": "vm_adoptaensettings",
+                  "$select": "vm_adoptaensettingid,vm_coachknowledgeurl",
+                  "$filter": "statecode eq 0",
+                  "$orderby": "createdon asc",
+                  "$top": 1
+                },
+                "authentication": "@parameters('$authentication')"
+              }
+            },
+            "Is_active_setting": {
+              "actions": {
+                "Dataverse_url": {
+                  "runAfter": {},
+                  "metadata": {
+                    "operationMetadataId": "ba2b9c34-1186-429b-8b5b-79a86baac215"
+                  },
+                  "type": "Compose",
+                  "inputs": "@first(split(string(coalesce(body('Get_active_setting')?['@odata.context'],'')),'/api/data/'))"
+                },
+                "Knowledge_url": {
+                  "runAfter": {
+                    "Dataverse_url": [
+                      "Succeeded"
+                    ]
+                  },
+                  "metadata": {
+                    "operationMetadataId": "78331429-35a2-4582-bff7-60435ca8b468"
+                  },
+                  "type": "Compose",
+                  "inputs": "@trim(coalesce(first(body('Get_active_setting')?['value'])?['vm_coachknowledgeurl'],''))"
+                },
+                "Values_valid": {
+                  "actions": {
+                    "Apply_each_variable": {
+                      "foreach": "@union(createArray(addProperty(addProperty(json('{}'),'schema','vm_AdoptaENDataverseUrl'),'value',outputs('Dataverse_url'))),if(empty(outputs('Knowledge_url')),json('[]'),createArray(addProperty(addProperty(json('{}'),'schema','vm_AdoptaENCoachKnowledgeUrl'),'value',outputs('Knowledge_url')))))",
+                      "actions": {
+                        "Get_definition": {
+                          "runAfter": {},
+                          "metadata": {
+                            "operationMetadataId": "7c4f4f32-2295-4a9b-94aa-402c19b0dcb4"
+                          },
+                          "type": "OpenApiConnection",
+                          "inputs": {
+                            "host": {
+                              "connectionName": "shared_commondataserviceforapps",
+                              "operationId": "ListRecords",
+                              "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps"
+                            },
+                            "parameters": {
+                              "entityName": "environmentvariabledefinitions",
+                              "$select": "environmentvariabledefinitionid",
+                              "$filter": "schemaname eq '@{items('Apply_each_variable')?['schema']}' and statecode eq 0",
+                              "$top": 1
+                            },
+                            "authentication": "@parameters('$authentication')"
+                          }
+                        },
+                        "Definition_found": {
+                          "actions": {
+                            "Get_value": {
+                              "runAfter": {},
+                              "metadata": {
+                                "operationMetadataId": "bb027221-a8ed-483e-b80e-7a8d16da0d9b"
+                              },
+                              "type": "OpenApiConnection",
+                              "inputs": {
+                                "host": {
+                                  "connectionName": "shared_commondataserviceforapps",
+                                  "operationId": "ListRecords",
+                                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps"
+                                },
+                                "parameters": {
+                                  "entityName": "environmentvariablevalues",
+                                  "$select": "environmentvariablevalueid,value",
+                                  "$filter": "_environmentvariabledefinitionid_value eq @{first(body('Get_definition')?['value'])?['environmentvariabledefinitionid']} and statecode eq 0",
+                                  "$top": 1
+                                },
+                                "authentication": "@parameters('$authentication')"
+                              }
+                            },
+                            "Value_exists": {
+                              "actions": {
+                                "Value_changed": {
+                                  "actions": {
+                                    "Update_value": {
+                                      "runAfter": {},
+                                      "metadata": {
+                                        "operationMetadataId": "ade48ce5-a51b-4cc8-893f-782942cc858f"
+                                      },
+                                      "type": "OpenApiConnection",
+                                      "inputs": {
+                                        "host": {
+                                          "connectionName": "shared_commondataserviceforapps",
+                                          "operationId": "UpdateOnlyRecord",
+                                          "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps"
+                                        },
+                                        "parameters": {
+                                          "entityName": "environmentvariablevalues",
+                                          "recordId": "@first(body('Get_value')?['value'])?['environmentvariablevalueid']",
+                                          "item/value": "@items('Apply_each_variable')?['value']"
+                                        },
+                                        "authentication": "@parameters('$authentication')"
+                                      }
+                                    },
+                                    "Record_update": {
+                                      "runAfter": {
+                                        "Update_value": [
+                                          "Succeeded"
+                                        ]
+                                      },
+                                      "metadata": {
+                                        "operationMetadataId": "68e26952-515a-4169-9646-c365019db0b1"
+                                      },
+                                      "type": "AppendToArrayVariable",
+                                      "inputs": {
+                                        "name": "changed",
+                                        "value": "@items('Apply_each_variable')?['schema']"
+                                      }
+                                    }
+                                  },
+                                  "runAfter": {},
+                                  "expression": "@not(equals(first(body('Get_value')?['value'])?['value'],items('Apply_each_variable')?['value']))",
+                                  "metadata": {
+                                    "operationMetadataId": "da23ae09-5778-465f-9d92-75fa9c54b0cb"
+                                  },
+                                  "type": "If"
+                                }
+                              },
+                              "runAfter": {
+                                "Get_value": [
+                                  "Succeeded"
+                                ]
+                              },
+                              "else": {
+                                "actions": {
+                                  "Create_value": {
+                                    "runAfter": {},
+                                    "metadata": {
+                                      "operationMetadataId": "4fc7099a-b3d2-47a0-882f-1cf7834088a7"
+                                    },
+                                    "type": "OpenApiConnection",
+                                    "inputs": {
+                                      "host": {
+                                        "connectionName": "shared_commondataserviceforapps",
+                                        "operationId": "CreateRecord",
+                                        "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps"
+                                      },
+                                      "parameters": {
+                                        "entityName": "environmentvariablevalues",
+                                        "item/schemaname": "@items('Apply_each_variable')?['schema']",
+                                        "item/EnvironmentVariableDefinitionId@odata.bind": "/environmentvariabledefinitions(@{first(body('Get_definition')?['value'])?['environmentvariabledefinitionid']})",
+                                        "item/value": "@items('Apply_each_variable')?['value']"
+                                      },
+                                      "authentication": "@parameters('$authentication')"
+                                    }
+                                  },
+                                  "Record_creation": {
+                                    "runAfter": {
+                                      "Create_value": [
+                                        "Succeeded"
+                                      ]
+                                    },
+                                    "metadata": {
+                                      "operationMetadataId": "45678064-5150-4e8f-bcdf-0cd23dc59b71"
+                                    },
+                                    "type": "AppendToArrayVariable",
+                                    "inputs": {
+                                      "name": "changed",
+                                      "value": "@items('Apply_each_variable')?['schema']"
+                                    }
+                                  }
+                                }
+                              },
+                              "expression": "@equals(length(body('Get_value')?['value']),1)",
+                              "metadata": {
+                                "operationMetadataId": "b17f488d-826b-45a8-a97a-a48905e3f252"
+                              },
+                              "type": "If"
+                            }
+                          },
+                          "runAfter": {
+                            "Get_definition": [
+                              "Succeeded"
+                            ]
+                          },
+                          "else": {
+                            "actions": {
+                              "Record_missing": {
+                                "runAfter": {},
+                                "metadata": {
+                                  "operationMetadataId": "fa72fd7f-84ff-4c0b-a0a0-2ac9c7b9bfed"
+                                },
+                                "type": "AppendToArrayVariable",
+                                "inputs": {
+                                  "name": "missing",
+                                  "value": "@items('Apply_each_variable')?['schema']"
+                                }
+                              }
+                            }
+                          },
+                          "expression": "@equals(length(body('Get_definition')?['value']),1)",
+                          "metadata": {
+                            "operationMetadataId": "37e5f1f2-9d99-4947-ae9e-2f7b13d49183"
+                          },
+                          "type": "If"
+                        }
+                      },
+                      "runAfter": {},
+                      "metadata": {
+                        "operationMetadataId": "fefcc35f-d774-4dc9-ad15-59b6e94a0460"
+                      },
+                      "type": "Foreach",
+                      "runtimeConfiguration": {
+                        "concurrency": {
+                          "repetitions": 1
+                        }
+                      }
+                    },
+                    "Applied_status": {
+                      "runAfter": {
+                        "Apply_each_variable": [
+                          "Succeeded"
+                        ]
+                      },
+                      "metadata": {
+                        "operationMetadataId": "1ccaba2c-f39a-43ca-ac3f-8431447d95f5"
+                      },
+                      "type": "SetVariable",
+                      "inputs": {
+                        "name": "status",
+                        "value": "@concat('Configurazione applicata. URL ambiente Dataverse: ',outputs('Dataverse_url'),'. URL knowledge del Coach: ',if(empty(outputs('Knowledge_url')),'non impostato, quindi il Coach non ha la knowledge SharePoint',outputs('Knowledge_url')),'. ',if(empty(variables('changed')),'Le variabili d''ambiente avevano già questi valori.',concat('Variabili aggiornate: ',join(variables('changed'),', '),'. Ripubblica in Copilot Studio prima Adopta - Adoption Coach e poi Adopta per usare i nuovi valori.')),if(empty(variables('missing')),'',concat(' Variabili non trovate nell''ambiente: ',join(variables('missing'),', '),'.')))"
+                      }
+                    }
+                  },
+                  "runAfter": {
+                    "Knowledge_url": [
+                      "Succeeded"
+                    ]
+                  },
+                  "else": {
+                    "actions": {
+                      "Invalid_values": {
+                        "runAfter": {},
+                        "metadata": {
+                          "operationMetadataId": "a87a9621-2976-46eb-a2b8-7dcca0b74b9e"
+                        },
+                        "type": "SetVariable",
+                        "inputs": {
+                          "name": "status",
+                          "value": "@if(startsWith(toLower(outputs('Dataverse_url')),'https://'),'URL knowledge del Coach non valido: deve iniziare con https://. Nessuna variabile modificata.','Impossibile ricavare l''URL dell''ambiente Dataverse. Nessuna variabile modificata: imposta vm_AdoptaENDataverseUrl a mano in Power Apps e segnala il problema.')"
+                        }
+                      }
+                    }
+                  },
+                  "expression": "@and(startsWith(toLower(outputs('Dataverse_url')),'https://'),or(empty(outputs('Knowledge_url')),startsWith(toLower(outputs('Knowledge_url')),'https://')))",
+                  "metadata": {
+                    "operationMetadataId": "8531c15f-1046-4e0c-a7dc-ba20be174440"
+                  },
+                  "type": "If"
+                }
+              },
+              "runAfter": {
+                "Get_active_setting": [
+                  "Succeeded"
+                ]
+              },
+              "else": {
+                "actions": {
+                  "Not_active_setting": {
+                    "runAfter": {},
+                    "metadata": {
+                      "operationMetadataId": "3c412089-ece6-43aa-af11-727ebd204a05"
+                    },
+                    "type": "SetVariable",
+                    "inputs": {
+                      "name": "status",
+                      "value": "Non applicata: app e agente usano solo il record attivo creato per primo. Modifica quel record oppure disattiva questo."
+                    }
+                  }
+                }
+              },
+              "expression": "@equals(first(body('Get_active_setting')?['value'])?['vm_adoptaensettingid'],triggerOutputs()?['body/vm_adoptaensettingid'])",
+              "metadata": {
+                "operationMetadataId": "d6ef6650-4345-4c3f-a18e-a329d6126b68"
+              },
+              "type": "If"
+            }
+          },
+          "runAfter": {
+            "Initialize_missing": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "4023cae0-4253-49ea-9f48-12da035ad0df"
+          },
+          "type": "Scope"
+        },
+        "Apply_error": {
+          "actions": {
+            "Report_apply_error": {
+              "runAfter": {},
+              "metadata": {
+                "operationMetadataId": "6624052d-d711-4306-91e5-d98354e3f22d"
+              },
+              "type": "SetVariable",
+              "inputs": {
+                "name": "status",
+                "value": "@concat('Applicazione non riuscita',if(empty(variables('changed')),'',concat(' dopo aver aggiornato ',join(variables('changed'),', '))),'. Controlla la cronologia di AdoptaENApplySettings: l''account della connessione Dataverse deve poter modificare le variabili d''ambiente (ruolo System Customizer).')"
+              }
+            }
+          },
+          "runAfter": {
+            "Try_apply": [
+              "Failed",
+              "TimedOut"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "cdd39643-04b8-4b20-9dce-52cc191aa738"
+          },
+          "type": "Scope"
+        },
+        "Write_status": {
+          "runAfter": {
+            "Apply_error": [
+              "Succeeded",
+              "Skipped"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "f757060c-751e-466c-b110-f320e5f5d803"
+          },
+          "type": "OpenApiConnection",
+          "inputs": {
+            "host": {
+              "connectionName": "shared_commondataserviceforapps",
+              "operationId": "UpdateOnlyRecord",
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps"
+            },
+            "parameters": {
+              "entityName": "vm_adoptaensettings",
+              "recordId": "@triggerOutputs()?['body/vm_adoptaensettingid']",
+              "item/vm_appliedon": "@utcNow()",
+              "item/vm_applystatus": "@variables('status')"
+            },
+            "authentication": "@parameters('$authentication')"
+          }
+        }
+      },
+      "outputs": {}
+    },
+    "templateName": ""
+  },
+  "schemaVersion": "1.0.0.0"
+}

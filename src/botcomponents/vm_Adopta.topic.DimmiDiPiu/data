@@ -10,28 +10,18 @@ beginDialog:
       id: versioned
       variable: Topic.Versioned
       value: =StartsWith(System.Activity.Text, "Adopta.Communication.v2|")
-
     - kind: SetVariable
       id: parts
       variable: Topic.Parts
       value: =Split(System.Activity.Text, "|")
-
-    - kind: SetVariable
-      id: english
-      variable: Topic.English
-      value: =If(Topic.Versioned, CountRows(Topic.Parts) = 3 && Text(Index(Topic.Parts, 2).Value) = "en", StartsWith(System.Activity.Text, "Tell me more about the communication «"))
-
     - kind: SetVariable
       id: prefix
       variable: Topic.Prefix
-      value: =If(Topic.English, "Tell me more about the communication «", "Dimmi di più sulla comunicazione «")
-
+      value: =If(StartsWith(System.Activity.Text, "Tell me more about the communication «"), "Tell me more about the communication «", "Dimmi di più sulla comunicazione «")
     - kind: SetVariable
       id: titleEnd
       variable: Topic.TitleEnd
-      value: |-
-        =If(!Topic.Versioned, If(EndsWith(System.Activity.Text, "»"), Len(System.Activity.Text), Find("»: ", System.Activity.Text)), Blank())
-
+      value: '=If(!Topic.Versioned, If(EndsWith(System.Activity.Text, "»"), Len(System.Activity.Text), Find("»: ", System.Activity.Text)), Blank())'
     - kind: ConditionGroup
       id: validReference
       conditions:
@@ -40,8 +30,7 @@ beginDialog:
           actions:
             - kind: SendActivity
               id: waiting
-              activity: "{If(Topic.English, \"One moment, I'm preparing your answer...\", \"Un attimo, sto preparando la risposta...\")}"
-
+              activity: Un attimo, sto preparando la risposta...
             - kind: BeginDialog
               id: resolveCard
               dialog: vm_Adopta.topic.RisolviComunicazione
@@ -52,17 +41,13 @@ beginDialog:
                   Title: =If(Topic.Versioned, "", Trim(Mid(System.Activity.Text, Len(Topic.Prefix) + 1, Topic.TitleEnd - Len(Topic.Prefix) - 1)))
                   Link: =If(!Topic.Versioned && Topic.TitleEnd < Len(System.Activity.Text), Trim(Mid(System.Activity.Text, Topic.TitleEnd + 3)), "")
                   MatchLink: =!Topic.Versioned
-                  Request: =If(Topic.English, "Explain this communication, how to use the feature and its documented prerequisites.", "Spiega questa comunicazione, come si usa la funzionalità e i prerequisiti documentati.")
-                  English: =Topic.English
+                  Request: ="Spiega questa comunicazione, come si usa la funzionalità e i prerequisiti documentati."
                   ConfirmLatest: =false
-
       elseActions:
         - kind: SendActivity
           id: invalidReference
-          activity: "{If(Topic.English, \"I cannot interpret this card's reference. Ask about a communication by its complete title; I have not selected another message.\", \"Non riesco a interpretare il riferimento della card. Indicami il titolo completo della comunicazione: non ho selezionato un altro messaggio.\")}"
-
+          activity: "Non riesco a interpretare il riferimento della card. Indicami il titolo completo della comunicazione: non ho selezionato un altro messaggio."
     - kind: CancelAllDialogs
       id: finish
-
 inputType: {}
 outputType: {}

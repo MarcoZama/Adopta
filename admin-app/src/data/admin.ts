@@ -4,15 +4,20 @@
  */
 import type { IOperationResult } from "@microsoft/power-apps/data";
 import type { Vm_adoptaaudiencegroupsvm_grouptype } from "../generated/models/Vm_adoptaaudiencegroupsModel";
-import { Vm_adoptaaudiencegroupsService as GroupsService } from "../generated/services/Vm_adoptaaudiencegroupsService";
-import { Vm_adoptasettingsService as SettingsService } from "../generated/services/Vm_adoptasettingsService";
+import { dataSourcesInfo } from "../../.power/schemas/appschemas/dataSourcesInfo";
+import { services } from "../../../shared/power-apps";
+import { edition } from "../../../shared/edition";
 import { currentLanguage, text, toLanguage, type Language } from "../i18n";
+
+const bound = services(dataSourcesInfo);
+const GroupsService = bound.table("vm_adoptaaudiencegroups")();
+const SettingsService = bound.table("vm_adoptasettings")();
 
 export interface SettingsForm {
   name: string;
   appTitle: string;
   agentName: string;
-  /** vm_defaultlanguage: new communications, the apps and the agent fallback. */
+  /** vm_defaultlanguage: app fallback only, never the agent or card language. */
   defaultLanguage: Language;
   coachKnowledgeUrl: string;
   sendingEnabled: boolean;
@@ -105,8 +110,7 @@ function toSettings(row: SettingsRow): SettingsRecord {
     name: row.vm_name ?? "",
     appTitle: row.vm_apptitle ?? "",
     agentName: row.vm_agentname ?? "",
-    // Records created before 1.0.0.12 have no language: Italian, as the agent and the apps assume.
-    defaultLanguage: toLanguage(row.vm_defaultlanguage) ?? "it",
+    defaultLanguage: toLanguage(row.vm_defaultlanguage) ?? edition().language,
     coachKnowledgeUrl: row.vm_coachknowledgeurl ?? "",
     sendingEnabled: row.vm_sendingenabled === true,
     applyStatus: row.vm_applystatus ?? "",
@@ -142,6 +146,9 @@ export async function saveSettings(form: SettingsForm, saved?: SettingsRecord): 
   const fields = settingsFields(form);
   if (!saved) {
     const created = check(await SettingsService.create({ statecode: 0, ...fields }), text().data.createSettings);
+    if (!created || typeof created !== "object" || !("vm_adoptasettingid" in created) || typeof created.vm_adoptasettingid !== "string") {
+      throw new Error(text().common.unknownError + ": missing setting ID");
+    }
     return created.vm_adoptasettingid;
   }
   const before = settingsFields(saved);

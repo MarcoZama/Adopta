@@ -1,27 +1,21 @@
 param(
-    [string] $BaselineVersion = '1.0.0.16',
+    [ValidateSet('it', 'en')] [string] $Edition = 'it',
+    [ValidateSet('Unmanaged', 'Managed')] [string] $PackageType = 'Unmanaged',
     [switch] $SkipTests
 )
 
 $ErrorActionPreference = 'Stop'
 $root = Split-Path $PSScriptRoot
-$source = Join-Path $root 'src'
-$dist = Join-Path $root 'dist'
-[xml]$manifest = Get-Content -Raw -LiteralPath (Join-Path $source 'Other\Solution.xml')
-$version = [string]$manifest.ImportExportXml.SolutionManifest.Version
-if ($version -notmatch '^\d+\.\d+\.\d+\.\d+$' -or $BaselineVersion -notmatch '^\d+\.\d+\.\d+\.\d+$') {
-    throw 'Solution and baseline versions must contain four numeric parts.'
+$profiles = Get-Content -Raw -LiteralPath (Join-Path $PSScriptRoot 'editions.json') | ConvertFrom-Json
+$profile = $profiles.$Edition
+if ($PackageType -eq 'Managed') {
+    throw "Managed $Edition release is blocked in this local authoring builder. Use the verified native exports in dist, or export the synchronized solution from an authorized development environment. Never synthesize managed from unmanaged XML. No package was created."
 }
-if ([version]$version -le [version]$BaselineVersion) { throw 'The new version must be higher than the managed baseline.' }
-$baseline = Join-Path $dist ("Adopta_{0}_managed.zip" -f $BaselineVersion.Replace('.', '_'))
-if (-not (Test-Path -LiteralPath $baseline)) { throw "Managed baseline not found: $baseline" }
-$unmanagedZip = Join-Path $dist ("Adopta_{0}.zip" -f $version.Replace('.', '_'))
-$managedZip = Join-Path $dist ("Adopta_{0}_managed.zip" -f $version.Replace('.', '_'))
 
-function Invoke-Pac {
-    param([string[]] $Arguments)
-    & pac @Arguments
-    if ($LASTEXITCODE -ne 0) { throw "Local PAC operation failed: pac $($Arguments -join ' ')" }
+function Invoke-Checked {
+    param([string] $Command, [string[]] $Arguments)
+    & $Command @Arguments
+    if ($LASTEXITCODE -ne 0) { throw "$Command failed (exit $LASTEXITCODE)." }
 }
 
 function Read-ZipEntry {
@@ -32,108 +26,65 @@ function Read-ZipEntry {
     try { return $reader.ReadToEnd() } finally { $reader.Dispose() }
 }
 
-if (-not $SkipTests) {
-    Push-Location $root
-    try {
-        & npm test
-        if ($LASTEXITCODE -ne 0) { throw 'Regression checks failed. No packages were built.' }
-    } finally { Pop-Location }
-}
-
-$work = Join-Path $root ('.solution-build\' + [guid]::NewGuid().ToString())
-$managedSource = Join-Path $work 'managed'
-$null = New-Item -ItemType Directory -Path $work
+Push-Location $root
+$work = $null
 try {
-    Invoke-Pac @('solution', 'unpack', '--zipfile', $baseline, '--folder', $managedSource, '--packagetype', 'Managed', '--errorlevel', 'Warning')
-    [xml]$managedManifest = Get-Content -Raw -LiteralPath (Join-Path $managedSource 'Other\Solution.xml')
-    if ($managedManifest.ImportExportXml.SolutionManifest.Managed -ne '1') { throw 'The local baseline is not managed.' }
-    $managedManifest.ImportExportXml.SolutionManifest.Version = $version
-    $managedManifest.Save((Join-Path $managedSource 'Other\Solution.xml'))
-
-    foreach ($component in Get-ChildItem -LiteralPath (Join-Path $source 'botcomponents') -Directory) {
-        $target = Join-Path $managedSource ('botcomponents\' + $component.Name)
-        if (-not (Test-Path -LiteralPath $target)) {
-            Copy-Item -LiteralPath $component.FullName -Destination $target -Recurse
-        } else {
-            foreach ($file in Get-ChildItem -LiteralPath $component.FullName -File | Where-Object Name -ne 'botcomponent.xml') {
-                Copy-Item -LiteralPath $file.FullName -Destination (Join-Path $target $file.Name)
-            }
-            [xml]$metadata = Get-Content -Raw -LiteralPath (Join-Path $component.FullName 'botcomponent.xml')
-            [xml]$managedMetadata = Get-Content -Raw -LiteralPath (Join-Path $target 'botcomponent.xml')
-            foreach ($field in 'description', 'name') {
-                $node = $metadata.botcomponent.SelectSingleNode($field)
-                if ($node) {
-                    $existing = $managedMetadata.botcomponent.SelectSingleNode($field)
-                    if ($existing) { $existing.InnerText = $node.InnerText }
-                    else { $null = $managedMetadata.botcomponent.AppendChild($managedMetadata.ImportNode($node, $true)) }
-                }
-            }
-            $managedMetadata.Save((Join-Path $target 'botcomponent.xml'))
-        }
+    if (-not $SkipTests) { Invoke-Checked 'npm' @('test') }
+    foreach ($app in 'communications', 'admin') {
+        Invoke-Checked 'npm' @('--prefix', $profile.apps.$app.project, 'run', "build:$Edition")
     }
-    Get-ChildItem -LiteralPath (Join-Path $source 'Workflows') -Filter '*.json' -File | ForEach-Object {
-        Copy-Item -LiteralPath $_.FullName -Destination (Join-Path $managedSource ('Workflows\' + $_.Name))
-    }
-
-    Invoke-Pac @('solution', 'pack', '--folder', $source, '--zipfile', $unmanagedZip, '--packagetype', 'Unmanaged', '--errorlevel', 'Warning')
-    Invoke-Pac @('solution', 'pack', '--folder', $managedSource, '--zipfile', $managedZip, '--packagetype', 'Managed', '--errorlevel', 'Warning')
+    $work = Join-Path $root ('.solution-build\' + [guid]::NewGuid().ToString())
+    $stage = Join-Path $work 'source'
+    $null = New-Item -ItemType Directory -Path $work
+    Invoke-Checked 'node' @('deploy\prepare-solution.mjs', $Edition, $stage)
+    Invoke-Checked 'node' @('deploy\validate-solution.mjs', $Edition, $stage)
+    [xml]$manifest = Get-Content -Raw -LiteralPath (Join-Path $stage 'Other\Solution.xml')
+    $version = [string]$manifest.ImportExportXml.SolutionManifest.Version
+    if ($manifest.ImportExportXml.SolutionManifest.UniqueName -cne $profile.solution -or
+        $manifest.ImportExportXml.SolutionManifest.Managed -ne '0' -or
+        $version -notmatch '^\d+\.\d+\.\d+\.\d+$') { throw 'Wrong solution identity, package type or version.' }
+    $dist = Join-Path $root 'dist\local'
+    $null = New-Item -ItemType Directory -Path $dist -Force
+    $stem = "Adopta_$($Edition.ToUpperInvariant())_$($version.Replace('.', '_'))_unmanaged"
+    $candidate = Join-Path $work "$stem.zip"
+    Invoke-Checked 'pac' @('solution', 'pack', '--folder', $stage, '--zipfile', $candidate, '--packagetype', 'Unmanaged', '--errorlevel', 'Warning')
 
     Add-Type -AssemblyName System.IO.Compression.FileSystem
-    $baselineArchive = [IO.Compression.ZipFile]::OpenRead($baseline)
+    $archive = [IO.Compression.ZipFile]::OpenRead($candidate)
     try {
-        foreach ($package in @(@{ Path = $unmanagedZip; Managed = '0' }, @{ Path = $managedZip; Managed = '1' })) {
-            $archive = [IO.Compression.ZipFile]::OpenRead($package.Path)
-            try {
-                [xml]$solution = Read-ZipEntry $archive 'solution.xml'
-                if ($solution.ImportExportXml.SolutionManifest.Version -ne $version -or
-                    $solution.ImportExportXml.SolutionManifest.Managed -ne $package.Managed) {
-                    throw "Wrong version or package type: $($package.Path)"
-                }
-                foreach ($entry in $archive.Entries) {
-                    if ($entry.Name -eq '') { continue }
-                    if ($entry.FullName.EndsWith('.xml')) { $null = [xml](Read-ZipEntry $archive $entry.FullName) }
-                    if ($entry.FullName.EndsWith('.json')) { $null = (Read-ZipEntry $archive $entry.FullName) | ConvertFrom-Json }
-                }
-                foreach ($file in Get-ChildItem -LiteralPath (Join-Path $source 'botcomponents') -Recurse -File |
-                    Where-Object Name -eq 'data') {
-                    $name = [IO.Path]::GetRelativePath($source, $file.FullName).Replace('\', '/')
-                    $expected = (Get-Content -Raw -LiteralPath $file.FullName).Replace("`r`n", "`n").Trim()
-                    $actual = (Read-ZipEntry $archive $name).Replace("`r`n", "`n").Trim()
-                    if ($actual -cne $expected) { throw "Stale or changed agent payload: $name" }
-                }
-                $workflow = 'Workflows/AdoptaScheduleCommunication-046919BC-1AE2-40FE-A68F-51000EBCC08E.json'
-                $expectedWorkflow = Get-Content -Raw -LiteralPath (Join-Path $source $workflow.Replace('/', '\'))
-                if ((Read-ZipEntry $archive $workflow).Replace("`r`n", "`n").Trim() -cne $expectedWorkflow.Replace("`r`n", "`n").Trim()) {
-                    throw "Stale scheduling workflow: $($package.Path)"
-                }
-                foreach ($asset in $baselineArchive.Entries | Where-Object FullName -Match '^CanvasApps/.+_CodeAppPackages/') {
-                    if ($asset.Name -eq '') { continue }
-                    if ((Read-ZipEntry $archive $asset.FullName) -cne (Read-ZipEntry $baselineArchive $asset.FullName)) {
-                        throw "An unchanged code app asset differs: $($asset.FullName)"
-                    }
-                }
-                if ($archive.Entries.FullName -match 'environmentvariablevalues\.json$') {
-                    throw 'The package must not contain exported environment variable values.'
-                }
-            } finally { $archive.Dispose() }
+        [xml]$packed = Read-ZipEntry $archive 'solution.xml'
+        if ($packed.ImportExportXml.SolutionManifest.UniqueName -cne $profile.solution -or
+            $packed.ImportExportXml.SolutionManifest.Version -ne $version -or
+            $packed.ImportExportXml.SolutionManifest.Managed -ne '0') { throw 'Packed solution identity does not match the edition.' }
+        foreach ($file in Get-ChildItem -LiteralPath $stage -Recurse -File |
+            Where-Object { $_.Name -eq 'data' -or $_.Directory.Name -eq 'Workflows' -and $_.Extension -eq '.json' -or $_.FullName -match '_CodeAppPackages\\' }) {
+            $name = [IO.Path]::GetRelativePath($stage, $file.FullName).Replace('\', '/')
+            $actual = Read-ZipEntry $archive $name
+            $expected = Get-Content -Raw -LiteralPath $file.FullName
+            if ($actual.Replace("`r`n", "`n").Trim() -cne $expected.Replace("`r`n", "`n").Trim()) { throw "Stale package payload: $name" }
         }
-    } finally { $baselineArchive.Dispose() }
+        if ($archive.Entries.FullName -match 'environmentvariablevalues\.json$') { throw 'Exported environment values must not be packaged.' }
+    } finally { $archive.Dispose() }
 
-    foreach ($package in @(@{ Path = $unmanagedZip; Type = 'Unmanaged' }, @{ Path = $managedZip; Type = 'Managed' })) {
-        $roundtrip = Join-Path $work $package.Type
-        Invoke-Pac @('solution', 'unpack', '--zipfile', $package.Path, '--folder', $roundtrip, '--packagetype', $package.Type, '--errorlevel', 'Warning')
-        foreach ($name in 'ResolveCommunication', 'ApprofondisciComunicazione', 'RisolviComunicazione', 'SpiegaComunicazione') {
-            $prefix = if ($name -eq 'ResolveCommunication') { 'action' } else { 'topic' }
-            if (-not (Test-Path -LiteralPath (Join-Path $roundtrip "botcomponents\vm_Adopta.$prefix.$name\data"))) {
-                throw "A new component was lost during packaging: $name"
-            }
-        }
+    $roundtrip = Join-Path $work 'roundtrip'
+    Invoke-Checked 'pac' @('solution', 'unpack', '--zipfile', $candidate, '--folder', $roundtrip, '--packagetype', 'Unmanaged', '--errorlevel', 'Warning')
+    Invoke-Checked 'node' @('deploy\validate-solution.mjs', $Edition, $roundtrip)
+    $output = Join-Path $dist "$stem.zip"
+    Copy-Item -LiteralPath $candidate -Destination $output
+    $settings = Join-Path $PSScriptRoot $(if ($Edition -eq 'it') { 'deploymentSettings.json' } else { 'deploymentSettings.en.json' })
+    if (-not (Test-Path -LiteralPath $settings)) {
+        Invoke-Checked 'pac' @('solution', 'create-settings', '--solution-zip', $output, '--settings-file', $settings)
     }
-    Get-FileHash -LiteralPath $unmanagedZip, $managedZip -Algorithm SHA256 |
-        ForEach-Object { '{0}  {1}' -f $_.Hash.ToLowerInvariant(), [IO.Path]::GetFileName($_.Path) } |
-        Set-Content -LiteralPath (Join-Path $dist ("Adopta_{0}.sha256" -f $version.Replace('.', '_'))) -Encoding utf8NoBOM
-    Write-Output "Local packages verified: $unmanagedZip; $managedZip"
-    Write-Output 'No environment was queried or changed. Import, publishing and Teams behavior are not validated by these local checks.'
+    $hash = (Get-FileHash -LiteralPath $output -Algorithm SHA256).Hash.ToLowerInvariant()
+    "$hash  $stem.zip" | Set-Content -LiteralPath (Join-Path $dist "$stem.sha256")
+    Write-Host "Local unmanaged authoring package: $output"
+    Write-Warning 'No environment was changed. Import, agent creation, app registration, publication and Teams behavior remain unverified. This is not a managed customer release.'
 } finally {
-    if (Test-Path -LiteralPath $work) { Remove-Item -LiteralPath $work -Recurse -Force }
+    Pop-Location
+    if ($work -and (Test-Path -LiteralPath $work)) {
+        $resolved = (Resolve-Path -LiteralPath $work).Path
+        $expectedRoot = (Join-Path $root '.solution-build') + '\'
+        if (-not $resolved.StartsWith($expectedRoot, [StringComparison]::OrdinalIgnoreCase)) { throw "Unsafe build cleanup path: $resolved" }
+        Remove-Item -LiteralPath $resolved -Recurse -Force
+    }
 }

@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 
 export function evaluateWorkflow(expression, context) {
+  if (typeof expression !== "string") return structuredClone(expression);
   let position = expression.startsWith("@") ? 1 : 0;
   const skip = () => { while (/\s/.test(expression[position] ?? "") && position < expression.length) position++; };
   function readString() {

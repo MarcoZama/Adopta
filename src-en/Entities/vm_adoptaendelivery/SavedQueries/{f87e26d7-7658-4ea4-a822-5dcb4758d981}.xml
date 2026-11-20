@@ -1,0 +1,45 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<savedqueries xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <savedquery>
+    <IsCustomizable>1</IsCustomizable>
+    <CanBeDeleted>0</CanBeDeleted>
+    <isquickfindquery>0</isquickfindquery>
+    <isprivate>0</isprivate>
+    <isdefault>1</isdefault>
+    <savedqueryid>{f87e26d7-7658-4ea4-a822-5dcb4758d981}</savedqueryid>
+    <layoutxml>
+      <grid name="resultset" jump="vm_name" select="1" icon="1" preview="1">
+        <row name="result" id="vm_adoptaendeliveryid">
+          <cell name="vm_name" width="300" />
+          <cell name="createdon" width="125" />
+          <cell name="vm_recipientobject" width="150" />
+          <cell name="vm_deliverystatus" width="150" />
+          <cell name="vm_attempts" width="150" />
+          <cell name="vm_sentat" width="150" />
+        </row>
+      </grid>
+    </layoutxml>
+    <querytype>0</querytype>
+    <fetchxml>
+      <fetch version="1.0" mapping="logical">
+        <entity name="vm_adoptaendelivery">
+          <attribute name="vm_adoptaendeliveryid" />
+          <attribute name="vm_name" />
+          <attribute name="createdon" />
+          <order attribute="vm_name" descending="false" />
+          <filter type="and">
+            <condition attribute="statecode" operator="eq" value="0" />
+          </filter>
+          <attribute name="vm_recipientobject" />
+          <attribute name="vm_deliverystatus" />
+          <attribute name="vm_attempts" />
+          <attribute name="vm_sentat" />
+        </entity>
+      </fetch>
+    </fetchxml>
+    <IntroducedVersion>1.0</IntroducedVersion>
+    <LocalizedNames>
+      <LocalizedName description="Active Adopta Deliverys" languagecode="1033" />
+    </LocalizedNames>
+  </savedquery>
+</savedqueries>

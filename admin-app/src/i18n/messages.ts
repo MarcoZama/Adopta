@@ -71,9 +71,9 @@ const it = {
     logoHint: "PNG o JPG quadrato. Si applica subito, senza salvare.",
     logoAfterCreate: "Disponibile dopo aver creato la configurazione.",
     languageSection: "Lingua",
-    defaultLanguage: "Lingua predefinita",
+    defaultLanguage: "Lingua di riserva delle app",
     defaultLanguageHint:
-      "Lingua iniziale delle nuove comunicazioni e delle app. L'agente la usa con gli utenti il cui profilo non è in italiano né in inglese.",
+      "Usata solo dalle app quando non esiste una scelta dell'utente e il browser non è italiano o inglese. Non cambia la lingua degli agenti o delle nuove card.",
     knowledge: "Knowledge dell'Adoption Coach",
     knowledgeUrl: "URL della libreria SharePoint",
     knowledgeHint: "Cartella o libreria che il Coach usa come knowledge. Gli utenti devono poterla leggere.",
@@ -201,9 +201,9 @@ const en: Messages = {
     logoHint: "Square PNG or JPG. Applied right away, without saving.",
     logoAfterCreate: "Available after the configuration is created.",
     languageSection: "Language",
-    defaultLanguage: "Default language",
+    defaultLanguage: "App fallback language",
     defaultLanguageHint:
-      "Starting language of new communications and of the apps. The agent uses it with users whose profile is neither Italian nor English.",
+      "Used only by the apps when no user preference exists and the browser is neither Italian nor English. Does not change the agents or new cards.",
     knowledge: "Adoption Coach knowledge",
     knowledgeUrl: "SharePoint library URL",
     knowledgeHint: "Folder or library the Coach uses as knowledge. Users must be able to read it.",

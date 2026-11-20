@@ -1,0 +1,123 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ImportExportXml xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" OrganizationVersion="9.2.26101.177" OrganizationSchemaType="Standard" CRMServerServiceabilityVersion="9.2.26101.00177">
+  <Entities />
+  <Roles />
+  <Workflows />
+  <FieldSecurityProfiles />
+  <Templates />
+  <EntityImageConfigs>
+    <EntityImageConfig>
+      <parententitylogicalname>vm_adoptaensetting</parententitylogicalname>
+      <primaryimageattribute>vm_logo</primaryimageattribute>
+    </EntityImageConfig>
+  </EntityImageConfigs>
+  <AttributeImageConfigs>
+    <AttributeImageConfig>
+      <attributelogicalname>vm_logo</attributelogicalname>
+      <parententitylogicalname>vm_adoptaensetting</parententitylogicalname>
+      <canstorefullimage>1</canstorefullimage>
+    </AttributeImageConfig>
+  </AttributeImageConfigs>
+  <EntityMaps />
+  <EntityRelationships />
+  <OrganizationSettings />
+  <optionsets />
+  <CustomControls />
+  <AppModuleSiteMaps />
+  <AppModules />
+  <EntityDataProviders />
+  <CanvasApps />
+  <AIModels>
+    <AIModel>
+      <msdyn_aimodelid>{18d7ca29-7460-4d39-90f8-7990800c497c}</msdyn_aimodelid>
+      <msdyn_name>Adopta EN ClassifyDepartment</msdyn_name>
+      <msdyn_templateid>{edfdb190-3791-45d8-9a6c-8f90a37c278a}</msdyn_templateid>
+      <statecode>1</statecode>
+      <statuscode>1</statuscode>
+      <IsCustomizable>1</IsCustomizable>
+      <msdyn_activerunconfigurationid>{bc94a0ee-4095-47f0-9fb3-ababda75140d}</msdyn_activerunconfigurationid>
+      <AIConfigurations>
+        <AIConfiguration>
+          <msdyn_aiconfigurationid>{bc94a0ee-4095-47f0-9fb3-ababda75140d}</msdyn_aiconfigurationid>
+          <msdyn_customconfiguration>{"version":"GptDynamicPrompt-2","prompt":[{"type":"literal","text":"Classify the user's department into one of these categories:\r\nIT, Engineering, Operations, PMO, HR, Legal, Finance, Procurement, Marketing, Customer Service, Consulting, Sales and Account Management.\n\r\n\r\nDepartment value:   "},{"type":"inputVariable","id":"department"},{"type":"literal","text":" \n\rReturn a text and only one of the following:\r\nIT, Engineering, Operations, PMO, HR, Legal, Finance, Procurement, Marketing, Customer Service, Consulting, Sales and Account Management.\r\n\rIf uncertain, return 'NA'."}],"definitions":{"inputs":[{"id":"department","text":"department","type":"text","quickTestValue":"Technology"}],"formulas":[],"data":[],"output":{"formats":["text"]}},"modelParameters":{"modelType":"gpt-5-chat","gptParameters":{"temperature":0}},"settings":{"recordRetrievalLimit":30,"shouldPreserveRecordLinks":null,"runtime":null},"code":"","signature":""}</msdyn_customconfiguration>
+          <msdyn_majoriterationnumber>5</msdyn_majoriterationnumber>
+          <msdyn_minoriterationnumber>0</msdyn_minoriterationnumber>
+          <msdyn_name>18d7ca29-7460-4d39-90f8-7990800c497c_10/27/2026 3:06:16 PM</msdyn_name>
+          <msdyn_modelrundataspecification>H4sIAAAAAAAACpWQzQ6CMBCEX8XsuRcT44Eb/iVeJAHifZVFm0DbtNtEQnh3i2gkwsXzzH4zsy1khq4HbWvkM1kntYJoKeCojOdUa94rltxA1MJOOlNhc8KaIAIQEDNbefFMrpcLMmi5JsVT80gTkBgOKVhBVGLlSEDemN6UBZq6QScAi0IOnq1WTI8ZYjyxjMFs/Ze7QUfr1YfeBX7i+d918y3yIXgyoJRKuntK6Pp3/l4dXuriLU/OQ8UnwgbOJJYBAAA=</msdyn_modelrundataspecification>
+          <msdyn_type>190690001</msdyn_type>
+          <msdyn_aimodelid>{18d7ca29-7460-4d39-90f8-7990800c497c}</msdyn_aimodelid>
+          <msdyn_trainedmodelaiconfigurationpareid>{22d6bace-1423-46fa-8742-17ca067aca6f}</msdyn_trainedmodelaiconfigurationpareid>
+          <statecode>2</statecode>
+          <statuscode>7</statuscode>
+          <IsCustomizable>1</IsCustomizable>
+          <msdyn_templateversion>1</msdyn_templateversion>
+        </AIConfiguration>
+        <AIConfiguration>
+          <msdyn_aiconfigurationid>{22d6bace-1423-46fa-8742-17ca067aca6f}</msdyn_aiconfigurationid>
+          <msdyn_majoriterationnumber>1</msdyn_majoriterationnumber>
+          <msdyn_minoriterationnumber>0</msdyn_minoriterationnumber>
+          <msdyn_modeldata>3031a5ae-6bc6-4f00-ace3-40d924b0c55f</msdyn_modeldata>
+          <msdyn_name>18d7ca29-7460-4d39-90f8-7990800c497c_Training_8/6/2026 9:19:12 AM</msdyn_name>
+          <msdyn_modelrundataspecification>
+        {
+          "schemaVersion": 2,
+          "input": {},
+          "output": {}
+        }
+      </msdyn_modelrundataspecification>
+          <msdyn_type>190690000</msdyn_type>
+          <msdyn_aimodelid>{18d7ca29-7460-4d39-90f8-7990800c497c}</msdyn_aimodelid>
+          <statecode>2</statecode>
+          <statuscode>6</statuscode>
+          <IsCustomizable>1</IsCustomizable>
+          <msdyn_templateversion>1</msdyn_templateversion>
+        </AIConfiguration>
+      </AIConfigurations>
+    </AIModel>
+  </AIModels>
+  <connectionreferences>
+    <connectionreference connectionreferencelogicalname="vm_AdoptaEN.shared_commondataserviceforapps.shared-commondataser-6e49f493-498a-4491-a695-495acadecad3">
+      <connectionreferencedisplayname>Adopta - Dataverse</connectionreferencedisplayname>
+      <connectorid>/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps</connectorid>
+      <iscustomizable>0</iscustomizable>
+      <promptingbehavior>0</promptingbehavior>
+      <statecode>0</statecode>
+      <statuscode>1</statuscode>
+    </connectionreference>
+    <connectionreference connectionreferencelogicalname="vm_AdoptaEN.shared_office365users.shared-office365user-8dfd2f1e-f214-4d98-99eb-7efc58c1608f">
+      <connectionreferencedisplayname>Adopta - Office 365 Users</connectionreferencedisplayname>
+      <connectorid>/providers/Microsoft.PowerApps/apis/shared_office365users</connectorid>
+      <iscustomizable>0</iscustomizable>
+      <promptingbehavior>0</promptingbehavior>
+      <statecode>0</statecode>
+      <statuscode>1</statuscode>
+    </connectionreference>
+    <connectionreference connectionreferencelogicalname="vm_adoptaendataverse">
+      <connectionreferencedisplayname>Adopta Communications - Dataverse</connectionreferencedisplayname>
+      <connectorid>/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps</connectorid>
+      <iscustomizable>1</iscustomizable>
+      <promptingbehavior>0</promptingbehavior>
+      <statecode>0</statecode>
+      <statuscode>1</statuscode>
+    </connectionreference>
+    <connectionreference connectionreferencelogicalname="vm_adoptaenoffice365groups">
+      <connectionreferencedisplayname>Adopta Communications - Office 365 Groups</connectionreferencedisplayname>
+      <connectorid>/providers/Microsoft.PowerApps/apis/shared_office365groups</connectorid>
+      <iscustomizable>1</iscustomizable>
+      <promptingbehavior>0</promptingbehavior>
+      <statecode>0</statecode>
+      <statuscode>1</statuscode>
+    </connectionreference>
+    <connectionreference connectionreferencelogicalname="vm_adoptaenteams">
+      <connectionreferencedisplayname>Adopta Communications - Microsoft Teams</connectionreferencedisplayname>
+      <connectorid>/providers/Microsoft.PowerApps/apis/shared_teams</connectorid>
+      <iscustomizable>1</iscustomizable>
+      <promptingbehavior>0</promptingbehavior>
+      <statecode>0</statecode>
+      <statuscode>1</statuscode>
+    </connectionreference>
+  </connectionreferences>
+  <Languages>
+    <Language>1033</Language>
+  </Languages>
+</ImportExportXml>

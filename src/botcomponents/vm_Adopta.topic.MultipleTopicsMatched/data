@@ -8,31 +8,25 @@ beginDialog:
       id: setVariable_M6434i
       variable: init:Topic.IntentOptions
       value: =System.Recognizer.IntentOptions
-
     - kind: SetVariable
       id: setTextVariable_0
       variable: Topic.NoneOfTheseDisplayName
-      value: =If(Text(Global.UserLanguage) = "en", "None of these", "Nessuno di questi")
-
+      value: ="Nessuno di questi"
     - kind: EditTable
       id: sendMessage_g5Ls09
       changeType: Add
       itemsVariable: Topic.IntentOptions
-      value: "={ DisplayName: Topic.NoneOfTheseDisplayName, TopicId: \"NoTopic\", TriggerId: \"NoTrigger\", Score: 1.0 }"
-
+      value: '={ DisplayName: Topic.NoneOfTheseDisplayName, TopicId: "NoTopic", TriggerId: "NoTrigger", Score: 1.0 }'
     - kind: Question
       id: question_zf2HhP
       interruptionPolicy:
         allowInterruption: false
-
       alwaysPrompt: true
       variable: System.Recognizer.SelectedIntent
-      prompt: |-
-        {If(Text(Global.UserLanguage) = "en", "To clarify, did you mean:", "Per chiarezza, intendevi:")}
+      prompt: "Per chiarezza, intendevi:"
       entity:
         kind: DynamicClosedListEntity
         items: =Topic.IntentOptions
-
     - kind: ConditionGroup
       id: conditionGroup_60PuXb
       conditions:

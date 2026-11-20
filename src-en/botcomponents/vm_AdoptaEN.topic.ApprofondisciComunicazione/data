@@ -1,0 +1,53 @@
+kind: AdaptiveDialog
+inputs:
+  - kind: AutomaticTaskInput
+    propertyName: Selection
+    description: Use latest only when the user explicitly requests the latest communication; title for an explicitly named communication; selected for a clear follow-up about the verified communication; otherwise unspecified. Never infer a different communication.
+    entity: StringPrebuiltEntity
+    shouldPromptUser: false
+    defaultValue: unspecified
+  - kind: AutomaticTaskInput
+    propertyName: Title
+    description: Exact communication title explicitly provided by the user, not an inferred title. Leave empty when absent.
+    entity: StringPrebuiltEntity
+    shouldPromptUser: false
+    defaultValue: =""
+modelDescription: Explain a received communication or its Microsoft 365 feature, usage or prerequisites, using the same verified pipeline as Teams cards. Use for explicit latest requests, an exact title, or explanatory follow-ups on the selected communication. Do not use for generic Microsoft 365 questions or practical prompts and work scenarios, which belong to Adoption Coach. This topic sends the final answer itself; do not add another answer.
+beginDialog:
+  kind: OnRecognizedIntent
+  id: main
+  intent:
+    triggerQueries:
+      - Explain my latest communication
+      - Tell me more about this communication
+      - Explain the feature prerequisites in this communication
+  actions:
+    - kind: SetVariable
+      id: selectionMode
+      variable: Topic.Mode
+      value: =If(Topic.Selection = "title" || !IsBlank(Trim(Topic.Title)), "title", Topic.Selection = "latest", "latest", !IsBlank(Global.CommunicationSelectedId), "id", "latest")
+    - kind: SetVariable
+      id: priorId
+      variable: Topic.PriorId
+      value: =Global.CommunicationSelectedId
+    - kind: BeginDialog
+      id: resolveChat
+      dialog: vm_AdoptaEN.topic.RisolviComunicazione
+      input:
+        binding:
+          Mode: =Topic.Mode
+          CommunicationId: =Topic.PriorId
+          Title: =Topic.Title
+          Link: =""
+          MatchLink: =false
+          Request: =System.Activity.Text
+          ConfirmLatest: =Topic.Mode = "latest" && Topic.Selection <> "latest"
+    - kind: CancelAllDialogs
+      id: finish
+inputType:
+  properties:
+    Selection:
+      type: String
+    Title:
+      type: String
+outputType: {}

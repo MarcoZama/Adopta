@@ -1,5 +1,25 @@
 # Adopta Communications: code app
 
+## Edizioni IT / EN (sorgenti 1.0.0.18)
+
+Un progetto, due build separate: `npm run build:it` produce `dist-it`,
+`npm run build:en` produce `dist-en`. Entrambe le interfacce restano IT/EN.
+L'edizione e' visibile nell'intestazione e non puo' essere cambiata dall'utente.
+I binding condivisi in [shared](../shared/) selezionano tabelle, ID e flow
+prima della pubblicazione, senza modificare il testo libero delle comunicazioni.
+
+Gli agenti e le nuove card hanno la lingua fissa dell'edizione. La pianificazione
+salva anche `vm_language` coerentemente con la card; le card gia' pianificate
+mantengono il payload originale. `vm_defaultlanguage` ora riguarda soltanto il
+fallback delle app. La scelta UI precede lingua browser, fallback salvato ed edizione.
+
+`npm run build` resta un alias IT; il `power.config.json` presente e' IT e usa
+`dist-it`. Non eseguire un push EN con tale configurazione. Il setup EN e' bloccato
+finche' non vengono creati contesti e appId reali in un ambiente autorizzato;
+il setup IT verifica che l'ambiente richiesto coincida con quello configurato.
+Il confezionamento locale delle due app e' gestito dalla
+[build della soluzione](../deploy/README.md).
+
 L'app per comporre e inviare le comunicazioni. Dalla 1.0.0.11 sostituisce l'app canvas *Adopta Communications*, che non è più nella soluzione. È scritta in React e TypeScript con la [Power Apps client library](https://learn.microsoft.com/power-apps/developer/code-apps/overview) e Fluent UI 9. Offre:
 
 - elenco delle comunicazioni, nuova bozza e modifica;
@@ -8,7 +28,7 @@ L'app per comporre e inviare le comunicazioni. Dalla 1.0.0.11 sostituisce l'app 
 - eliminazione, annullamento della pianificazione e interruttore globale degli invii con *AdoptaManageCommunication*;
 - storico con esiti per destinatario e diagnostica. Chi non ha ricevuto la card perché non ha l'agente installato in Teams ha l'esito *Agente non installato*, con contatore e istruzioni;
 - interfaccia in italiano o in inglese, con il selettore **IT / EN** nella barra laterale. La scelta resta nel browser; senza scelta vale la lingua del browser, poi la *Lingua predefinita* di *Adopta Setting*. I testi sono in `src/i18n/messages.ts`, che traduce anche i messaggi italiani dei flow;
-- *Lingua della card* per ogni comunicazione: i pulsanti della card Teams e le risposte fisse dell'agente seguono quella lingua.
+- *Lingua della card* in sola lettura: le nuove card usano l'edizione installata; non la lingua selezionata nell'interfaccia.
 
 Titolo, nome dell'agente e logo vengono letti da *Adopta Setting*, configurata nella code app *Adopta Admin (code app)* (vedi [admin-app/README.md](../admin-app/README.md)).
 
@@ -80,7 +100,7 @@ Dopo l'unpack controlla due cose:
 
 | Cosa | Dove |
 |---|---|
-| Tabelle e flow | `src/data/generated.ts` è l'unico file che conosce il codice generato. Trova i servizi per nome di file, senza distinguere maiuscole e minuscole. Se ne manca uno, l'app mostra quale generare |
+| Tabelle e flow | `src/data/generated.ts` collega i metadati SDK generati all'adattatore condiviso in `shared/power-apps.ts`. I servizi mancanti producono un errore esplicito, senza usare il backend dell'altra edizione |
 | Operazioni | `src/data/repository.ts`: letture, salvataggio della bozza, gruppi, flow e configurazione |
 | Input dei flow | Trigger *When Power Apps calls a flow (V2)*: `text` = CommunicationId, `text_1` = Operation |
 | Connessione dei flow | I due flow eseguono le azioni Dataverse con l'identità dell'utente (impersonazione), quindi l'app passa loro la connessione Dataverse dell'utente. In `power.config.json` ogni flow ha `workflowDetails.dependencies` verso il riferimento `shared_commondataserviceforapps`. La CLI non lo genera, perché per i flow aggiunge solo le connessioni "fornite dall'utente": lo aggiunge `setup.ps1`. Senza, le chiamate ai flow falliscono con "Unable to find api with id" |

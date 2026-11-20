@@ -1,0 +1,10 @@
+<botcomponent schemaname="vm_AdoptaEN.action.MicrosoftDataverse-Listrowsfromselectedenvironment">
+  <componenttype>9</componenttype>
+  <iscustomizable>0</iscustomizable>
+  <name>Get My Recent Communications</name>
+  <parentbotid>
+    <schemaname>vm_AdoptaEN</schemaname>
+  </parentbotid>
+  <statecode>0</statecode>
+  <statuscode>1</statuscode>
+</botcomponent>

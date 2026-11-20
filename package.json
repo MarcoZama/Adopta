@@ -3,10 +3,11 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "node --test tests/communication-details.test.mjs",
+    "test": "node --test tests/communication-details.test.mjs tests/editions.test.mjs",
     "validate": "node deploy/validate-solution.mjs"
   },
   "devDependencies": {
+    "@microsoft/power-apps": "1.5.0",
     "yaml": "2.8.1"
   }
 }

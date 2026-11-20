@@ -1,0 +1,50 @@
+{
+  "it": {
+    "label": "Adopta IT",
+    "language": "it",
+    "lcid": 1040,
+    "source": "src",
+    "solution": "Adopta",
+    "agent": "vm_Adopta",
+    "coach": "vm_AdoptaAdoptionCoach",
+    "prefix": "vm_adopta",
+    "flowPrefix": "Adopta",
+    "managedBaseline": null,
+    "apps": {
+      "communications": {
+        "project": "code-app",
+        "schema": "vm_adoptacommunicationscodeapp_d7690",
+        "appId": "dbcfaf8d-0436-4734-b8ad-724eeb1f6841"
+      },
+      "admin": {
+        "project": "admin-app",
+        "schema": "vm_adoptaadmincodeapp_daf99",
+        "appId": "2d6ba304-055d-4859-be93-d37c1c20df66"
+      }
+    }
+  },
+  "en": {
+    "label": "Adopta EN",
+    "language": "en",
+    "lcid": 1033,
+    "source": "src-en",
+    "solution": "AdoptaEN",
+    "agent": "vm_AdoptaEN",
+    "coach": "vm_AdoptaENAdoptionCoach",
+    "prefix": "vm_adoptaen",
+    "flowPrefix": "AdoptaEN",
+    "managedBaseline": null,
+    "apps": {
+      "communications": {
+        "project": "code-app",
+        "schema": "vm_adoptaencommunicationscodeapp_d7690",
+        "appId": null
+      },
+      "admin": {
+        "project": "admin-app",
+        "schema": "vm_adoptaenadmincodeapp_daf99",
+        "appId": null
+      }
+    }
+  }
+}

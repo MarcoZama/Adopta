@@ -6,12 +6,9 @@ beginDialog:
   actions:
     - kind: SendActivity
       id: sendMessage_OPsT1O
-      activity: |-
-        {If(Text(Global.UserLanguage) = "en", "How can I help you?", "Come posso aiutarti?")}
-
+      activity: Come posso aiutarti?
     - kind: ClearAllVariables
       id: clearAllVariables_73bTFR
       variables: ConversationScopedVariables
-
     - kind: CancelAllDialogs
       id: cancelAllDialogs_12Gt21

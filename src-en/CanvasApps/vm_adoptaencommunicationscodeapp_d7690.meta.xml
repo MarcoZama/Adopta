@@ -1,0 +1,34 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<CanvasApp xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <Name>vm_adoptaencommunicationscodeapp_d7690</Name>
+  <AppVersion>2026-11-04T14:35:49Z</AppVersion>
+  <Status>Ready</Status>
+  <CreatedByClientVersion>0.0.0.0</CreatedByClientVersion>
+  <MinClientVersion>0.0.0.0</MinClientVersion>
+  <Tags>{}</Tags>
+  <IsCdsUpgraded>0</IsCdsUpgraded>
+  <GalleryItemId xsi:nil="true"></GalleryItemId>
+  <BackgroundColor>RGBA(255,255,255,1)</BackgroundColor>
+  <DisplayName>Adopta EN Communications (code app)</DisplayName>
+  <Description></Description>
+  <CommitMessage></CommitMessage>
+  <Publisher></Publisher>
+  <AuthorizationReferences>[]</AuthorizationReferences>
+  <ConnectionReferences>{"b4c70f41-6f95-4bb8-9f7d-6150f84d36dd":{"id":"/providers/Microsoft.PowerApps/apis/shared_logicflows","displayName":"Logic flows","iconUri":"https://static.powerapps.com/resource/ppcr/releases/v1.0.1827/1.0.1827.4908/logicflows/icon.png","dataSources":["adoptaschedulecommunication"],"dependencies":["e891a1c3-ee68-4259-a78b-963d8e9fd250"],"dependents":[],"parameterHints":{"workflowEntityId":{"value":"46412212-8e45-42ac-b0bc-33404426db44"},"workflowDisplayName":{"value":"AdoptaENScheduleCommunication"},"workflowName":{"value":"96df3174-e596-4d36-b060-2c2176fa9b35"}},"parameterHintsV2":{"workflowEntityId":{"value":"46412212-8e45-42ac-b0bc-33404426db44"},"workflowDisplayName":{"value":"AdoptaENScheduleCommunication"},"workflowName":{"value":"96df3174-e596-4d36-b060-2c2176fa9b35"},"shared_commondataserviceforapps":{"value":"e891a1c3-ee68-4259-a78b-963d8e9fd250"}},"isOnPremiseConnection":false,"bypassConsent":false,"dataSets":{},"apiTier":"Standard","actions":[]},"04115b98-e70e-4bfe-aba5-92da8b04d82b":{"id":"/providers/Microsoft.PowerApps/apis/shared_logicflows","displayName":"Logic flows","iconUri":"https://static.powerapps.com/resource/ppcr/releases/v1.0.1827/1.0.1827.4908/logicflows/icon.png","dataSources":["adoptamanagecommunication"],"dependencies":["e891a1c3-ee68-4259-a78b-963d8e9fd250"],"dependents":[],"parameterHints":{"workflowEntityId":{"value":"f32fb76b-d3f0-4237-aa9d-1eb3dfdefcfc"},"workflowDisplayName":{"value":"AdoptaENManageCommunication"},"workflowName":{"value":"f373a8ba-7adc-446c-8c52-3bca501039e3"}},"parameterHintsV2":{"workflowEntityId":{"value":"f32fb76b-d3f0-4237-aa9d-1eb3dfdefcfc"},"workflowDisplayName":{"value":"AdoptaENManageCommunication"},"workflowName":{"value":"f373a8ba-7adc-446c-8c52-3bca501039e3"},"shared_commondataserviceforapps":{"value":"e891a1c3-ee68-4259-a78b-963d8e9fd250"}},"isOnPremiseConnection":false,"bypassConsent":false,"dataSets":{},"apiTier":"Standard","actions":[]},"e891a1c3-ee68-4259-a78b-963d8e9fd250":{"id":"/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps","displayName":"Microsoft Dataverse","iconUri":"https://static.powerapps.com/resource/ppcr/releases/v1.0.1834/1.0.1834.5101/commondataserviceforapps/icon.png","dataSources":[],"dependencies":[],"dependents":["b4c70f41-6f95-4bb8-9f7d-6150f84d36dd","04115b98-e70e-4bfe-aba5-92da8b04d82b"],"parameterHints":{},"parameterHintsV2":{},"isOnPremiseConnection":false,"bypassConsent":false,"dataSets":{},"apiTier":"Premium","actions":[]}}</ConnectionReferences>
+  <DatabaseReferences>{"default.cds":{"databaseDetails":{"referenceType":"Environmental","environmentName":"default.cds","overrideValues":{"status":"NotSpecified","environmentVariableName":""}},"dataSources":{"adoptacommunications":{"entitySetName":"vm_adoptaencommunications","logicalName":"vm_adoptaencommunication"},"adoptacommunicationgroups":{"entitySetName":"vm_adoptaencommunicationgroups","logicalName":"vm_adoptaencommunicationgroup"},"adoptaaudiencegroups":{"entitySetName":"vm_adoptaenaudiencegroups","logicalName":"vm_adoptaenaudiencegroup"},"adoptadeliverys":{"entitySetName":"vm_adoptaendeliveries","logicalName":"vm_adoptaendelivery"},"adoptasettings":{"entitySetName":"vm_adoptaensettings","logicalName":"vm_adoptaensetting"}}}}</DatabaseReferences>
+  <AppComponents>[]</AppComponents>
+  <AppComponentDependencies>[]</AppComponentDependencies>
+  <CanConsumeAppPass>1</CanConsumeAppPass>
+  <CanvasAppType>4</CanvasAppType>
+  <BypassConsent>0</BypassConsent>
+  <AdminControlBypassConsent>0</AdminControlBypassConsent>
+  <EmbeddedApp xsi:nil="true"></EmbeddedApp>
+  <IntroducedVersion>1.0</IntroducedVersion>
+  <CdsDependencies>{"cdsdependencies":[{"componenttype":29,"dependencyid":"46412212-8e45-42ac-b0bc-33404426db44","componenttypeplatformname":"Workflow"},{"componenttype":29,"dependencyid":"f32fb76b-d3f0-4237-aa9d-1eb3dfdefcfc","componenttypeplatformname":"Workflow"},{"componenttype":1,"logicalname":"vm_adoptaencommunication"},{"componenttype":1,"logicalname":"vm_adoptaencommunicationgroup"},{"componenttype":1,"logicalname":"vm_adoptaenaudiencegroup"},{"componenttype":1,"logicalname":"vm_adoptaendelivery"},{"componenttype":1,"logicalname":"vm_adoptaensetting"}]}</CdsDependencies>
+  <IsCustomizable>1</IsCustomizable>
+  <CodeAppPackageUris>
+    <CodeAppPackageUri>/CanvasApps/vm_adoptaencommunicationscodeapp_d7690_CodeAppPackages/index.html_ContentType_text/html</CodeAppPackageUri>
+    <CodeAppPackageUri>/CanvasApps/vm_adoptaencommunicationscodeapp_d7690_CodeAppPackages/assets/index-D5VkMmc3.css_ContentType_text/css</CodeAppPackageUri>
+    <CodeAppPackageUri>/CanvasApps/vm_adoptaencommunicationscodeapp_d7690_CodeAppPackages/assets/index-erMoL4tC.js_ContentType_application/javascript</CodeAppPackageUri>
+  </CodeAppPackageUris>
+</CanvasApp>

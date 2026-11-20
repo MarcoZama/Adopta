@@ -1,0 +1,44 @@
+kind: TaskDialog
+inputs:
+  - kind: ManualTaskInput
+    propertyName: organization
+    value: =Env.vm_AdoptaENDataverseUrl
+  - kind: ManualTaskInput
+    propertyName: entityName
+    value: vm_adoptaendeliveries
+  - kind: ManualTaskInput
+    propertyName: fetchXml
+    value: ="<fetch top='1'><entity name='vm_adoptaendelivery'><attribute name='vm_adoptaendeliveryid'/><attribute name='vm_sentat'/><order attribute='vm_sentat' descending='true'/><order attribute='vm_adoptaendeliveryid' descending='false'/><filter type='and'><condition attribute='vm_deliverystatus' operator='eq' value='100000002'/>" & If(System.User.IsLoggedIn && !IsBlank(Trim(System.User.PrincipalName)), "<condition attribute='vm_recipientupn' operator='eq' value='" & Substitute(Substitute(Substitute(Substitute(Substitute(Trim(System.User.PrincipalName), "&", "&amp;"), "<", "&lt;"), ">", "&gt;"), "'", "&apos;"), Char(34), "&quot;") & "'/>", "<condition attribute='vm_adoptaendeliveryid' operator='null'/>") & "</filter><link-entity name='vm_adoptaencommunication' from='vm_adoptaencommunicationid' to='vm_communication' link-type='inner' alias='communication'><attribute name='vm_adoptaencommunicationid' alias='communicationid'/><attribute name='vm_title' alias='communicationtitle'/><attribute name='vm_body' alias='communicationbody'/><attribute name='vm_link' alias='communicationlink'/></link-entity></entity></fetch>"
+modelDisplayName: Get My Recent Communications
+modelDescription: Read only the single most recent Sent delivery for the authenticated user by vm_sentat, with current archive title, body, source link and communication ID. Stable ID tie order is not precise chronology. Never change recipients or query inputs.
+outputs:
+  - propertyName: "@odata.nextLink"
+    name: Next link
+    description: The url to fetch next page data.
+  - propertyName: value
+    name: value
+action:
+  kind: InvokeConnectorTaskAction
+  connectionReference: vm_AdoptaEN.shared_commondataserviceforapps.shared-commondataser-6e49f493-498a-4491-a695-495acadecad3
+  connectionProperties:
+    mode: Maker
+  operationId: ListRecordsWithOrganization
+  dynamicOutputSchema:
+    kind: Record
+    properties:
+      "@odata.nextLink":
+        displayName: Next link
+        description: The url to fetch next page data.
+        visibility: Advanced
+        order: 1
+        type: String
+      value:
+        order: 0
+        type:
+          kind: Table
+          properties:
+            dynamicProperties:
+              order: 0
+              type: Any
+outputMode: All
+triggerCondition: true

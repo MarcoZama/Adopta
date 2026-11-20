@@ -1,0 +1,117 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<forms xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <systemform>
+    <formid>{ce8684af-9317-4cff-8ce0-c8d77945598a}</formid>
+    <IntroducedVersion>1.0</IntroducedVersion>
+    <FormPresentation>1</FormPresentation>
+    <FormActivationState>1</FormActivationState>
+    <form showImage="true">
+      <tabs>
+        <tab verticallayout="true" id="{fae8612d-489f-45ce-94f6-f9b0fcb8f0ce}" IsUserDefined="1">
+          <labels>
+            <label description="General" languagecode="1033" />
+          </labels>
+          <columns>
+            <column width="100%">
+              <sections>
+                <section showlabel="false" showbar="false" IsUserDefined="0" id="{c44ba0a0-67bc-4d45-b88f-dda4d77cafff}">
+                  <labels>
+                    <label description="General" languagecode="1033" />
+                  </labels>
+                  <rows>
+                    <row>
+                      <cell id="{5d876b9e-92c5-4ee4-ade1-bbe6e37d4c25}">
+                        <labels>
+                          <label description="Name" languagecode="1033" />
+                        </labels>
+                        <control id="vm_name" classid="{4273EDBD-AC1D-40d3-9FB2-095C621B552D}" datafieldname="vm_Name" />
+                      </cell>
+                    </row>
+                    <row>
+                      <cell id="{7fa8a0f8-27f4-4363-9cb5-70887e23e385}">
+                        <labels>
+                          <label description="App title" languagecode="1033" />
+                        </labels>
+                        <control id="vm_apptitle" classid="{4273EDBD-AC1D-40d3-9FB2-095C621B552D}" datafieldname="vm_apptitle" />
+                      </cell>
+                    </row>
+                    <row>
+                      <cell id="{f615c6db-33a1-4d04-ac6c-9cfea03efcf8}">
+                        <labels>
+                          <label description="Agent name" languagecode="1033" />
+                        </labels>
+                        <control id="vm_agentname" classid="{4273EDBD-AC1D-40d3-9FB2-095C621B552D}" datafieldname="vm_agentname" />
+                      </cell>
+                    </row>
+                    <row>
+                      <cell id="{2e482449-afdc-4729-8203-13301f9fccc3}">
+                        <labels>
+                          <label description="Owner" languagecode="1033" />
+                        </labels>
+                        <control id="ownerid" classid="{270BD3DB-D9AF-4782-9025-509E298DEC0A}" datafieldname="ownerid" />
+                      </cell>
+                    </row>
+                  </rows>
+                </section>
+                <section showlabel="true" showbar="true" IsUserDefined="1" id="{f3fa8922-34e3-4871-be10-9bb618650053}">
+                  <labels>
+                    <label description="Agent and sending" languagecode="1033" />
+                  </labels>
+                  <rows>
+                    <row>
+                      <cell id="{bdddba0e-2b5c-463b-be95-b7447fd6a873}">
+                        <labels>
+                          <label description="Coach knowledge URL" languagecode="1033" />
+                        </labels>
+                        <control id="vm_coachknowledgeurl" classid="{71716B6C-711E-476c-8AB8-5D11542BFB47}" datafieldname="vm_coachknowledgeurl" />
+                      </cell>
+                    </row>
+                    <row>
+                      <cell id="{4510941b-4178-4227-8377-9b279c6389af}">
+                        <labels>
+                          <label description="Sending enabled" languagecode="1033" />
+                        </labels>
+                        <control id="vm_sendingenabled" classid="{67fac785-cd58-4f9f-abb3-4b7ddc6ed5ed}" datafieldname="vm_sendingenabled" />
+                      </cell>
+                    </row>
+                  </rows>
+                </section>
+                <section showlabel="true" showbar="true" IsUserDefined="1" id="{d6a8d966-51cc-49ea-8b61-0bff086bde0a}">
+                  <labels>
+                    <label description="Apply status" languagecode="1033" />
+                  </labels>
+                  <rows>
+                    <row>
+                      <cell id="{bc182766-c13d-4356-9dd5-38389125a7e0}">
+                        <labels>
+                          <label description="Apply status" languagecode="1033" />
+                        </labels>
+                        <control id="vm_applystatus" classid="{E0DECE4B-6FC8-4a8f-A065-082708572369}" datafieldname="vm_applystatus" disabled="true" />
+                      </cell>
+                    </row>
+                    <row>
+                      <cell id="{e47121a7-53a1-49b0-892a-14ee52c138cf}">
+                        <labels>
+                          <label description="Applied on" languagecode="1033" />
+                        </labels>
+                        <control id="vm_appliedon" classid="{5b773807-9fb2-42db-97c3-7a91eff8adff}" datafieldname="vm_appliedon" disabled="true" />
+                      </cell>
+                    </row>
+                  </rows>
+                </section>
+              </sections>
+            </column>
+          </columns>
+        </tab>
+      </tabs>
+    </form>
+    <IsCustomizable>1</IsCustomizable>
+    <CanBeDeleted>1</CanBeDeleted>
+    <LocalizedNames>
+      <LocalizedName description="Information" languagecode="1033" />
+    </LocalizedNames>
+    <Descriptions>
+      <Description description="A form for this entity." languagecode="1033" />
+    </Descriptions>
+  </systemform>
+</forms>

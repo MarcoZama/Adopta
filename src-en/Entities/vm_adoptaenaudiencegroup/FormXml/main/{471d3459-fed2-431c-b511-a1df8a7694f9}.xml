@@ -1,0 +1,79 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<forms xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <systemform>
+    <formid>{471d3459-fed2-431c-b511-a1df8a7694f9}</formid>
+    <IntroducedVersion>1.0</IntroducedVersion>
+    <FormPresentation>1</FormPresentation>
+    <FormActivationState>1</FormActivationState>
+    <form>
+      <tabs>
+        <tab verticallayout="true" id="{5edc8d01-0ae7-42b4-b337-0d6bbeb669e1}" IsUserDefined="1">
+          <labels>
+            <label description="General" languagecode="1033" />
+          </labels>
+          <columns>
+            <column width="100%">
+              <sections>
+                <section showlabel="false" showbar="false" IsUserDefined="0" id="{8946df6f-67f8-47ce-ba58-788d1d0e43d1}">
+                  <labels>
+                    <label description="General" languagecode="1033" />
+                  </labels>
+                  <rows>
+                    <row>
+                      <cell id="{37af41b3-e9a7-4383-a661-4d6150fe37e7}">
+                        <labels>
+                          <label description="Name" languagecode="1033" />
+                        </labels>
+                        <control id="vm_name" classid="{4273EDBD-AC1D-40d3-9FB2-095C621B552D}" datafieldname="vm_name" />
+                      </cell>
+                    </row>
+                    <row>
+                      <cell id="{1ca41bf9-6a0b-4911-bb92-18860687b0a2}">
+                        <labels>
+                          <label description="Owner" languagecode="1033" />
+                        </labels>
+                        <control id="ownerid" classid="{270BD3DB-D9AF-4782-9025-509E298DEC0A}" datafieldname="ownerid" />
+                      </cell>
+                    </row>
+                    <row>
+                      <cell id="{a0ba9aaf-d614-4764-8278-d676613360bd}">
+                        <labels>
+                          <label description="Entra group ID" languagecode="1033" />
+                        </labels>
+                        <control id="vm_entraobject" classid="{4273edbd-ac1d-40d3-9fb2-095c621b552d}" datafieldname="vm_entraobject" />
+                      </cell>
+                    </row>
+                    <row>
+                      <cell id="{a60c37cc-63e7-4ba1-bf2f-a339010a440e}">
+                        <labels>
+                          <label description="Group type" languagecode="1033" />
+                        </labels>
+                        <control id="vm_grouptype" classid="{3ef39988-22bb-4f0b-bbbe-64b5a3748aee}" datafieldname="vm_grouptype" />
+                      </cell>
+                    </row>
+                    <row>
+                      <cell id="{6637518a-58f1-443d-b2c1-03291494ade8}">
+                        <labels>
+                          <label description="Enabled" languagecode="1033" />
+                        </labels>
+                        <control id="vm_enabled" classid="{67fac785-cd58-4f9f-abb3-4b7ddc6ed5ed}" datafieldname="vm_enabled" />
+                      </cell>
+                    </row>
+                  </rows>
+                </section>
+              </sections>
+            </column>
+          </columns>
+        </tab>
+      </tabs>
+    </form>
+    <IsCustomizable>1</IsCustomizable>
+    <CanBeDeleted>1</CanBeDeleted>
+    <LocalizedNames>
+      <LocalizedName description="Information" languagecode="1033" />
+    </LocalizedNames>
+    <Descriptions>
+      <Description description="A form for this entity." languagecode="1033" />
+    </Descriptions>
+  </systemform>
+</forms>

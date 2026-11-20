@@ -13,18 +13,12 @@ beginDialog:
       - Arrivederci
       - No, grazie. Arrivederci.
       - A più tardi
-      - Goodbye
-      - Bye
-      - See you later
-
   actions:
     - kind: Question
       id: question_zf2HhP
       variable: Topic.EndConversation
-      prompt: |-
-        {If(Text(Global.UserLanguage) = "en", "Do you want to end the conversation?", "Vuoi terminare la conversazione?")}
+      prompt: Vuoi terminare la conversazione?
       entity: BooleanPrebuiltEntity
-
     - kind: ConditionGroup
       id: condition_DGc1Wy
       conditions:
@@ -34,11 +28,9 @@ beginDialog:
             - kind: BeginDialog
               id: dn94DC
               dialog: vm_Adopta.topic.EndofConversation
-
         - id: condition_DGc1Wy-item-1
           condition: =Topic.EndConversation = false
           actions:
             - kind: SendActivity
               id: sendMessage_LdLhmf
-              activity: |-
-                {If(Text(Global.UserLanguage) = "en", "Go ahead. I'm listening.", "Continua. Sono in attesa.")}
+              activity: Continua. Sono in attesa.

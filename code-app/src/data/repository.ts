@@ -13,6 +13,7 @@ import {
   type TableService,
 } from "./generated";
 import { text, toLanguage } from "../i18n";
+import { edition } from "../../../shared/edition";
 import {
   CommunicationStatus,
   type AudienceGroup,
@@ -25,8 +26,8 @@ import {
   type ManageOperation,
 } from "./types";
 
-export const DEFAULT_APP_TITLE = "Adopta Communications";
-export const DEFAULT_AGENT_NAME = "Adopta";
+export const DEFAULT_APP_TITLE = `${edition().label} Communications`;
+export const DEFAULT_AGENT_NAME = edition().label;
 export const NO_COMMUNICATION_ID = "00000000-0000-0000-0000-000000000000";
 
 export const HISTORY_LIMIT = 500;
@@ -119,7 +120,7 @@ export async function saveCommunication(draft: DraftInput, existingId?: string):
     vm_body: draft.body,
     vm_link: draft.link.trim() || null,
     vm_cardmessage: draft.cardMessage.trim() || null,
-    vm_language: draft.language,
+    vm_language: edition().language,
     vm_scheduledat: draft.scheduledAt.toISOString(),
     vm_timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || "Device local time",
     vm_communicationstatus: CommunicationStatus.Draft,

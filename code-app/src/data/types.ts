@@ -20,7 +20,7 @@ export const DeliveryStatus = {
   NotInstalled: 100000006,
 } as const;
 
-/** Language of a communication (vm_language) and of the apps: empty or unknown means Italian. */
+/** Archived card language. New cards use the fixed build edition. */
 export type CardLanguage = "it" | "en";
 
 export interface Communication {

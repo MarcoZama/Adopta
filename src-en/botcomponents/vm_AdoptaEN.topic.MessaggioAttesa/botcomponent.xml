@@ -1,0 +1,11 @@
+<botcomponent schemaname="vm_AdoptaEN.topic.MessaggioAttesa">
+  <componenttype>9</componenttype>
+  <description>Disabled: the Coach owns coaching progress messages. No automatic notice based on message length.</description>
+  <iscustomizable>0</iscustomizable>
+  <name>Waiting message</name>
+  <parentbotid>
+    <schemaname>vm_AdoptaEN</schemaname>
+  </parentbotid>
+  <statecode>1</statecode>
+  <statuscode>2</statuscode>
+</botcomponent>

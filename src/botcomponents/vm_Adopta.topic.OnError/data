@@ -8,7 +8,6 @@ beginDialog:
       id: setVariable_timestamp
       variable: init:Topic.CurrentTime
       value: =Text(Now(), DateTimeFormat.UTC)
-
     - kind: ConditionGroup
       id: condition_1
       conditions:
@@ -22,7 +21,6 @@ beginDialog:
                 Codice errore: {System.Error.Code}
                 ID conversazione: {System.Conversation.Id}
                 Ora (UTC): {Topic.CurrentTime}
-
       elseActions:
         - kind: ConditionGroup
           id: communicationError
@@ -32,30 +30,26 @@ beginDialog:
               actions:
                 - kind: SendActivity
                   id: explanationError
-                  activity: "{If(Global.CommunicationEnglish, \"The documentation search failed, so I cannot provide a verified explanation. No other communication was selected. You can try again later.\", \"La ricerca nella documentazione non è riuscita: non posso fornire un approfondimento verificato. Non è stata selezionata un'altra comunicazione. Puoi riprovare più tardi.\")}"
+                  activity: "La ricerca nella documentazione non è riuscita: non posso fornire un approfondimento verificato. Non è stata selezionata un'altra comunicazione. Puoi riprovare più tardi."
           elseActions:
             - kind: SendActivity
               id: sendMessage_dZ0gaF
               activity:
                 text:
                   - |-
-                    {If(Text(Global.UserLanguage) = "en", "Something went wrong.", "Si è verificato un errore.")}
-                    {If(Text(Global.UserLanguage) = "en", "Error code", "Codice errore")}: {System.Error.Code}
-                    {If(Text(Global.UserLanguage) = "en", "Conversation ID", "ID conversazione")}: {System.Conversation.Id}
-                    {If(Text(Global.UserLanguage) = "en", "Time (UTC)", "Ora (UTC)")}: {Topic.CurrentTime}.
+                    Si è verificato un errore.
+                    Codice errore: {System.Error.Code}
+                    ID conversazione: {System.Conversation.Id}
+                    Ora (UTC): {Topic.CurrentTime}.
                 speak:
-                  - |-
-                    {If(Text(Global.UserLanguage) = "en", "Something went wrong. Please try again.", "Si è verificato un errore. Riprova.")}
-
+                  - Si è verificato un errore. Riprova.
     - kind: SetVariable
       id: resetExplaining
       variable: Global.CommunicationExplaining
       value: =false
-
     - kind: LogCustomTelemetryEvent
       id: 9KwEAn
       eventName: OnErrorLog
       properties: "={ErrorMessage: System.Error.Message, ErrorCode: System.Error.Code, TimeUTC: Topic.CurrentTime, ConversationId: System.Conversation.Id}"
-
     - kind: CancelAllDialogs
       id: NW7NyY

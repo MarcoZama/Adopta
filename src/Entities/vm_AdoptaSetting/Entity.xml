@@ -956,10 +956,10 @@
           <MaxLength>10</MaxLength>
           <Length>20</Length>
           <displaynames>
-            <displayname description="Default language" languagecode="1033" />
+            <displayname description="App fallback language" languagecode="1033" />
           </displaynames>
           <Descriptions>
-            <Description description="Default language, it or en: new communications and the two apps start with it, and the agent uses it when the user profile has neither Italian nor English." languagecode="1033" />
+            <Description description="App fallback language, it or en, used only when no user preference or supported browser language exists. Does not select the agent or new card language." languagecode="1033" />
           </Descriptions>
         </attribute>
         <attribute PhysicalName="vm_Logo">

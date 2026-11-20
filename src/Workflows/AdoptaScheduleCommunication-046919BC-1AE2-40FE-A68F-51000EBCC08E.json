@@ -219,13 +219,18 @@
                       "actions": {
                         "Card_texts": {
                           "type": "Compose",
-                          "description": "Button labels in the communication language. Legacy text prefixes remain for Ignore and already scheduled cards.",
-                          "inputs": "@if(equals(toLower(trim(coalesce(body('Get_communication')?['vm_language'],''))),'en'),json('{\"more\":\"Tell me more\",\"moreText\":\"Tell me more about the communication «\",\"ignore\":\"Ignore\",\"ignoreText\":\"Ignore the communication «\"}'),json('{\"more\":\"Dimmi di più\",\"moreText\":\"Dimmi di più sulla comunicazione «\",\"ignore\":\"Ignora\",\"ignoreText\":\"Ignora la comunicazione «\"}'))"
+                          "description": "Fixed labels for this edition, independent of the app language.",
+                          "inputs": {
+                            "more": "Dimmi di più",
+                            "moreText": "Dimmi di più sulla comunicazione «",
+                            "ignore": "Ignora",
+                            "ignoreText": "Ignora la comunicazione «"
+                          }
                         },
                         "Card_reference": {
                           "type": "Compose",
                           "description": "Stable, versioned reference carried by the existing messageBack text; displayText remains the localized button label. The agent verifies the recipient in Dataverse.",
-                          "inputs": "@concat('Adopta.Communication.v2|',if(equals(toLower(trim(coalesce(body('Get_communication')?['vm_language'],''))),'en'),'en','it'),'|',body('Get_communication')?['vm_adoptacommunicationid'])",
+                          "inputs": "@concat('Adopta.Communication.v2|it|',body('Get_communication')?['vm_adoptacommunicationid'])",
                           "runAfter": {
                             "Card_texts": [
                               "Succeeded"
@@ -252,6 +257,7 @@
                                   "entityName": "vm_adoptacommunications",
                                   "recordId": "@triggerBody()?['text']",
                                   "item/vm_cardjson": "@string(outputs('Build_card'))",
+                                  "item/vm_language": "it",
                                   "item/vm_communicationstatus": 100000001,
                                   "item/vm_failedcount": 0,
                                   "item/vm_lasterror": "",
